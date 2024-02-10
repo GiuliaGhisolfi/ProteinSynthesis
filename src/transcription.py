@@ -83,7 +83,7 @@ class Transcription():
         # add error
         messenger_rna_sequence = ''.join([BASE_COMPLEMENT_DNA2RNA[base] 
             if random.random() > RNA_POLYMERASE_ERROR_RATE 
-            else random.choice(list(BASE_COMPLEMENT_DNA2RNA.values()))
+            else random.choice([b for b in list(BASE_COMPLEMENT_DNA2RNA.values()) if b != BASE_COMPLEMENT_DNA2RNA[base]])
             for base in dna_sequence_to_transcript])
         messenger_rna_sequence = self.find_terminator(messenger_rna_sequence)
 
