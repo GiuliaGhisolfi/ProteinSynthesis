@@ -1,3 +1,5 @@
+import random
+
 def splicing(rna_sequence, intron_sequences):
     for intron_sequence in intron_sequences:
         rna_sequence = rna_sequence.replace(intron_sequence, '')
@@ -78,7 +80,11 @@ class Transcription():
         dna_sequence_to_transcript = self.find_promoter(dna_sequence)
         
         # transcription initiation
-        messenger_rna_sequence = ''.join([BASE_COMPLEMENT_DNA2RNA[base] for base in dna_sequence_to_transcript])
+        # add error
+        messenger_rna_sequence = ''.join([BASE_COMPLEMENT_DNA2RNA[base] 
+            if random.random() > RNA_POLYMERASE_ERROR_RATE 
+            else random.choice(list(BASE_COMPLEMENT_DNA2RNA.values()))
+            for base in dna_sequence_to_transcript])
         messenger_rna_sequence = self.find_terminator(messenger_rna_sequence)
 
         # transcription elongation
