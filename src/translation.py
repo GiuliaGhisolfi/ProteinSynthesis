@@ -1,5 +1,5 @@
 
-class Translation:
+class Cytoplasm:
     def __init__(self):
         pass
 

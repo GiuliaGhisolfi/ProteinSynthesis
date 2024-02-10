@@ -1,5 +1,19 @@
 import random
 
+BASE_COMPLEMENT_DNA2RNA = {
+    'A': 'U', 
+    'T': 'A', 
+    'C': 'G', 
+    'G': 'C'
+}
+BASE_COMPLEMENT_RNA2DNA = {
+    'U': 'A', 
+    'A': 'T', 
+    'G': 'C', 
+    'C': 'G'
+}
+RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
+
 def splicing(rna_sequence, intron_sequences):
     for intron_sequence in intron_sequences:
         rna_sequence = rna_sequence.replace(intron_sequence, '')
@@ -16,21 +30,7 @@ def capping(rna_sequence):
 def polyadenylation(rna_sequence):
     return '{}-AAAA'.format(rna_sequence) # Add PolyA tail
 
-BASE_COMPLEMENT_DNA2RNA = {
-    'A': 'U', 
-    'T': 'A', 
-    'C': 'G', 
-    'G': 'C'
-}
-BASE_COMPLEMENT_RNA2DNA = {
-    'U': 'A', 
-    'A': 'T', 
-    'G': 'C', 
-    'C': 'G'
-}
-RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
-
-class Transcription():
+class Nucleus():
 
     def __init__(self, intron_sequences_list, editing_sites_dict,
             promoters_sequence_list, terminator_sequence):
