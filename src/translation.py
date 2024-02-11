@@ -1,5 +1,5 @@
 
-class Cytoplasm:
+class Ribosome:
     def __init__(self):
         pass
 

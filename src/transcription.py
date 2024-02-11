@@ -13,28 +13,15 @@ BASE_COMPLEMENT_RNA2DNA = {
     'C': 'G'
 }
 RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
+LENGTH_EXTRON_SEQUENCE = 3 # length of extron sequence
 
-def splicing(rna_sequence, intron_sequences):
-    for intron_sequence in intron_sequences:
-        rna_sequence = rna_sequence.replace(intron_sequence, '')
-    return rna_sequence
 
-def editing(rna_sequence, editing_sites_dict):
-    for editing_site in editing_sites_dict:
-        rna_sequence = rna_sequence.replace(editing_site, editing_sites_dict[editing_site])
-    return rna_sequence
-
-def capping(rna_sequence):
-    return 'CH3GPPP-{}'.format(rna_sequence) # Add 5'-methyl cap
-
-def polyadenylation(rna_sequence):
-    return '{}-AAAA'.format(rna_sequence) # Add PolyA tail
 
 class Nucleus():
 
-    def __init__(self, intron_sequences_list, editing_sites_dict,
+    def __init__(self, extron_sequences_list, editing_sites_dict,
             promoters_sequence_list, terminator_sequence):
-        self.intron_sequences_list = intron_sequences_list
+        self.extron_sequences_list = extron_sequences_list
 
         self.editing_sites_dict = editing_sites_dict
         self.editing_sites_dict = dict(sorted(self.editing_sites_dict.items(), 
@@ -42,17 +29,27 @@ class Nucleus():
 
         self.promoters_sequence_list = promoters_sequence_list
         self.terminator_sequence = terminator_sequence
-        # enzime: RNA polymerase
 
-        # type of RNA
-        # - messenger RNA (mRNA): code for proteins
-        # - transfer RNA (tRNA): transport amino acids to ribosomes
-        # - ribosomal RNA (rRNA): form the core of a ribosome's functional center
-        # - small nuclear RNA (snRNA): splicing of pre-mRNA
-        # - small cajan RNA (scaRNA): modification of snRNA and snoRNA
-        # - small nucleolar RNA (snoRNA): processing and modification of rRNA, tRNA, and snRNA
-        # - microRNA (miRNA): regulate gene expression
-        # - small interfering RNA (siRNA): regulate gene expression
+        self.nucleotides = {'U': 0, 'A': 0, 'G': 0, 'C': 0} # TODO: change e implementare il conteggio quando si usano
+
+    def transcript(self, dna_sequence): # enzime: RNA polymerase
+        # detect promoter
+        dna_sequence_to_transcript = self.find_promoter(dna_sequence)
+        
+        # transcript from gene to pre-mRNA
+        messenger_rna_sequence = ''.join([BASE_COMPLEMENT_DNA2RNA[base] 
+            if random.random() > RNA_POLYMERASE_ERROR_RATE 
+            else random.choice([b for b in list(BASE_COMPLEMENT_DNA2RNA.values()) if b != BASE_COMPLEMENT_DNA2RNA[base]])
+            for base in dna_sequence_to_transcript])
+        #messenger_rna_sequence = self.find_terminator(messenger_rna_sequence)
+
+        # transcription elongation
+        messenger_rna_sequence = self.splicing(messenger_rna_sequence)
+        messenger_rna_sequence = self.editing(messenger_rna_sequence)
+        messenger_rna_sequence = self.capping(messenger_rna_sequence)
+        messenger_rna_sequence = self.polyadenylation(messenger_rna_sequence)
+
+        return messenger_rna_sequence # mature mRNA
     
     def find_promoter(self, dna_sequence):
         # find promoter sequence
@@ -71,28 +68,35 @@ class Nucleus():
         # find terminator sequence
         positions_list = [pos for pos in [rna_sequence.find(terminator) for terminator in 
             self.terminator_sequence] if pos > 0]
-        terminator_position = -1 if not positions_list else max(positions_list) 
+        terminator_position = -1 if not positions_list else min(positions_list) 
         
         return rna_sequence[:terminator_position]
-
-    def transcript(self, dna_sequence):
-        # detect promoter
-        dna_sequence_to_transcript = self.find_promoter(dna_sequence)
-        
-        # transcription initiation
-        # add error
-        messenger_rna_sequence = ''.join([BASE_COMPLEMENT_DNA2RNA[base] 
-            if random.random() > RNA_POLYMERASE_ERROR_RATE 
-            else random.choice([b for b in list(BASE_COMPLEMENT_DNA2RNA.values()) if b != BASE_COMPLEMENT_DNA2RNA[base]])
-            for base in dna_sequence_to_transcript])
-        messenger_rna_sequence = self.find_terminator(messenger_rna_sequence)
-
-        # transcription elongation
-        messenger_rna_sequence = splicing(messenger_rna_sequence, self.intron_sequences_list)
-        messenger_rna_sequence = editing(messenger_rna_sequence, self.editing_sites_dict)
-        messenger_rna_sequence = capping(messenger_rna_sequence)
-        messenger_rna_sequence = polyadenylation(messenger_rna_sequence)
-
-        return messenger_rna_sequence
     
+    def splicing(self, rna_sequence):
+        # remove introns: non-coding regions
+        i = 0 # index
+        while i+3 < len(rna_sequence):
+            if rna_sequence[i:i+LENGTH_EXTRON_SEQUENCE] in self.extron_sequences_list:
+                i += LENGTH_EXTRON_SEQUENCE
+            else:
+                # remouve nucleotide and save it
+                self.nucleotides[rna_sequence[i]] += 1
+                rna_sequence = rna_sequence[:i] + rna_sequence[i+1:]
+        """for j in range(len(rna_sequence)-i): 
+            # terminate with stop codon
+            i = len(rna_sequence)-4
+            self.nucleotides[rna_sequence[i]] += 1
+            rna_sequence = rna_sequence[:i] + rna_sequence[i+1:]"""
+        return rna_sequence
+
+    def editing(self, rna_sequence):
+        for editing_site in self.editing_sites_dict.keys():
+            rna_sequence = rna_sequence.replace(editing_site, self.editing_sites_dict[editing_site])
+        return rna_sequence
+
+    def capping(self, rna_sequence):
+        return 'CH3GPPP-{}'.format(rna_sequence) # Add 5'-methyl cap
+
+    def polyadenylation(self, rna_sequence):
+        return '{}-AAAA'.format(rna_sequence) # Add PolyA tail
     
