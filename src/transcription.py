@@ -82,11 +82,12 @@ class Nucleus():
                 # remouve nucleotide and save it
                 self.nucleotides[rna_sequence[i]] += 1
                 rna_sequence = rna_sequence[:i] + rna_sequence[i+1:]
-        """for j in range(len(rna_sequence)-i): 
-            # terminate with stop codon
-            i = len(rna_sequence)-4
-            self.nucleotides[rna_sequence[i]] += 1
-            rna_sequence = rna_sequence[:i] + rna_sequence[i+1:]"""
+
+        for _ in range(i%LENGTH_EXTRON_SEQUENCE): #TODO: raise exception if not multiple of 3
+            # remove last nucleotide
+            self.nucleotides[rna_sequence[-1]] += 1
+            rna_sequence = rna_sequence[:-1]
+
         return rna_sequence
 
     def editing(self, rna_sequence):
