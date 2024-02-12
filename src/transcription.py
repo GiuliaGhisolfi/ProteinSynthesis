@@ -14,6 +14,7 @@ BASE_COMPLEMENT_RNA2DNA = {
 }
 RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
 LENGTH_EXTRON_SEQUENCE = 3 # length of extron sequence
+LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
 
 class Nucleus():
 
@@ -39,14 +40,14 @@ class Nucleus():
             if random.random() > RNA_POLYMERASE_ERROR_RATE 
             else random.choice([b for b in list(BASE_COMPLEMENT_DNA2RNA.values()) if b != BASE_COMPLEMENT_DNA2RNA[base]])
             for base in dna_sequence_to_transcript])
-        #messenger_rna_sequence = self.find_terminator(messenger_rna_sequence)
+
+        messenger_rna_sequence = self.capping(messenger_rna_sequence)
 
         # elongation phase
         messenger_rna_sequence = self.splicing(messenger_rna_sequence)
         messenger_rna_sequence = self.editing(messenger_rna_sequence)
         
         # post-transcriptional modifications
-        messenger_rna_sequence = self.capping(messenger_rna_sequence)
         messenger_rna_sequence = self.cleavage(messenger_rna_sequence)
         messenger_rna_sequence = self.polyadenylation(messenger_rna_sequence)
 
@@ -65,30 +66,16 @@ class Nucleus():
 
         return dna_sequence[promoter_posotion+len_promoter:]
     
-    def find_terminator(self, rna_sequence): # TODO: spostare in translation
-        # find terminator sequence
-        positions_list = [pos for pos in [rna_sequence.find(terminator) for terminator in 
-            self.terminator_sequence] if pos > 0]
-        terminator_position = -1 if not positions_list else min(positions_list)
-        
-        return rna_sequence[:terminator_position]
-    
     def splicing(self, rna_sequence):
-        # TODO: use lib for this
         # remove introns: non-coding regions
-        i = 0 # index
+        i = LENGTH_METHYL_CAP # index
         while i+3 < len(rna_sequence):
             if rna_sequence[i:i+LENGTH_EXTRON_SEQUENCE] in self.extron_sequences_list:
                 i += LENGTH_EXTRON_SEQUENCE
-            else:
+            else: # TODO: implementare il conteggio dei nucleotidi o togliere tutto
                 # remouve nucleotide and save it
                 self.nucleotides[rna_sequence[i]] += 1
                 rna_sequence = rna_sequence[:i] + rna_sequence[i+1:]
-
-        for _ in range(i%LENGTH_EXTRON_SEQUENCE): #TODO: raise exception if not multiple of 3
-            # remove last nucleotide
-            self.nucleotides[rna_sequence[-1]] += 1
-            rna_sequence = rna_sequence[:-1]
 
         return rna_sequence
 
