@@ -14,7 +14,7 @@ class Ribosome:
         #mrna_sequence = self.activation(mrna_sequence)
         mrna_sequence = self.initialization(mrna_sequence)
         polypeptides_chain, polypeptides_chain_ext = self.elongation(mrna_sequence)
-        #TODO: correct transcription errors
+        #TODO: mechanism to correct transcription errors
         
         return polypeptides_chain, polypeptides_chain_ext
     

@@ -34,32 +34,37 @@ class Nucleus():
     def transcript(self, dna_sequence): # enzime: RNA polymerase
         # detect promoter
         dna_sequence_to_transcript = self.find_promoter(dna_sequence)
-        
-        # transcript from gene to pre-mRNA
-        messenger_rna_sequence = ''.join([BASE_COMPLEMENT_DNA2RNA[base] 
-            if random.random() > RNA_POLYMERASE_ERROR_RATE 
-            else random.choice([b for b in list(BASE_COMPLEMENT_DNA2RNA.values()) if b != BASE_COMPLEMENT_DNA2RNA[base]])
-            for base in dna_sequence_to_transcript])
 
-        messenger_rna_sequence = self.capping(messenger_rna_sequence)
+        if dna_sequence_to_transcript is None:
+            return None
+        else:
+            # transcript from gene to pre-mRNA
+            messenger_rna_sequence = ''.join([BASE_COMPLEMENT_DNA2RNA[base] 
+                if random.random() > RNA_POLYMERASE_ERROR_RATE 
+                else random.choice([b for b in list(BASE_COMPLEMENT_DNA2RNA.values()) if b != BASE_COMPLEMENT_DNA2RNA[base]])
+                for base in dna_sequence_to_transcript])
 
-        # elongation phase
-        messenger_rna_sequence = self.splicing(messenger_rna_sequence)
-        messenger_rna_sequence = self.editing(messenger_rna_sequence)
-        
-        # post-transcriptional modifications
-        messenger_rna_sequence = self.cleavage(messenger_rna_sequence)
-        messenger_rna_sequence = self.polyadenylation(messenger_rna_sequence)
+            messenger_rna_sequence = self.capping(messenger_rna_sequence)
 
-        return messenger_rna_sequence # mature mRNA
+            # elongation phase
+            messenger_rna_sequence = self.splicing(messenger_rna_sequence)
+            messenger_rna_sequence = self.editing(messenger_rna_sequence)
+            
+            # post-transcriptional modifications
+            messenger_rna_sequence = self.cleavage(messenger_rna_sequence)
+            messenger_rna_sequence = self.polyadenylation(messenger_rna_sequence)
+
+            return messenger_rna_sequence # mature mRNA
     
     def find_promoter(self, dna_sequence):
         # find promoter sequence
         positions_list = [dna_sequence.find(promoter) for promoter in self.promoters_sequence_list]
-        if positions_list:
-            promoter_posotion = min([pos for pos in positions_list if pos > 0])
+
+        if not any([pos > 0 for pos in positions_list]):
+            #raise ValueError('No promoter found')
+            return None
         else:
-            raise ValueError('No promoter found')
+            promoter_posotion = min([pos for pos in positions_list if pos > 0])
 
         promoter_string = self.promoters_sequence_list[positions_list.index(promoter_posotion)]
         len_promoter = len(promoter_string)
