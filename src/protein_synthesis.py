@@ -7,7 +7,7 @@ DATA_PATH = 'data/'
 CODONS_PATH = DATA_PATH + 'codons.json'
 PEPTIDES_PATH = DATA_PATH + 'peptides.json'
 PROMOTERS = ['TATAAAA', 'TATAAAT', 'TATATAA', 'TATATAT']
-TERMINATORS = ['UAA', 'UAG', 'UGA'] # TODO: valutare se cambiare stop codons
+TERMINATORS = ['UAA', 'UAG', 'UGA']
 
 class EucaryotesCell:
     def __init__(self, dna):
@@ -29,7 +29,13 @@ class EucaryotesCell:
             terminator_sequence=TERMINATORS
             )
         self.mrna = self.nucleus.transcript(self.dna)
+
         #TODO: Implement Translation
+        self.ribosome = Ribosome(
+            codons_dict=self.codons_dict, 
+            peptide_dict=self.peptides_dict
+        )
+        self.protein = self.ribosome.translate(self.mrna)
     
     def get_dna(self):
         return self.dna

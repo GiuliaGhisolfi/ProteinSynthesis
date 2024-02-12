@@ -71,6 +71,7 @@ class Nucleus():
         return rna_sequence[:terminator_position]
     
     def splicing(self, rna_sequence):
+        # TODO: use lib for this
         # remove introns: non-coding regions
         i = 0 # index
         while i+3 < len(rna_sequence):

@@ -13,3 +13,5 @@ dependencies:
   - matplotlib                   # The de facto standard Python plotting library
   - seaborn                      # Make matplotlib plots pretty
   - rpy2                         # For using R packages in Python!
+
+  # conda env create -f https://raw.githubusercontent.com/wfondrie/msstats-demo/main/environment.yaml

@@ -1,9 +1,10 @@
 
 class Ribosome:
-    def __init__(self):
-        pass
+    def __init__(self, codons_dict, peptide_dict):
+        self.codons_dict = codons_dict
+        self.peptide_dict = peptide_dict
 
-    def translation(self, rna_sequence):
+    def translate(self, mrna_sequence):
         pass
 
     def initialization():
