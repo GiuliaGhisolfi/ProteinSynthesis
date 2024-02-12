@@ -12,16 +12,15 @@ TERMINATORS = ['UAA', 'UAG', 'UGA']
 class EucaryotesCell:
     def __init__(self, dna):
         self.dna = dna # template strand (3' to 5' direction)
-        self.codons_dict = json.load(open(CODONS_PATH))
-        self.peptides_dict = json.load(open(PEPTIDES_PATH))
-        self.extron_list = self.codons_dict.keys()
+        self.codons2aminoacids_dict = json.load(open(CODONS_PATH))
+        self.aminoacids_dict = json.load(open(PEPTIDES_PATH))
+        self.extron_list = self.codons2aminoacids_dict.keys()
 
         env = simpy.Environment
         #pipeline = BroadcastPipe(env)
 
-        self.protein = self.synthesize_protein()
-
     def synthesize_protein(self):
+        # transcription
         self.nucleus = Nucleus(
             extron_sequences_list=self.extron_list,
             editing_sites_dict={}, #TODO
@@ -30,10 +29,10 @@ class EucaryotesCell:
             )
         self.mrna = self.nucleus.transcript(self.dna)
 
-        #TODO: Implement Translation
+        # translation
         self.ribosome = Ribosome(
-            codons_dict=self.codons_dict, 
-            peptide_dict=self.peptides_dict
+            codons2aminoacids_dict=self.codons2aminoacids_dict, 
+            aminoacids_dict=self.aminoacids_dict,
         )
         self.protein = self.ribosome.translate(self.mrna)
     
