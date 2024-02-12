@@ -34,7 +34,7 @@ class EucaryotesCell:
             codons2aminoacids_dict=self.codons2aminoacids_dict, 
             aminoacids_dict=self.aminoacids_dict,
         )
-        self.protein = self.ribosome.translate(self.mrna)
+        self.protein, self.protein_extended_name = self.ribosome.translate(self.mrna)
     
     def get_dna(self):
         return self.dna
@@ -44,3 +44,6 @@ class EucaryotesCell:
     
     def get_protein(self):
         return self.protein
+    
+    def get_extended_protein_name(self):
+        return self.protein_extended_name

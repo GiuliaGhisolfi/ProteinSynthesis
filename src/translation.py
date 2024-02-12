@@ -10,9 +10,9 @@ class Ribosome:
     def translate(self, mrna_sequence):
         #mrna_sequence = self.activation(mrna_sequence)
         mrna_sequence = self.initialization(mrna_sequence)
-        protein = self.elongation(mrna_sequence)
+        protein, protein_ext = self.elongation(mrna_sequence)
         
-        return protein
+        return protein, protein_ext
     
     def activation(self): #TODO
         # required energy from adenosine triphosphate (ATP)
@@ -34,6 +34,7 @@ class Ribosome:
     def elongation(self, mrna_sequence):
         aminoacid = ''
         aminoacids_chain = ''
+        aminoacids_chain_ext = ''
         i = 0
         end_mrna_length = LENGTH_CODON + LENGTH_POLY_A_TAIL
 
@@ -41,9 +42,12 @@ class Ribosome:
             codon = mrna_sequence[i:i+LENGTH_CODON]
             aminoacid = self.codons2aminoacids_dict[codon]
             aminoacids_chain = aminoacids_chain + self.aminoacids_dict[aminoacid]
+            aminoacids_chain_ext = aminoacids_chain_ext + aminoacid + '-'
             i += LENGTH_CODON
+        
+        aminoacids_chain_ext = aminoacids_chain_ext.rstrip('-Stop-')
     
-        return aminoacids_chain
+        return aminoacids_chain, aminoacids_chain_ext
 
     def termination(self, aminoacid):
         return aminoacid == 'Stop'
