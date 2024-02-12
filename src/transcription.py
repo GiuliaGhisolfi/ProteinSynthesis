@@ -15,8 +15,6 @@ BASE_COMPLEMENT_RNA2DNA = {
 RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
 LENGTH_EXTRON_SEQUENCE = 3 # length of extron sequence
 
-
-
 class Nucleus():
 
     def __init__(self, extron_sequences_list, editing_sites_dict,
@@ -64,11 +62,11 @@ class Nucleus():
 
         return dna_sequence[promoter_posotion+len_promoter:]
     
-    def find_terminator(self, rna_sequence):
+    def find_terminator(self, rna_sequence): # TODO: spostare in translation
         # find terminator sequence
         positions_list = [pos for pos in [rna_sequence.find(terminator) for terminator in 
             self.terminator_sequence] if pos > 0]
-        terminator_position = -1 if not positions_list else min(positions_list) 
+        terminator_position = -1 if not positions_list else min(positions_list)
         
         return rna_sequence[:terminator_position]
     
