@@ -41,10 +41,13 @@ class Nucleus():
             for base in dna_sequence_to_transcript])
         #messenger_rna_sequence = self.find_terminator(messenger_rna_sequence)
 
-        # transcription elongation
+        # elongation phase
         messenger_rna_sequence = self.splicing(messenger_rna_sequence)
         messenger_rna_sequence = self.editing(messenger_rna_sequence)
+        
+        # post-transcriptional modifications
         messenger_rna_sequence = self.capping(messenger_rna_sequence)
+        messenger_rna_sequence = self.cleavage(messenger_rna_sequence)
         messenger_rna_sequence = self.polyadenylation(messenger_rna_sequence)
 
         return messenger_rna_sequence # mature mRNA
@@ -96,7 +99,12 @@ class Nucleus():
 
     def capping(self, rna_sequence):
         return 'CH3GPPP-{}'.format(rna_sequence) # Add 5'-methyl cap
+    
+    def cleavage(self, rna_sequence): #TODO
+        # first step in adding a polyadenine tail to the pre-mRNA (post-transcriptional
+        # modifications) it is necessary for producing a mature mRNA molecule
+        return rna_sequence
 
     def polyadenylation(self, rna_sequence):
-        return '{}-AAAA'.format(rna_sequence) # Add PolyA tail
+        return '{}-AAAA'.format(rna_sequence) # Add PolyA tail (250 nucleotides circa)
     
