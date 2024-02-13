@@ -23,7 +23,9 @@ class Ribosome:
         return mrna_sequence[:-LENGTH_POLY_A_TAIL]
     
     def activation(self): #TODO
-        # required energy from adenosine triphosphate (ATP)
+        # required energy from adenosine triphosphate (ATP) to activate tRNA
+        # reaction catalyzed by the enzyme aminoacyl-tRNA synthetase
+        # reaction: amino acid + ATP + tRNA -> aminoacyl-tRNA + AMP + PPi
         pass
 
     def initialization(self, mrna_sequence):
