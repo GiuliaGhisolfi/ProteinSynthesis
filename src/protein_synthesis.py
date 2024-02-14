@@ -1,4 +1,3 @@
-import simpy
 import json
 from src.transcription import Nucleus
 from src.translation import Ribosome
