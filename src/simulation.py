@@ -30,7 +30,7 @@ def load_data(path):
 
     return df
 
-def save_data(results_df, path, verbose):
+def save_data(results_df, path, verbose=False):
     # Save the DataFrame to a pickle file
     with open(path, 'wb') as f:
         pickle.dump(results_df, f)
