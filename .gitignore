@@ -1,2 +1,5 @@
 __pycache__
 .conda
+data/human_genoma_rna.csv
+human_genoma/rna/
+human_genoma/protein/
