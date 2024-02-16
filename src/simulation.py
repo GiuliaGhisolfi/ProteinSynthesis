@@ -5,7 +5,7 @@ import pandas as pd
 from src.protein_synthesis import EucaryotesCell
 
 SAMPLES_DATA_PATH = 'data/samples/data.pkl'
-HUMAN_GENOMA_DATA_PATH = 'data/human_genoma_rna.csv'
+HUMAN_GENOMA_DATA_PATH = 'data/human_genoma.csv'
 LENGTH_AMIO_GROUP = 4 # length of amino acid group
 LENGTH_CARBOXYL_GROUP = 5 # length of carboxyl group
 RANDOM_SEED = 42
@@ -35,8 +35,6 @@ def load_data_from_csv(path):
 
     # convert columns to lowercase
     df.columns = df.columns.str.lower()
-    # convert 'rna_sequence' column to 'sequence
-    df = df.rename(columns={'rna_sequence': 'sequence'})
 
     # add columns
     df['mrna_sequence'] = None
