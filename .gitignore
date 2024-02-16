@@ -3,3 +3,4 @@ __pycache__
 data/human_genoma_rna.csv
 human_genoma/rna/
 human_genoma/protein/
+data/human_genoma_results.pkl

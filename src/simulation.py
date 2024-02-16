@@ -4,15 +4,14 @@ import pickle
 import pandas as pd
 from src.protein_synthesis import EucaryotesCell
 
-DATA_PATH = 'data/data.pkl'
-RESULTS_PATH = 'data/results.pkl'
+SAMPLES_DATA_PATH = 'data/samples/data.pkl'
+HUMAN_GENOMA_DATA_PATH = 'data/human_genoma_rna.csv'
 LENGTH_AMIO_GROUP = 4 # length of amino acid group
 LENGTH_CARBOXYL_GROUP = 5 # length of carboxyl group
 RANDOM_SEED = 42
 SIM_TIME = 1000
-VERBOSE = True
 
-def load_data(path):
+def load_data_from_pickle(path):
     # Load the pickle file
     with open(path, 'rb') as f:
         data = pickle.load(f)
@@ -20,6 +19,24 @@ def load_data(path):
     # Convert the data to a pandas DataFrame
     df = pd.DataFrame(data.values(), columns=['sequence'])
     df['sequence'] = df['sequence'].apply(lambda x: x.upper())
+
+    # add columns
+    df['mrna_sequence'] = None
+    df['polypeptides_chain_synthetized'] = None
+    df['polypeptides_chain_extended'] = None
+    df['protein_synthesized'] = None
+    df['peptides_cardinality'] = None
+
+    return df
+
+def load_data_from_csv(path):
+    # Load the csv file
+    df = pd.read_csv(path, index_col=0)
+
+    # convert columns to lowercase
+    df.columns = df.columns.str.lower()
+    # convert 'rna_sequence' column to 'sequence
+    df = df.rename(columns={'rna_sequence': 'sequence'})
 
     # add columns
     df['mrna_sequence'] = None
@@ -38,11 +55,16 @@ def save_data(results_df, path, verbose=False):
     if verbose: print('Results saved')
 
 class ProteinSinthesisProcess():
-    def __init__(self, verbose=False):
+    def __init__(self, data='human_genoma', verbose=False):
         self.verbose = verbose
 
         # load dna sequences
-        self.dna_sequences_df = load_data(DATA_PATH)
+        if data == 'sample':
+            self.dna_sequences_df = load_data_from_pickle(SAMPLES_DATA_PATH)
+        else:
+            if data != 'human_genoma':
+                print('Invalid data, using human genoma data as default')
+            self.dna_sequences_df = load_data_from_csv(HUMAN_GENOMA_DATA_PATH)
         self.dna_sequences = self.dna_sequences_df['sequence'].tolist()
         if self.verbose: print('DNA sequences loaded')
 
@@ -93,9 +115,15 @@ class ProteinSinthesisProcess():
         if self.verbose: print('Simulation started: \t')
         self.env.run(until=simulation_time)
 
-if __name__ == '__main__':
+"""if __name__ == '__main__':
+    RESULTS_PATH = 'data/samples/results.pkl'
+    SIM_TIME = 1000
+    VERBOSE = True
+
+    data = 'sample'
     verbose = VERBOSE
-    protein_synthesis_process = ProteinSinthesisProcess(verbose)
+
+    protein_synthesis_process = ProteinSinthesisProcess(data, verbose)
     protein_synthesis_process.run() # run the simulation
     save_data(protein_synthesis_process.dna_sequences_df, RESULTS_PATH, verbose)
-    if verbose: print('Simulation ended')
+    if verbose: print('Simulation ended')"""
