@@ -4,7 +4,7 @@ BASE_COMPLEMENT_DNA2RNA = {
     'A': 'U', 
     'T': 'A', 
     'C': 'G', 
-    'G': 'C'
+    'G': 'C',
 }
 BASE_COMPLEMENT_RNA2DNA = {
     'U': 'A', 
