@@ -1,6 +1,6 @@
 __pycache__
 .conda
-data/human_genoma_rna.csv
 human_genoma/rna/
 human_genoma/protein/
+data/human_genoma.csv
 data/human_genoma_results.pkl
