@@ -1,4 +1,5 @@
 import random
+from src.nucleotides import NucleotidesSymbolsAllocations
 
 BASE_COMPLEMENT_DNA2RNA = {
     'A': 'U', 
@@ -38,6 +39,9 @@ class Nucleus():
         if dna_sequence_to_transcript is None:
             return None
         else:
+            # make sequence univoque to transcript
+            dna_sequence = ''.join([random.choice(NucleotidesSymbolsAllocations[n]) for n in dna_sequence])
+
             # transcript from gene to pre-mRNA
             messenger_rna_sequence = ''.join([BASE_COMPLEMENT_DNA2RNA[base] 
                 if random.random() > RNA_POLYMERASE_ERROR_RATE 
