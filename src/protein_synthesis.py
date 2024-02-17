@@ -1,4 +1,3 @@
-import simpy
 import json
 from src.transcription import Nucleus
 from src.translation import Ribosome
@@ -15,7 +14,6 @@ class EucaryotesCell:
         self.aminoacids_dict = json.load(open(PEPTIDES_PATH))
         self.extron_list = self.codons2aminoacids_dict.keys()
 
-        #env = simpy.Environment
 
     def synthesize_protein(self, dna):
         self.dna = dna # template strand (3' to 5' direction)
