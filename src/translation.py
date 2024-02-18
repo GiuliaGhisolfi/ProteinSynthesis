@@ -44,8 +44,8 @@ class Ribosome:
     def elongation(self, mrna_sequence):
         # enzima: aminoacyl-tRNA synthetases
         aminoacid = ''
-        polypeptides_chain = 'H2N-' # amino group
-        polypeptides_chain_ext = 'H2N-'
+        polypeptides_chain = 'NH2-' # amino group
+        polypeptides_chain_ext = 'NH2-'
 
         i = LENGTH_CODON # not translation of the start codon
         end_mrna_length = LENGTH_CODON + LENGTH_POLY_A_TAIL
