@@ -31,6 +31,7 @@ class ProteinSinthesisProcess():
         if self.verbose: print('Simulation environment initialized \t')
     
     def save_synthesize_protein(self, dna_sequence, mrna_sequences, polypeptides_chain, polypeptides_chain_ext):
+        # TODO: gestire errori (dna_sequence non trovata nel dataframe)
         row_index = self.dna_sequences_df[self.dna_sequences_df['sequence'] == dna_sequence].index[0]
 
         results = {
