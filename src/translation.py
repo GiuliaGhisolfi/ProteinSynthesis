@@ -9,14 +9,23 @@ class Ribosome:
         self.codons2aminoacids_dict = codons2aminoacids_dict
         self.aminoacids_dict = aminoacids_dict
 
-    def translate(self, mrna_sequence): # protein synthesis
-        mrna_sequence = self.degradation(mrna_sequence)
-        #mrna_sequence = self.activation(mrna_sequence)
-        mrna_sequence = self.initialization(mrna_sequence)
-        polypeptides_chain, polypeptides_chain_ext = self.elongation(mrna_sequence)
-        #TODO: mechanism to correct transcription errors
+    def translate(self, mrna_sequences_list): # protein synthesis
+        polypeptides_chain_list = []
+        polypeptides_chain_ext_list = []
+
+        for mrna_sequence in mrna_sequences_list: 
+            #TODO: process mrna sequences in parallel
+
+            mrna_sequence = self.degradation(mrna_sequence)
+            #mrna_sequence = self.activation(mrna_sequence)
+            mrna_sequence = self.initialization(mrna_sequence)
+            polypeptides_chain, polypeptides_chain_ext = self.elongation(mrna_sequence)
+            #TODO: mechanism to correct transcription errors
+
+            polypeptides_chain_list.append(polypeptides_chain)
+            polypeptides_chain_ext_list.append(polypeptides_chain_ext)
         
-        return polypeptides_chain, polypeptides_chain_ext
+        return polypeptides_chain_list, polypeptides_chain_ext_list
     
     def degradation(self, mrna_sequence):
         # degradation of the 5' cap and poly-A tail, enzime: exonuclease

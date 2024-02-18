@@ -5,8 +5,6 @@ from src.translation import Ribosome
 DATA_PATH = 'data/'
 CODONS_PATH = DATA_PATH + 'codons.json'
 PEPTIDES_PATH = DATA_PATH + 'peptides.json'
-PROMOTERS = ['TATAAAA', 'TATAAAT', 'TATATAA', 'TATATAT']
-TERMINATORS = ['UAA', 'UAG', 'UGA']
 
 class EucaryotesCell:
     def __init__(self):
@@ -22,20 +20,18 @@ class EucaryotesCell:
         self.nucleus = Nucleus(
             extron_sequences_list=self.extron_list,
             editing_sites_dict={}, #TODO
-            promoters_sequence_list=PROMOTERS, # TATA box
-            terminator_sequence=TERMINATORS
             )
-        self.mrna = self.nucleus.transcript(self.dna)
+        self.mrna_list = self.nucleus.transcript(self.dna)
 
-        if self.mrna is None: # no promoter found in the DNA
-            self.protein, self.protein_extended_name = None, None
+        if self.mrna_list is None: # no promoter found in the DNA
+            self.proteins, self.proteins_extended_name = None, None
         else:
             # translation
             self.ribosome = Ribosome(
                 codons2aminoacids_dict=self.codons2aminoacids_dict, 
                 aminoacids_dict=self.aminoacids_dict,
             )
-            self.protein, self.protein_extended_name = self.ribosome.translate(self.mrna)
+            self.proteins, self.proteins_extended_name = self.ribosome.translate(self.mrna_list)
 
             #TODO
             # protein folding: ordered three-dimensional structure
@@ -45,10 +41,10 @@ class EucaryotesCell:
         return self.dna
     
     def get_mrna(self):
-        return self.mrna
+        return self.mrna_list
     
-    def get_protein(self):
-        return self.protein
+    def get_proteins(self):
+        return self.proteins
     
-    def get_extended_protein_name(self):
-        return self.protein_extended_name
+    def get_extended_proteins_name(self):
+        return self.proteins_extended_name

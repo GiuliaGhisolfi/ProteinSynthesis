@@ -1,6 +1,9 @@
 import pickle
 import pandas as pd
 
+SAMPLES_DATA_PATH = 'data/samples/data.pkl'
+HUMAN_GENOMA_DATA_PATH = 'data/human_genoma.csv'
+
 def load_data_from_pickle(path):
     # Load the pickle file
     with open(path, 'rb') as f:
