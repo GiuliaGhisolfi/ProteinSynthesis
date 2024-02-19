@@ -47,7 +47,7 @@ class ProteinSinthesisProcess():
                 #self.env.process(self.eucaryotes_cell.synthesize_protein(dna_sequence))
                 self.eucaryotes_cell.synthesize_protein(dna_sequence)
                 self.save_proteins_synthesized(
-                    dna_sequence, 
+                    dna_sequence,
                     self.eucaryotes_cell.get_mrna(),
                     self.eucaryotes_cell.get_proteins(),
                     self.eucaryotes_cell.get_extended_proteins_name()
