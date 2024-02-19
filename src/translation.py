@@ -69,10 +69,7 @@ class Ribosome:
             polypeptides_chain = polypeptides_chain + self.aminoacids_dict[aminoacid]
             polypeptides_chain_ext = polypeptides_chain_ext + aminoacid + '-'
             i += LENGTH_CODON
-            #yield self.env.timeout(0.05) # 0.05 seconds to add each amino acid #FIXME
-        
-        # simpy wait for the termination codon
-        #yield self.env.timeout(i/3 * 0.05) # 0.05 seconds to add each amino acid #FIXME
+            #FIXME: yield self.env.timeout(0.05) # 0.05 seconds to add each amino acid
         
         # add the carboxyl group to the polypeptide chain
         polypeptides_chain = polypeptides_chain + '-COOH'

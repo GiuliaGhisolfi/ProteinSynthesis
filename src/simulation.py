@@ -38,7 +38,7 @@ class ProteinSinthesisProcess():
         while True:
             yield self.env.timeout(random.random()*10) # time between one protein synthesis and another
 
-            dna_sequence = random.choice(self.dna_sequences)
+            dna_sequence = random.choice(self.dna_sequences) # TODO: Seq object from biopython
             # var: enzimi, basi, ATP, tRNA, aminoacidi
             #atp = random.randint(1,6)
 
