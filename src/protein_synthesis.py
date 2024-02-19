@@ -15,16 +15,24 @@ class EucaryotesCell:
         self.aminoacids_dict = json.load(open(PEPTIDES_PATH))
         self.extron_list = self.codons2aminoacids_dict.keys()
 
+        self.nucleus = Nucleus(
+            environment=self.env,
+            extron_sequences_list=self.extron_list,
+            editing_sites_dict={}, #TODO
+            )
+        
+        self.ribosome = Ribosome(
+            environment=self.env,
+            codons2aminoacids_dict=self.codons2aminoacids_dict, 
+            aminoacids_dict=self.aminoacids_dict,
+            )
+
     def synthesize_protein(self, dna):
         self.dna = dna # template strand (3' to 5' direction)
 
         # transcription
         if self.verbose:
             print(f'Time {self.env.now}: Transcription started')
-        self.nucleus = Nucleus(
-            extron_sequences_list=self.extron_list,
-            editing_sites_dict={}, #TODO
-            )
         self.mrna_list = self.nucleus.transcript(self.dna)
         if self.verbose:
             print(f'Time {self.env.now}: Transcription ended') 
@@ -36,10 +44,6 @@ class EucaryotesCell:
             # translation
             if self.verbose: 
                 print(f'Time {self.env.now}: Translation started')
-            self.ribosome = Ribosome(
-                codons2aminoacids_dict=self.codons2aminoacids_dict, 
-                aminoacids_dict=self.aminoacids_dict,
-                )
             self.proteins, self.proteins_extended_name = self.ribosome.translate(self.mrna_list)
             if self.verbose: 
                 print(f'Time {self.env.now}: Translation ended')

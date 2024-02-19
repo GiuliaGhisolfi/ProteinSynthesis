@@ -1,11 +1,15 @@
+import random
+
 LENGTH_CODON = 3 # number of nucleotides that code for an amino acid
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
 LENGTH_POLY_A_TAIL = 5 # length of poly-A tail
 MRNA_DECODED_ERROR_RATE = 1e-4 # 1 mistake every 10.000 amino acids
 
 class Ribosome:
-    def __init__(self, codons2aminoacids_dict, aminoacids_dict):
+    def __init__(self, environment, codons2aminoacids_dict, aminoacids_dict):
         # ribonucleoprotein complex in the cytoplasm
+        self.env = environment
+
         self.codons2aminoacids_dict = codons2aminoacids_dict
         self.aminoacids_dict = aminoacids_dict
 
@@ -29,7 +33,7 @@ class Ribosome:
     
     def degradation(self, mrna_sequence):
         # degradation of the 5' cap and poly-A tail, enzime: exonuclease
-        return mrna_sequence[:-LENGTH_POLY_A_TAIL]
+        return mrna_sequence[LENGTH_METHYL_CAP:-LENGTH_POLY_A_TAIL]
     
     def activation(self): #TODO
         # required energy from adenosine triphosphate (ATP) to activate tRNA
@@ -65,6 +69,10 @@ class Ribosome:
             polypeptides_chain = polypeptides_chain + self.aminoacids_dict[aminoacid]
             polypeptides_chain_ext = polypeptides_chain_ext + aminoacid + '-'
             i += LENGTH_CODON
+            #yield self.env.timeout(0.05) # 0.05 seconds to add each amino acid #FIXME
+        
+        # simpy wait for the termination codon
+        #yield self.env.timeout(i/3 * 0.05) # 0.05 seconds to add each amino acid #FIXME
         
         # add the carboxyl group to the polypeptide chain
         polypeptides_chain = polypeptides_chain + '-COOH'
@@ -74,3 +82,4 @@ class Ribosome:
 
     def termination(self, aminoacid):
         return aminoacid == 'Stop'
+        # TODO: add nucleotide degradation

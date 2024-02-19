@@ -22,7 +22,8 @@ LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
 
 class Nucleus():
 
-    def __init__(self, extron_sequences_list, editing_sites_dict):
+    def __init__(self, environment, extron_sequences_list, editing_sites_dict):
+        self.env = environment
         self.extron_sequences_list = extron_sequences_list
 
         self.editing_sites_dict = editing_sites_dict

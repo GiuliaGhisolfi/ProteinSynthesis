@@ -36,7 +36,7 @@ class ProteinSinthesisProcess():
     
     def start(self):
         while True:
-            yield self.env.timeout(random.random()*10)
+            yield self.env.timeout(random.random()*10) # time between one protein synthesis and another
 
             dna_sequence = random.choice(self.dna_sequences)
             # var: enzimi, basi, ATP, tRNA, aminoacidi
@@ -55,7 +55,7 @@ class ProteinSinthesisProcess():
                 self.available[dna_sequence] = False
                 
     def run(self, simulation_time=SIM_TIME):
-        if self.verbose: print('Simulation started: \t \t')
+        if self.verbose: print('Simulation started: \n')
         self.env.run(until=simulation_time)
     
     def save_proteins_synthesized(self, dna_sequence, mrna_sequences, polypeptides_chain, polypeptides_chain_ext):
@@ -73,7 +73,7 @@ class ProteinSinthesisProcess():
         self.dna_sequences_df.iloc[row_index] = results
 
         if self.verbose:
-            print(f'Protein synthesized: {len(mrna_sequences) if mrna_sequences else 0} \t \t')
+            print(f'Protein synthesized: {len(mrna_sequences) if mrna_sequences else 0} \n')
 
         """if polypeptides_chain:
             if self.verbose: print('Protein synthesized')
