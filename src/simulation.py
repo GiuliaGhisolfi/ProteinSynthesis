@@ -14,25 +14,22 @@ class ProteinSinthesisProcess():
         self.verbose = verbose
 
         # add columns to store the results
-        self.dna_sequences_df['mrna_sequences'] = None
-        self.dna_sequences_df['polypeptides_chains'] = None
-        self.dna_sequences_df['polypeptides_chains_ext'] = None
-        self.dna_sequences_df['number_of_proteins_synthesized'] = None
-        self.dna_sequences_df['protein_synthesized'] = None
-
+        columns = ['mrna_sequences', 'polypeptides_chains', 'polypeptides_chains_ext',
+            'number_of_proteins_synthesized', 'protein_synthesized']
+        for col in columns:
+            self.dna_sequences_df[col] = None
+        
         self.initialize_environment()
         
     def initialize_environment(self):
         # initialize the simulation environment
-        self.eucaryotes_cell = EucaryotesCell()
-        if self.verbose: print('Eucaryotes cell initialized')
-
         self.dna_sequences = self.dna_sequences_df['sequence'].values
-        self.available = {row['sequence']: True if row['protein_synthesized'].isna() else False
-            for row  in self.dna_sequences_df}
+        self.available =  {row['sequence']: True if row['protein_synthesized']==None else False
+        for id, row in self.dna_sequences_df.iterrows()}
         
-        random.seed(RANDOM_SEED)
+        #random.seed(RANDOM_SEED) TODO: remove or set the seed
         self.env = simpy.Environment()
+        self.eucaryotes_cell = EucaryotesCell(environment=self.env, verbose=self.verbose)
 
         self.process = self.env.process(self.start())
         if self.verbose: print('Simulation environment initialized \t')
@@ -46,6 +43,7 @@ class ProteinSinthesisProcess():
             #atp = random.randint(1,6)
 
             if self.available[dna_sequence]:
+                print(f'Time {self.env.now}: Protein synthesis started')
                 #self.env.process(self.eucaryotes_cell.synthesize_protein(dna_sequence))
                 self.eucaryotes_cell.synthesize_protein(dna_sequence)
                 self.save_proteins_synthesized(
@@ -57,7 +55,7 @@ class ProteinSinthesisProcess():
                 self.available[dna_sequence] = False
                 
     def run(self, simulation_time=SIM_TIME):
-        if self.verbose: print('Simulation started: \t')
+        if self.verbose: print('Simulation started: \t \t')
         self.env.run(until=simulation_time)
     
     def save_proteins_synthesized(self, dna_sequence, mrna_sequences, polypeptides_chain, polypeptides_chain_ext):
@@ -75,7 +73,7 @@ class ProteinSinthesisProcess():
         self.dna_sequences_df.iloc[row_index] = results
 
         if self.verbose:
-            print(f'Protein synthesized: {len(mrna_sequences) if mrna_sequences else 0}')
+            print(f'Protein synthesized: {len(mrna_sequences) if mrna_sequences else 0} \t \t')
 
         """if polypeptides_chain:
             if self.verbose: print('Protein synthesized')
