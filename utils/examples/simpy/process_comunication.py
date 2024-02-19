@@ -116,6 +116,9 @@ def message_consumer(name, env, in_pipe):
 # Setup and start the simulation
 print('Process communication')
 random.seed(RANDOM_SEED)
+
+"""
+# For one-to-one type pipes, use Store
 env = simpy.Environment()
 
 # For one-to-one or many-to-one type pipes, use Store
@@ -125,6 +128,7 @@ env.process(message_consumer('Consumer A', env, pipe))
 
 print('\nOne-to-one pipe communication\n')
 env.run(until=SIM_TIME)
+"""
 
 # For one-to many use BroadcastPipe
 # (Note: could also be used for one-to-one,many-to-one or many-to-many)
