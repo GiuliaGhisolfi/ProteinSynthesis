@@ -16,6 +16,7 @@ class ProteinSinthesisProcess():
         self.dna_sequences_df['polypeptides_chains'] = None
         self.dna_sequences_df['polypeptides_chains_ext'] = None
         self.dna_sequences_df['number_of_proteins_synthesized'] = None
+        self.dna_sequences_df['protein_synthesized'] = None
 
         self.dna_sequences = dna_sequences_df['sequence'].values
         self.verbose = verbose
@@ -40,6 +41,7 @@ class ProteinSinthesisProcess():
             'polypeptides_chains': polypeptides_chain,
             'polypeptides_chains_ext': polypeptides_chain_ext,
             'number_of_proteins_synthesized': len(mrna_sequences) if mrna_sequences else 0,
+            'protein_synthesized': True if mrna_sequences else False
         }
         self.dna_sequences_df.iloc[row_index] = results
 
