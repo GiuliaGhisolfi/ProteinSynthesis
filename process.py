@@ -38,7 +38,7 @@ def setup(env, sentences, num_machines, t_inter):
 
 # Setup and start the simulation
 env = simpy.Environment()
-sentences = ['Hello word', 'World cosa caso casa', 'Python fffra', 'Simulation started now']
+sentences = ['Hello word', 'World cosa caso casa']
 random.seed(42)
 env.process(setup(env, sentences, num_machines=2, t_inter=1))
 env.run(until=10)

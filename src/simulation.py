@@ -1,5 +1,6 @@
 import simpy
 import random 
+import itertools
 from src.protein_synthesis import EucaryotesCell
 
 LENGTH_AMIO_GROUP = 4 # length of amino acid group
@@ -19,44 +20,51 @@ class ProteinSinthesisProcess():
         for col in columns:
             self.dna_sequences_df[col] = None
         
-        self.initialize_environment()
-        
-    def initialize_environment(self):
         # initialize the simulation environment
         self.dna_sequences = self.dna_sequences_df['sequence'].values
         self.available =  {row['sequence']: True if row['protein_synthesized']==None else False
-        for id, row in self.dna_sequences_df.iterrows()}
+            for id, row in self.dna_sequences_df.iterrows()}
         
-        #random.seed(RANDOM_SEED) TODO: remove or set the seed
+        random.seed(RANDOM_SEED)
         self.env = simpy.Environment()
+        self.env.process(self.start())
+
         self.eucaryotes_cell = EucaryotesCell(environment=self.env, verbose=self.verbose)
 
-        self.process = self.env.process(self.start())
         if self.verbose: print('Simulation environment initialized \t')
     
-    def start(self):
-        while True:
-            yield self.env.timeout(random.random()*10) # time between one protein synthesis and another
-
-            dna_sequence = random.choice(self.dna_sequences) # TODO: Seq object from biopython
-            # var: enzimi, basi, ATP, tRNA, aminoacidi
-            #atp = random.randint(1,6)
-
-            if self.available[dna_sequence]:
-                print(f'Time {self.env.now}: Protein synthesis started')
-                #self.env.process(self.eucaryotes_cell.synthesize_protein(dna_sequence))
-                self.eucaryotes_cell.synthesize_protein(dna_sequence)
-                self.save_proteins_synthesized(
-                    dna_sequence,
-                    self.eucaryotes_cell.get_mrna(),
-                    self.eucaryotes_cell.get_proteins(),
-                    self.eucaryotes_cell.get_extended_proteins_name()
-                )
-                self.available[dna_sequence] = False
-                
     def run(self, simulation_time=SIM_TIME):
         if self.verbose: print('Simulation started: \n')
         self.env.run(until=simulation_time)
+        
+    def start(self):
+        sequences_count = itertools.count()
+
+        # Initialize 3 dna sequences to be synthesized
+        for _ in range(3):
+            self.process(next(sequences_count))
+                
+        # Synthesize dna sequences while the simulation is running
+        while True:
+            yield self.env.timeout(random.random()*10) # time between one protein synthesis and another
+            self.process(next(sequences_count))
+
+    def process(self, sequence_count):
+        dna_sequence = random.choice(self.dna_sequences) # TODO: Seq object from biopython
+        # var: enzimi, basi, ATP, tRNA, aminoacidi
+        #atp = random.randint(1,6)
+
+        if self.available[dna_sequence]:
+            print(f'Time {self.env.now}: Protein synthesis started for sequence {sequence_count}')
+            #self.env.process(self.eucaryotes_cell.synthesize_protein(dna_sequence))
+            self.eucaryotes_cell.synthesize_protein(dna_sequence)
+            self.save_proteins_synthesized(
+                dna_sequence,
+                self.eucaryotes_cell.get_mrna(),
+                self.eucaryotes_cell.get_proteins(),
+                self.eucaryotes_cell.get_extended_proteins_name()
+            )
+            self.available[dna_sequence] = False
     
     def save_proteins_synthesized(self, dna_sequence, mrna_sequences, polypeptides_chain, polypeptides_chain_ext):
         # TODO: gestire errori (dna_sequence non trovata nel dataframe)
@@ -74,14 +82,3 @@ class ProteinSinthesisProcess():
 
         if self.verbose:
             print(f'Protein synthesized: {len(mrna_sequences) if mrna_sequences else 0} \n')
-
-        """if polypeptides_chain:
-            if self.verbose: print('Protein synthesized')
-            self.dna_sequences_df.loc[row_index, 'protein_synthesized'] = True
-            peptides = polypeptides_chain[LENGTH_AMIO_GROUP:-LENGTH_CARBOXYL_GROUP]
-            self.dna_sequences_df.loc[row_index, 'peptides_cardinality'] = len(peptides)
-        else:
-            if self.verbose: print('Protein not synthesized')
-            self.dna_sequences_df.loc[row_index, 'protein_synthesized'] = False
-            self.dna_sequences_df.loc[row_index, 'peptides_cardinality'] = None
-        """
