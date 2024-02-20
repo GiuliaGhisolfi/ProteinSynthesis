@@ -7,6 +7,7 @@ LENGTH_AMIO_GROUP = 4 # length of amino acid group
 LENGTH_CARBOXYL_GROUP = 5 # length of carboxyl group
 RANDOM_SEED = 42
 SIM_TIME = 1000
+NUMBER_RIBOSOMES = 5
 
 
 class ProteinSinthesisProcess():
@@ -27,10 +28,11 @@ class ProteinSinthesisProcess():
         
         random.seed(RANDOM_SEED)
         self.env = simpy.Environment()
+        self.ribosomes = simpy.Resource(self.env, capacity=NUMBER_RIBOSOMES)
         self.env.process(self.start())
 
         self.eucaryotes_cell = EucaryotesCell(environment=self.env, verbose=self.verbose)
-
+        
         if self.verbose: print('Simulation environment initialized \t')
     
     def run(self, simulation_time=SIM_TIME):
@@ -40,32 +42,29 @@ class ProteinSinthesisProcess():
     def start(self):
         sequences_count = itertools.count()
 
-        # Initialize 3 dna sequences to be synthesized
-        for _ in range(3):
-            self.process(next(sequences_count))
-                
         # Synthesize dna sequences while the simulation is running
         while True:
-            yield self.env.timeout(random.random()*10) # time between one protein synthesis and another
-            self.process(next(sequences_count))
+            dna_sequence = random.choice(self.dna_sequences) # TODO: Seq object from biopython
+            # var: enzimi, basi, ATP, tRNA, aminoacidi
+            #atp = random.randint(1,6)
 
-    def process(self, sequence_count):
-        dna_sequence = random.choice(self.dna_sequences) # TODO: Seq object from biopython
-        # var: enzimi, basi, ATP, tRNA, aminoacidi
-        #atp = random.randint(1,6)
+            if self.available[dna_sequence]:
+                with self.ribosomes.request() as request: # request a ribosome
+                    yield request # wait for a ribosome to be available
 
-        if self.available[dna_sequence]:
-            print(f'Time {self.env.now}: Protein synthesis started for sequence {sequence_count}')
-            #self.env.process(self.eucaryotes_cell.synthesize_protein(dna_sequence))
-            self.eucaryotes_cell.synthesize_protein(dna_sequence)
-            self.save_proteins_synthesized(
-                dna_sequence,
-                self.eucaryotes_cell.get_mrna(),
-                self.eucaryotes_cell.get_proteins(),
-                self.eucaryotes_cell.get_extended_proteins_name()
-            )
-            self.available[dna_sequence] = False
-    
+                    print(f'Time {self.env.now}: Protein synthesis started for sequence {next(sequences_count)}')
+                    #self.env.process(self.eucaryotes_cell.synthesize_protein(dna_sequence))
+                    self.eucaryotes_cell.synthesize_protein(dna_sequence)
+                    self.save_proteins_synthesized(
+                        dna_sequence,
+                        self.eucaryotes_cell.get_mrna(),
+                        self.eucaryotes_cell.get_proteins(),
+                        self.eucaryotes_cell.get_extended_proteins_name()
+                    )
+                    self.available[dna_sequence] = False
+
+                    yield self.env.timeout(random.random()*10) # time between one protein synthesis and another
+
     def save_proteins_synthesized(self, dna_sequence, mrna_sequences, polypeptides_chain, polypeptides_chain_ext):
         # TODO: gestire errori (dna_sequence non trovata nel dataframe)
         row_index = self.dna_sequences_df[self.dna_sequences_df['sequence'] == dna_sequence].index[0]
