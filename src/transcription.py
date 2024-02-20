@@ -1,4 +1,6 @@
 import random
+from Bio.Seq import Seq
+from Bio import SeqUtils
 from src.nucleotides import NucleotidesSymbolsAllocations
 
 BASE_COMPLEMENT_DNA2RNA = {
@@ -13,7 +15,15 @@ BASE_COMPLEMENT_RNA2DNA = {
     'G': 'C', 
     'C': 'G'
 }
-PROMOTERS = ['TATAAAA', 'TATAAAT', 'TATATAA', 'TATATAT']
+PROMOTERS = [
+    'TATAAAA', 'TATAAAT', 'TATATAA', 'TATATAT', # TATA box
+]
+"""    
+    'CAAT', # CAAT box
+    'GC', # GC box
+    'GGGCGG' # Initiator element
+]
+"""
 LENGTH_PROMOTER = 7
 TERMINATORS = ['UAA', 'UAG', 'UGA']
 RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
@@ -67,7 +77,7 @@ class Nucleus():
             return messenger_rna_sequences_list # mature mRNA
     
     def find_promoter(self, dna_sequence):
-        # find promoter sequence
+        # find promoter sequences in the DNA sequence
         promoter_positions_list = sorted([i for promoter in PROMOTERS for i, _ in 
             enumerate(dna_sequence) if dna_sequence[i:].startswith(promoter)])
         

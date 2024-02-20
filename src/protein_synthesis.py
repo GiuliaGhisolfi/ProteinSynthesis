@@ -45,6 +45,7 @@ class EucaryotesCell:
             if self.verbose: 
                 print(f'Time {self.env.now}: Translation started')
             self.proteins, self.proteins_extended_name = self.ribosome.translate(self.mrna_list)
+            #FIXME: i want this as a process
             if self.verbose: 
                 print(f'Time {self.env.now}: Translation ended')
 

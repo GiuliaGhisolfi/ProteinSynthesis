@@ -1,4 +1,6 @@
 import random
+from Bio.Seq import Seq
+from Bio import SeqUtils
 
 LENGTH_CODON = 3 # number of nucleotides that code for an amino acid
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
@@ -42,17 +44,10 @@ class Ribosome:
         pass
 
     def initialization(self, mrna_sequence):
-        subunit = '' # init
-        subunit = mrna_sequence[:LENGTH_CODON]
-        i = LENGTH_CODON
+        start_codon = 'AUG' # start codon
+        start_codon_position = str(mrna_sequence).find(start_codon)
 
-        # find start codon: AUG (methionine)
-        while subunit != 'AUG' and i<len(mrna_sequence):
-            subunit = subunit[1:]
-            subunit = subunit + mrna_sequence[i]
-            i += 1
-
-        return mrna_sequence[i-LENGTH_CODON:]
+        return mrna_sequence[start_codon_position:]
 
     def elongation(self, mrna_sequence):
         # enzima: aminoacyl-tRNA synthetases
@@ -74,6 +69,7 @@ class Ribosome:
         # add the carboxyl group to the polypeptide chain
         polypeptides_chain = polypeptides_chain + '-COOH'
         polypeptides_chain_ext = polypeptides_chain_ext.rstrip('-Stop-') + '-COOH'
+    
     
         return polypeptides_chain, polypeptides_chain_ext
 

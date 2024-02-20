@@ -1,6 +1,7 @@
 import simpy
 import random 
 import itertools
+from Bio.Seq import Seq
 from src.protein_synthesis import EucaryotesCell
 
 LENGTH_AMIO_GROUP = 4 # length of amino acid group
@@ -44,7 +45,7 @@ class ProteinSinthesisProcess():
 
         # Synthesize dna sequences while the simulation is running
         while True:
-            dna_sequence = random.choice(self.dna_sequences) # TODO: Seq object from biopython
+            dna_sequence = Seq(random.choice(self.dna_sequences))
             # var: enzimi, basi, ATP, tRNA, aminoacidi
             #atp = random.randint(1,6)
 
