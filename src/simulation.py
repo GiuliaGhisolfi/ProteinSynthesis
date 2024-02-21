@@ -8,8 +8,7 @@ LENGTH_AMIO_GROUP = 4 # length of amino acid group
 LENGTH_CARBOXYL_GROUP = 5 # length of carboxyl group
 RANDOM_SEED = 42
 SIM_TIME = 1000
-NUMBER_RIBOSOMES = 5
-
+NUMBER_RESOURCES = 5
 
 class ProteinSinthesisProcess():
     def __init__(self, dna_sequences_df, verbose=False):
@@ -25,11 +24,11 @@ class ProteinSinthesisProcess():
         # initialize the simulation environment
         self.dna_sequences = self.dna_sequences_df['sequence'].values
         self.available =  {row['sequence']: True if row['protein_synthesized']==None else False
-            for id, row in self.dna_sequences_df.iterrows()}
+            for _, row in self.dna_sequences_df.iterrows()}
         
         random.seed(RANDOM_SEED)
         self.env = simpy.Environment()
-        self.resources = simpy.Resource(self.env, capacity=NUMBER_RIBOSOMES)
+        self.resources = simpy.Resource(self.env, capacity=NUMBER_RESOURCES)
         self.env.process(self.start())
 
         self.eucaryotes_cell = EucaryotesCell(environment=self.env, verbose=self.verbose)
@@ -50,12 +49,12 @@ class ProteinSinthesisProcess():
             #atp = random.randint(1,6)
 
             if self.available[dna_sequence]:
-                with self.resources.request() as request: # request a ribosome
-                    yield request # wait for a ribosome to be available
+                with self.resources.request() as request:
+                    yield request # wait for a cell be able to accepts dna sequence
 
                     print(f'Time {self.env.now}: Protein synthesis started for sequence {next(sequences_count)}')
                     yield self.env.process(self.eucaryotes_cell.synthesize_protein(dna_sequence))
-                    #self.eucaryotes_cell.synthesize_protein(dna_sequence)
+
                     self.save_proteins_synthesized(
                         dna_sequence,
                         self.eucaryotes_cell.get_mrna(),

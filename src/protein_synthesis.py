@@ -1,4 +1,5 @@
 import json
+import itertools
 from src.transcription import Nucleus
 from src.translation import Ribosome
 
@@ -27,14 +28,55 @@ class EucaryotesCell:
             aminoacids_dict=self.aminoacids_dict,
             )
 
-    def synthesize_protein(self, dna):
-        self.dna = dna # template strand (3' to 5' direction)
+    def synthesize_protein(self, dna_sequence):
+        self.dna = dna_sequence # template strand (3' to 5' direction)
 
-        # transcription
+        # start transcription
         if self.verbose:
             print(f'Time {self.env.now}: Transcription started')
-        transcript_generator = yield self.env.process(self.nucleus.transcript(self.dna))
+
+        # detect promoter
+        dna_sequences_to_transcript_list = self.nucleus.find_promoter(dna_sequence)
         if self.verbose:
+            promoters_count = len(dna_sequences_to_transcript_list) if dna_sequences_to_transcript_list is not None else 0
+            print(f'Promoters found: {promoters_count}')
+
+        if dna_sequences_to_transcript_list is None:
+            self.mrna_list = None
+            self.proteins, self.proteins_extended_name = None, None
+        else:
+            self.mrna_list = []
+            self.proteins = []
+            self.proteins_extended_name = []
+            """
+            for dna_sequence in dna_sequences_to_transcript_list:
+                with self.ribosome.request() as request:
+                    yield request # FIXME: wait for a ribosome to be available
+                    transcript_processes.append(self.env.process(self.transcript_process(dna_sequence)))
+
+            # Wait for all transcript processes to complete
+            transcript_processes_list = yield simpy.AllOf(self.env, transcript_processes)
+
+            """
+
+            for dna_sequence_to_transcript in dna_sequences_to_transcript_list:
+                # transcription
+                mrna = yield self.env.process(self.nucleus.transcript(dna_sequence_to_transcript))
+                self.mrna_list.append(mrna) # mature mRNA
+
+                # translation
+                protein, protein_extended_name = yield self.env.process(
+                    self.ribosome.translate(mrna))
+                self.proteins.append(protein) # polypeptides chain
+                self.proteins_extended_name.append(protein_extended_name)
+            
+            if self.verbose:
+                print(f'Time {self.env.now}: Translation ended')
+                
+
+        #transcript_generator = yield self.env.process(self.nucleus.transcript(self.dna))
+
+        """if self.verbose:
             print(f'Time {self.env.now}: Transcription ended') 
 
         if transcript_generator is not None:
@@ -43,16 +85,14 @@ class EucaryotesCell:
                 self.mrna_list.append(result.value)
             
             # translation
-            if self.verbose: 
+            if self.verbose:
                 print(f'mRNA synthesized: {len(self.mrna_list) if self.mrna_list is not None else 0}')
                 print(f'Time {self.env.now}: Translation started')
             self.proteins, self.proteins_extended_name = self.ribosome.translate(self.mrna_list)
             #FIXME: i want this as a process
-            if self.verbose: 
-                print(f'Time {self.env.now}: Translation ended')
-        else:
-            self.mrna_list = None
-            self.proteins, self.proteins_extended_name = None, None
+            if self.verbose:
+                print(f'Time {self.env.now}: Translation ended')"""
+            
 
             #TODO
             # protein folding: ordered three-dimensional structure

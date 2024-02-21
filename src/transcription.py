@@ -30,7 +30,7 @@ TERMINATORS = ['UAA', 'UAG', 'UGA']
 RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
 LENGTH_EXTRON_SEQUENCE = 3 # length of extron sequence
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
-NUMBER_RIBOSOMES = 2
+NUMBER_RNA_POLYMERASES = 2
 
 class Nucleus():
 
@@ -42,39 +42,35 @@ class Nucleus():
         self.editing_sites_dict = dict(sorted(self.editing_sites_dict.items(), 
             key=lambda x: len(x[0]), reverse=False)) # sort by length of key
         
-        self.ribosome = simpy.Resource(self.env, capacity=NUMBER_RIBOSOMES)
-        self.nucleotides = {'U': 0, 'A': 0, 'G': 0, 'C': 0} # TODO: change e implementare il conteggio quando si usano
-
-    def transcript(self, dna_sequence): # enzime: RNA polymerase
-        # detect promoter
-        dna_sequences_to_transcript_list = self.find_promoter(dna_sequence)
-
-        if dna_sequences_to_transcript_list is None:
+        self.rna_polymerase = simpy.Resource(self.env, capacity=NUMBER_RNA_POLYMERASES)
+        self.nucleotides = {'U': 0, 'A': 0, 'G': 0, 'C': 0} 
+        # TODO: change e implementare il conteggio prima e dopo degradetion, nel ribosoma (o gestire dentro cell)
+    
+    def find_promoter(self, dna_sequence):
+        # find promoter sequences in the DNA sequence
+        promoter_positions_list = sorted([i for promoter in PROMOTERS for i, _ in 
+            enumerate(dna_sequence) if dna_sequence[i:].startswith(promoter)])
+        
+        if len(promoter_positions_list) == 0:
             return None
         else:
-            # Start transcript processes for each DNA sequence in parallel
-            transcript_processes = []
-            for dna_sequence in dna_sequences_to_transcript_list:
-                with self.ribosome.request() as request:
-                    yield request # FIXME: wait for a ribosome to be available
-                    transcript_processes.append(self.env.process(self.transcript_process(dna_sequence)))
+            # split the DNA sequence in the promoter regions
+            dna_sequences_list = []
 
-            # Wait for all transcript processes to complete
-            transcript_processes_list = yield simpy.AllOf(self.env, transcript_processes)
+            for i in range(len(promoter_positions_list)-1):
+                dna_sequences_list.append(dna_sequence[promoter_positions_list[i]+LENGTH_PROMOTER
+                    :promoter_positions_list[i+1]])
+                
+            dna_sequences_list.append(dna_sequence[promoter_positions_list[-1]+LENGTH_PROMOTER:])
+            
+            return dna_sequences_list
 
-            return transcript_processes_list # return mature mRNA
-        """
-            messenger_rna_sequences_list = []
-
-            # TODO: process dna sequencs in parallel
-            for dna_sequence in dna_sequences_to_transcript_list:
-                with self.ribosome.request() as request:
-                    yield request 
-                    messenger_rna_sequence = yield self.env.process(
-                        self.trascript_process(dna_sequence)) # mature mRNA
-                    messenger_rna_sequences_list.append(messenger_rna_sequence)
-        
-        return messenger_rna_sequences_list"""
+    def transcript(self, dna_sequence): # enzime: RNA polymerase
+        with self.rna_polymerase.request() as request:
+            yield request # FIXME: wait for RNA polymerase to be available
+            # start transcript processes for DNA sequence
+            messenger_rna_sequence = yield self.env.process(self.transcript_process(dna_sequence))
+        return Seq(messenger_rna_sequence)
 
     def transcript_process(self, dna_sequence):
         # make sequence univoque to transcript
@@ -99,25 +95,6 @@ class Nucleus():
         yield self.env.timeout(1) #TODO: implementare il tempo di trascrizione
 
         return messenger_rna_sequence
-
-    def find_promoter(self, dna_sequence):
-        # find promoter sequences in the DNA sequence
-        promoter_positions_list = sorted([i for promoter in PROMOTERS for i, _ in 
-            enumerate(dna_sequence) if dna_sequence[i:].startswith(promoter)])
-        
-        if len(promoter_positions_list) == 0:
-            return None
-        else:
-            # split the DNA sequence in the promoter regions
-            dna_sequences_list = []
-
-            for i in range(len(promoter_positions_list)-1):
-                dna_sequences_list.append(dna_sequence[promoter_positions_list[i]+LENGTH_PROMOTER
-                    :promoter_positions_list[i+1]])
-                
-            dna_sequences_list.append(dna_sequence[promoter_positions_list[-1]+LENGTH_PROMOTER:])
-            
-            return dna_sequences_list
         
     def splicing(self, rna_sequence):
         # remove introns: non-coding regions
