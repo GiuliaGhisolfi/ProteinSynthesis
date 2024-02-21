@@ -63,7 +63,7 @@ class ProteinSinthesisProcess():
                     )
                     self.available[dna_sequence] = False
 
-                    yield self.env.timeout(random.random()*10) # time between one protein synthesis and another
+                    yield self.env.timeout(0.5) # time between one protein synthesis and another
 
     def save_proteins_synthesized(self, dna_sequence, mrna_sequences, polypeptides_chain, polypeptides_chain_ext):
         # TODO: gestire errori (dna_sequence non trovata nel dataframe)

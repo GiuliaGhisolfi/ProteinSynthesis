@@ -6,7 +6,7 @@ implement enzima
 
 implement possibility to synthetaise more than 1 prothein at time, dipende da numero ribosomi
 
-specify time 
+specify time (e rendere parametrico dove ci sono i tempi)
 
 gestire seq con più di una TATA box (done, to fix)
 

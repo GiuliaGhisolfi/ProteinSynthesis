@@ -30,7 +30,7 @@ TERMINATORS = ['UAA', 'UAG', 'UGA']
 RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
 LENGTH_EXTRON_SEQUENCE = 3 # length of extron sequence
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
-NUMBER_RNA_POLYMERASES = 2
+NUMBER_RNA_POLYMERASES = 5
 
 class Nucleus():
 
@@ -68,8 +68,12 @@ class Nucleus():
     def transcript(self, dna_sequence): # enzime: RNA polymerase
         with self.rna_polymerase.request() as request:
             yield request # FIXME: wait for RNA polymerase to be available
+
             # start transcript processes for DNA sequence
             messenger_rna_sequence = yield self.env.process(self.transcript_process(dna_sequence))
+
+            self.rna_polymerase.release(request) # release RNA polymerase
+
         return Seq(messenger_rna_sequence)
 
     def transcript_process(self, dna_sequence):
