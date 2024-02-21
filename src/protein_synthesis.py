@@ -33,21 +33,27 @@ class EucaryotesCell:
         # transcription
         if self.verbose:
             print(f'Time {self.env.now}: Transcription started')
-        self.mrna_list = self.nucleus.transcript(self.dna)
+        transcript_generator = yield self.env.process(self.nucleus.transcript(self.dna))
+        #yield from transcript_generator # wait for the transcription to end
         if self.verbose:
             print(f'Time {self.env.now}: Transcription ended') 
-            print(f'mRNA synthesized: {len(self.mrna_list) if self.mrna_list is not None else 0}')
 
-        if self.mrna_list is None: # no promoter found in the DNA
-            self.proteins, self.proteins_extended_name = None, None
-        else:
+        if transcript_generator is not None:
+            self.mrna_list = []
+            for result in transcript_generator: # list of process
+                self.mrna_list.append(result.value)
+            
             # translation
             if self.verbose: 
+                print(f'mRNA synthesized: {len(self.mrna_list) if self.mrna_list is not None else 0}')
                 print(f'Time {self.env.now}: Translation started')
             self.proteins, self.proteins_extended_name = self.ribosome.translate(self.mrna_list)
             #FIXME: i want this as a process
             if self.verbose: 
                 print(f'Time {self.env.now}: Translation ended')
+        else:
+            self.mrna_list = None
+            self.proteins, self.proteins_extended_name = None, None
 
             #TODO
             # protein folding: ordered three-dimensional structure

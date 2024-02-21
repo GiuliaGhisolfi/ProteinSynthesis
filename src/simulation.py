@@ -29,7 +29,7 @@ class ProteinSinthesisProcess():
         
         random.seed(RANDOM_SEED)
         self.env = simpy.Environment()
-        self.ribosomes = simpy.Resource(self.env, capacity=NUMBER_RIBOSOMES)
+        self.resources = simpy.Resource(self.env, capacity=NUMBER_RIBOSOMES)
         self.env.process(self.start())
 
         self.eucaryotes_cell = EucaryotesCell(environment=self.env, verbose=self.verbose)
@@ -50,12 +50,12 @@ class ProteinSinthesisProcess():
             #atp = random.randint(1,6)
 
             if self.available[dna_sequence]:
-                with self.ribosomes.request() as request: # request a ribosome
+                with self.resources.request() as request: # request a ribosome
                     yield request # wait for a ribosome to be available
 
                     print(f'Time {self.env.now}: Protein synthesis started for sequence {next(sequences_count)}')
-                    #self.env.process(self.eucaryotes_cell.synthesize_protein(dna_sequence))
-                    self.eucaryotes_cell.synthesize_protein(dna_sequence)
+                    yield self.env.process(self.eucaryotes_cell.synthesize_protein(dna_sequence))
+                    #self.eucaryotes_cell.synthesize_protein(dna_sequence)
                     self.save_proteins_synthesized(
                         dna_sequence,
                         self.eucaryotes_cell.get_mrna(),

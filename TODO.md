@@ -17,3 +17,7 @@ alternative splicing: to differencial protein coded by same gene
 Ribosome Binding Site (RBS): sequence in mRNA to which ribosomes can bind and initiate translation.
 
 lib to find promoters
+
+from Bio.SeqUtils import seq3
+seq3("MAIVMGRWKGAR*")
+output: 'MetAlaIleValMetGlyArgTrpLysGlyAlaArgTer'
