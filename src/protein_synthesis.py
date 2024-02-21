@@ -34,7 +34,6 @@ class EucaryotesCell:
         if self.verbose:
             print(f'Time {self.env.now}: Transcription started')
         transcript_generator = yield self.env.process(self.nucleus.transcript(self.dna))
-        #yield from transcript_generator # wait for the transcription to end
         if self.verbose:
             print(f'Time {self.env.now}: Transcription ended') 
 

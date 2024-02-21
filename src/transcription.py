@@ -50,7 +50,7 @@ class Nucleus():
         dna_sequences_to_transcript_list = self.find_promoter(dna_sequence)
 
         if dna_sequences_to_transcript_list is None:
-            messenger_rna_sequences_list = None
+            return None
         else:
             # Start transcript processes for each DNA sequence in parallel
             transcript_processes = []
@@ -60,9 +60,9 @@ class Nucleus():
                     transcript_processes.append(self.env.process(self.transcript_process(dna_sequence)))
 
             # Wait for all transcript processes to complete
-            messenger_rna_sequences_list = yield simpy.AllOf(self.env, transcript_processes)
+            transcript_processes_list = yield simpy.AllOf(self.env, transcript_processes)
 
-        return messenger_rna_sequences_list # return mature mRNA
+            return transcript_processes_list # return mature mRNA
         """
             messenger_rna_sequences_list = []
 
