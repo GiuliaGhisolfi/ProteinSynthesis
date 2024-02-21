@@ -51,6 +51,7 @@ class EucaryotesCell:
             self.proteins_extended_name = []
 
             while len(self.mrna_list) < promoters_count:
+                # FIXME: DNA sequence non vengono processate consequenzialmente, ma aspettano che termini la precedente
                 dna_sequence_to_transcript = dna_sequences_to_transcript_list[len(self.mrna_list)]
                 seq_count = next(sequences_count)
 
