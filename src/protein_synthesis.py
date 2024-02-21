@@ -38,8 +38,9 @@ class EucaryotesCell:
 
         # detect promoter
         dna_sequences_to_transcript_list = self.nucleus.find_promoter(dna_sequence)
+        
+        promoters_count = len(dna_sequences_to_transcript_list) if dna_sequences_to_transcript_list is not None else 0
         if self.verbose:
-            promoters_count = len(dna_sequences_to_transcript_list) if dna_sequences_to_transcript_list is not None else 0
             print(f'Promoters found: {promoters_count}')
 
         if dna_sequences_to_transcript_list is None:
@@ -55,8 +56,9 @@ class EucaryotesCell:
                 dna_sequence_to_transcript = dna_sequences_to_transcript_list[len(self.mrna_list)]
                 seq_count = next(sequences_count)
 
-                # transcription
-                print(f'Time {self.env.now}: Transcription started for mRNA sequence {seq_count}')
+                # transcription process
+                if self.verbose:
+                    print(f'Time {self.env.now}: Transcription started for mRNA sequence {seq_count}')
 
                 mrna = yield self.env.process(self.nucleus.transcript(dna_sequence_to_transcript))
                 self.mrna_list.append(mrna) # mature mRNA

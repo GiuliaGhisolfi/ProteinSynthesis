@@ -28,7 +28,7 @@ class ProteinSinthesisProcess():
         
         random.seed(RANDOM_SEED)
         self.env = simpy.Environment()
-        self.resources = simpy.Resource(self.env, capacity=NUMBER_RESOURCES)
+        self.resources = simpy.Resource(self.env, capacity=NUMBER_RESOURCES) #TODO: resources: enzimi, basi, ATP, tRNA, aminoacidi
         self.env.process(self.start())
 
         self.eucaryotes_cell = EucaryotesCell(environment=self.env, verbose=self.verbose)
@@ -45,14 +45,17 @@ class ProteinSinthesisProcess():
         # Synthesize dna sequences while the simulation is running
         while True:
             dna_sequence = Seq(random.choice(self.dna_sequences))
-            # var: enzimi, basi, ATP, tRNA, aminoacidi
-            #atp = random.randint(1,6)
 
             if self.available[dna_sequence]:
+                seq_count = next(sequences_count)
+                print(f'DNA Sequence {seq_count} requesting at {self.env.now}')
+
                 with self.resources.request() as request:
                     yield request # wait for a cell be able to accepts dna sequence
-
-                    print(f'Time {self.env.now}: Protein synthesis started for sequence {next(sequences_count)}')
+                    print(f'DNA Sequence {seq_count} got resource at {self.env.now}')
+                    
+                    if self.verbose:
+                        print(f'Time {self.env.now}: Protein synthesis started for sequence {seq_count}')
                     yield self.env.process(self.eucaryotes_cell.synthesize_protein(dna_sequence))
 
                     self.save_proteins_synthesized(
@@ -61,9 +64,9 @@ class ProteinSinthesisProcess():
                         self.eucaryotes_cell.get_proteins(),
                         self.eucaryotes_cell.get_extended_proteins_name()
                     )
-                    self.available[dna_sequence] = False
 
-                    yield self.env.timeout(0.5) # time between one protein synthesis and another
+                self.available[dna_sequence] = False
+                yield self.env.timeout(0.05) # time between one protein synthesis and another
 
     def save_proteins_synthesized(self, dna_sequence, mrna_sequences, polypeptides_chain, polypeptides_chain_ext):
         # TODO: gestire errori (dna_sequence non trovata nel dataframe)

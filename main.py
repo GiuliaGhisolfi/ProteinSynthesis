@@ -1,6 +1,6 @@
 from src.simulation import ProteinSinthesisProcess
 from HumanGenomeDataset.load_dataset import load_dataset
-SIM_TIME = 300
+SIM_TIME = 30
 
 if __name__ == '__main__':
     data_df = load_dataset('dna_protein_coding_sequences')

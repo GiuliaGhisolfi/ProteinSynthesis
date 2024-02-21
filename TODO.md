@@ -18,6 +18,11 @@ Ribosome Binding Site (RBS): sequence in mRNA to which ribosomes can bind and in
 
 lib to find promoters
 
+implementare:
 from Bio.SeqUtils import seq3
 seq3("MAIVMGRWKGAR*")
 output: 'MetAlaIleValMetGlyArgTrpLysGlyAlaArgTer'
+
+REQUEST RESOURCES NON FUNZIONA DA NESSUNA PARTE! 
+ASPETTA SEMPRE CHE UN PROCESSO FINISCA PER AVVIARE IL SUCCESSIVO, ANCHE SE CI SONO RISORSE DISPONIBILI
+SISTEMARE
