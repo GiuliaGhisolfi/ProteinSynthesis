@@ -1,12 +1,4 @@
-results df for human genoma in new df to compare using rna_id (non univoco) + possibilità di sintetizzare più volte da stesso dna
-
-PROCESSI CHE RICHIAMANO PROCESSI, e usare yield + resurces per gestire i tempi
-
 implement enzima
-
-implement possibility to synthetaise more than 1 prothein at time, dipende da numero ribosomi
-
-specify time (e rendere parametrico dove ci sono i tempi)
 
 gestire seq con più di una TATA box (done, to fix)
 
@@ -14,7 +6,7 @@ gestire NH2-COOH (del from list)
 
 alternative splicing: to differencial protein coded by same gene
 
-Ribosome Binding Site (RBS): sequence in mRNA to which ribosomes can bind and initiate translation.
+Ribosome Binding Site (RBS): sequence in mRNA to which ribosomes can bind and initiate translation. (maybe not)
 
 lib to find promoters
 
@@ -22,7 +14,3 @@ implementare:
 from Bio.SeqUtils import seq3
 seq3("MAIVMGRWKGAR*")
 output: 'MetAlaIleValMetGlyArgTrpLysGlyAlaArgTer'
-
-REQUEST RESOURCES NON FUNZIONA DA NESSUNA PARTE! 
-ASPETTA SEMPRE CHE UN PROCESSO FINISCA PER AVVIARE IL SUCCESSIVO, ANCHE SE CI SONO RISORSE DISPONIBILI
-SISTEMARE
