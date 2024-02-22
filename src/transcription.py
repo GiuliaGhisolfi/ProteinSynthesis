@@ -1,4 +1,5 @@
 import random
+import simpy
 from src.nucleotides import NucleotidesSymbolsAllocations
 
 BASE_COMPLEMENT_DNA2RNA = {
@@ -13,14 +14,23 @@ BASE_COMPLEMENT_RNA2DNA = {
     'G': 'C', 
     'C': 'G'
 }
-PROMOTERS = ['TATAAAA', 'TATAAAT', 'TATATAA', 'TATATAT']
+PROMOTERS = [
+    'TATAAAA', 'TATAAAT', 'TATATAA', 'TATATAT', # TATA box
+]
+"""    
+    'CAAT', # CAAT box
+    'GC', # GC box
+    'GGGCGG' # Initiator element
+]
+"""
 LENGTH_PROMOTER = 7
 TERMINATORS = ['UAA', 'UAG', 'UGA']
 RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
 LENGTH_EXTRON_SEQUENCE = 3 # length of extron sequence
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
+NUMBER_RNA_POLYMERASES = 3
 
-class Nucleus():
+class Nucleus:
 
     def __init__(self, environment, extron_sequences_list, editing_sites_dict):
         self.env = environment
@@ -29,45 +39,13 @@ class Nucleus():
         self.editing_sites_dict = editing_sites_dict
         self.editing_sites_dict = dict(sorted(self.editing_sites_dict.items(), 
             key=lambda x: len(x[0]), reverse=False)) # sort by length of key
-
-        self.nucleotides = {'U': 0, 'A': 0, 'G': 0, 'C': 0} # TODO: change e implementare il conteggio quando si usano
-
-    def transcript(self, dna_sequence): # enzime: RNA polymerase
-        # detect promoter
-        dna_sequences_to_transcript_list = self.find_promoter(dna_sequence)
-
-        if dna_sequences_to_transcript_list is None:
-            return None
-        else:
-            messenger_rna_sequences_list = []
-
-            # TODO: process dna sequencs in parallel
-            for dna_sequence in dna_sequences_to_transcript_list:
-                # make sequence univoque to transcript
-                dna_sequence = ''.join([random.choice(NucleotidesSymbolsAllocations[n]) for n in dna_sequence])
-
-                # transcript from gene to pre-mRNA
-                messenger_rna_sequence = ''.join([BASE_COMPLEMENT_DNA2RNA[base] 
-                    if random.random() > RNA_POLYMERASE_ERROR_RATE 
-                    else random.choice([b for b in list(BASE_COMPLEMENT_DNA2RNA.values()) if b != BASE_COMPLEMENT_DNA2RNA[base]])
-                    for base in dna_sequence])
-
-                messenger_rna_sequence = self.capping(messenger_rna_sequence)
-
-                # elongation phase
-                messenger_rna_sequence = self.splicing(messenger_rna_sequence)
-                messenger_rna_sequence = self.editing(messenger_rna_sequence)
-                
-                # post-transcriptional modifications
-                messenger_rna_sequence = self.cleavage(messenger_rna_sequence)
-                messenger_rna_sequence = self.polyadenylation(messenger_rna_sequence)
-
-                messenger_rna_sequences_list.append(messenger_rna_sequence)
-
-            return messenger_rna_sequences_list # mature mRNA
+        
+        self.rna_polymerase = simpy.Resource(self.env, capacity=NUMBER_RNA_POLYMERASES)
+        self.nucleotides = {'U': 0, 'A': 0, 'G': 0, 'C': 0} 
+        # TODO: change e implementare il conteggio prima e dopo degradetion, nel ribosoma (o gestire dentro cell)
     
     def find_promoter(self, dna_sequence):
-        # find promoter sequence
+        # find promoter sequences in the DNA sequence
         promoter_positions_list = sorted([i for promoter in PROMOTERS for i, _ in 
             enumerate(dna_sequence) if dna_sequence[i:].startswith(promoter)])
         
@@ -84,6 +62,42 @@ class Nucleus():
             dna_sequences_list.append(dna_sequence[promoter_positions_list[-1]+LENGTH_PROMOTER:])
             
             return dna_sequences_list
+
+    def transcript(self, dna_sequence): # enzime: RNA polymerase
+        with self.rna_polymerase.request() as request:
+            yield request  # wait for RNA polymerase to be available
+            # FIXME: request.queque non tiene in memoria le richieste
+
+            # start transcript processes for DNA sequence
+            messenger_rna_sequence = yield self.env.process(self.transcript_process(dna_sequence))
+
+            #FIXME: self.rna_polymerase.release(request) # release RNA polymerase
+
+        return messenger_rna_sequence #TODO: Seq(messenger_rna_sequence)
+
+    def transcript_process(self, dna_sequence):
+        # make sequence univoque to transcript
+        dna_sequence = ''.join([random.choice(NucleotidesSymbolsAllocations[n]) for n in dna_sequence])
+
+        # transcript from gene to pre-mRNA
+        messenger_rna_sequence = ''.join([BASE_COMPLEMENT_DNA2RNA[base] 
+            if random.random() > RNA_POLYMERASE_ERROR_RATE 
+            else random.choice([b for b in list(BASE_COMPLEMENT_DNA2RNA.values()) if b != BASE_COMPLEMENT_DNA2RNA[base]])
+            for base in dna_sequence])
+
+        messenger_rna_sequence = self.capping(messenger_rna_sequence)
+
+        # elongation phase
+        messenger_rna_sequence = self.splicing(messenger_rna_sequence)
+        messenger_rna_sequence = self.editing(messenger_rna_sequence)
+        
+        # post-transcriptional modifications
+        messenger_rna_sequence = self.cleavage(messenger_rna_sequence)
+        messenger_rna_sequence = self.polyadenylation(messenger_rna_sequence)
+
+        yield self.env.timeout(1) #TODO: implementare il tempo di trascrizione
+
+        return messenger_rna_sequence
         
     def splicing(self, rna_sequence):
         # remove introns: non-coding regions

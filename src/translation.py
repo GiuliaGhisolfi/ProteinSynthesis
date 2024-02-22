@@ -1,9 +1,10 @@
-import random
+import simpy
 
 LENGTH_CODON = 3 # number of nucleotides that code for an amino acid
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
 LENGTH_POLY_A_TAIL = 5 # length of poly-A tail
 MRNA_DECODED_ERROR_RATE = 1e-4 # 1 mistake every 10.000 amino acids
+NUMBER_RIBOSOMES = 2
 
 class Ribosome:
     def __init__(self, environment, codons2aminoacids_dict, aminoacids_dict):
@@ -13,23 +14,25 @@ class Ribosome:
         self.codons2aminoacids_dict = codons2aminoacids_dict
         self.aminoacids_dict = aminoacids_dict
 
-    def translate(self, mrna_sequences_list): # protein synthesis
-        polypeptides_chain_list = []
-        polypeptides_chain_ext_list = []
+        self.ribosomes = simpy.Resource(self.env, capacity=NUMBER_RIBOSOMES)
 
-        for mrna_sequence in mrna_sequences_list: 
-            #TODO: process mrna sequences in parallel
+    def translate(self, mrna_sequence): # protein synthesis
+        with self.ribosomes.request() as request:
+            yield request # wait for a ribosome to be available
+            polypeptides_chain, polypeptides_chain_ext = yield self.env.process(
+                self.translation_process(mrna_sequence))
+            
+        return polypeptides_chain, polypeptides_chain_ext
+    
+    def translation_process(self, mrna_sequence):
+        mrna_sequence = self.degradation(mrna_sequence)
+        #mrna_sequence = self.activation(mrna_sequence)
+        mrna_sequence = self.initialization(mrna_sequence)
+        polypeptides_chain, polypeptides_chain_ext = yield self.env.process(
+            self.elongation(mrna_sequence))
+        #TODO: mechanism to corre   ct transcription errors + translation times
 
-            mrna_sequence = self.degradation(mrna_sequence)
-            #mrna_sequence = self.activation(mrna_sequence)
-            mrna_sequence = self.initialization(mrna_sequence)
-            polypeptides_chain, polypeptides_chain_ext = self.elongation(mrna_sequence)
-            #TODO: mechanism to correct transcription errors
-
-            polypeptides_chain_list.append(polypeptides_chain)
-            polypeptides_chain_ext_list.append(polypeptides_chain_ext)
-        
-        return polypeptides_chain_list, polypeptides_chain_ext_list
+        return polypeptides_chain, polypeptides_chain_ext
     
     def degradation(self, mrna_sequence):
         # degradation of the 5' cap and poly-A tail, enzime: exonuclease
@@ -42,17 +45,10 @@ class Ribosome:
         pass
 
     def initialization(self, mrna_sequence):
-        subunit = '' # init
-        subunit = mrna_sequence[:LENGTH_CODON]
-        i = LENGTH_CODON
+        start_codon = 'AUG' # start codon
+        start_codon_position = str(mrna_sequence).find(start_codon)
 
-        # find start codon: AUG (methionine)
-        while subunit != 'AUG' and i<len(mrna_sequence):
-            subunit = subunit[1:]
-            subunit = subunit + mrna_sequence[i]
-            i += 1
-
-        return mrna_sequence[i-LENGTH_CODON:]
+        return mrna_sequence[start_codon_position:]
 
     def elongation(self, mrna_sequence):
         # enzima: aminoacyl-tRNA synthetases
@@ -69,7 +65,7 @@ class Ribosome:
             polypeptides_chain = polypeptides_chain + self.aminoacids_dict[aminoacid]
             polypeptides_chain_ext = polypeptides_chain_ext + aminoacid + '-'
             i += LENGTH_CODON
-            #FIXME: yield self.env.timeout(0.05) # 0.05 seconds to add each amino acid
+            yield self.env.timeout(0.05) # 0.05 seconds to add each amino acid
         
         # add the carboxyl group to the polypeptide chain
         polypeptides_chain = polypeptides_chain + '-COOH'

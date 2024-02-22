@@ -56,3 +56,15 @@ def save_data(results_df, path, verbose=False):
     self.dna_sequences = self.dna_sequences_df['sequence'].tolist()
     if self.verbose: print('DNA sequences loaded')
 """
+
+"""
+if polypeptides_chain:
+    if self.verbose: print('Protein synthesized')
+    self.dna_sequences_df.loc[row_index, 'protein_synthesized'] = True
+    peptides = polypeptides_chain[LENGTH_AMIO_GROUP:-LENGTH_CARBOXYL_GROUP]
+    self.dna_sequences_df.loc[row_index, 'peptides_cardinality'] = len(peptides)
+else:
+    if self.verbose: print('Protein not synthesized')
+    self.dna_sequences_df.loc[row_index, 'protein_synthesized'] = False
+    self.dna_sequences_df.loc[row_index, 'peptides_cardinality'] = None
+"""
