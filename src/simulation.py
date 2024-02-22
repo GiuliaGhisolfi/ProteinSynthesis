@@ -34,11 +34,12 @@ class ProteinSinthesisProcess:
 
         self.eucaryotes_cell = EucaryotesCell(environment=self.env, verbose=self.verbose)
         
-        if self.verbose: print('Simulation environment initialized \t')
+        if self.verbose: print('Simulation environment initialized')
     
     def run(self, simulation_time=SIM_TIME):
-        if self.verbose: print('Simulation started: \n')
+        if self.verbose: print('Simulation started:')
         self.env.run(until=simulation_time)
+        if self.verbose: print('End simulation')
     
     def setup_process(self):
         process_queue = []
@@ -62,12 +63,12 @@ class ProteinSinthesisProcess:
     def process(self, variables):
         # Synthesize dna sequences while the simulation is running            
         with self.resources.request() as request:
-            print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} requesting resources')
-            yield request # wait for a cell be able to accepts dna sequence
-            print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} got resource')
-            
             if self.verbose:
-                print(f'Time {self.env.now:.4f}: Protein synthesis started for sequence {variables.sequence_count}')
+                print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} requesting to start synthesis')
+            yield request # wait for a cell be able to accepts dna sequence
+
+            if self.verbose:
+                print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthesize started')
             yield self.env.process(self.eucaryotes_cell.synthesize_protein(variables))
 
             self.save_proteins_synthesized(
@@ -77,7 +78,8 @@ class ProteinSinthesisProcess:
                 variables.get_extended_proteins_name()
             )
 
-            print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthetis ended')
+            if self.verbose:
+                print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthetis ended')
             self.resources.release(request)
             
     def save_proteins_synthesized(self, dna_sequence, mrna_sequences, polypeptides_chain, polypeptides_chain_ext):
@@ -95,6 +97,3 @@ class ProteinSinthesisProcess:
             'protein_synthesized': True if mrna_sequences else False
         }
         self.dna_sequences_df.iloc[row_index] = results
-
-        if self.verbose:
-            print(f'Protein synthesized: {len(mrna_sequences) if mrna_sequences else 0} \n')

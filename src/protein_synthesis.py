@@ -31,7 +31,7 @@ class EucaryotesCell:
     def synthesize_protein(self, variables):
         # start transcription
         if self.verbose:
-            print(f'Time {self.env.now:.4f}: Transcription started')
+            print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} start transcription process')
 
         # split the DNA sequence by promoter regions
         self.detect_promoter_process(variables)
@@ -50,18 +50,15 @@ class EucaryotesCell:
                 seq_count = next(sequences_count)
 
                 if self.verbose:
-                    print(f'Time {self.env.now:.4f}: Transcription started for mRNA sequence {seq_count}')
-                
-                yield self.env.process(self.transcription_and_translation_process
-                    (variables, seq_count=seq_count))
+                    print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} '
+                        f'(mRNA sequence {seq_count}) start transcription process')
 
-                if self.verbose:
-                    print(f'Time {self.env.now:.4f}: Transcription ended for mRNA sequence {seq_count}')
-                    if seq_count == variables.promoters_count:
-                        print(f'Time {self.env.now:.4f}: Transcription ended')
+                yield self.env.process(self.transcription_and_translation_process
+                    (variables, seq_count=seq_count))                    
 
             if self.verbose:
-                print(f'Time {self.env.now:.4f}: Translation ended') 
+                print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} '
+                    f'end transcription and translation process')
     
     def detect_promoter_process(self, variables):
         # detect promoter
@@ -73,7 +70,8 @@ class EucaryotesCell:
             variables.promoters_count = 0
 
         if self.verbose:
-            print(f'Promoters found: {variables.promoters_count}')
+            print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} contains '
+                f'{variables.promoters_count} promoters')
     
     def transcription_and_translation_process(self, variables, seq_count):
         # transcription process
@@ -91,13 +89,15 @@ class EucaryotesCell:
         # translation
         if self.verbose:
             if seq_count == 0:
-                print(f'Time {self.env.now:.4f}: Translation started')
-            print(f'Time {self.env.now:.4f}: Translation started for mRNA sequence {seq_count}')
+                print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} start translation process')
+            print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} (mRNA sequence {seq_count}) '
+                f'start translation process')
         
         yield self.env.process(self.translation_process(variables, mrna))
 
         if self.verbose:
-            print(f'Time {self.env.now:.4f}: Translation ended for mRNA sequence {seq_count}')
+            print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} (mRNA sequence {seq_count}) '
+                f'end translation process')
     
     def translation_process(self, variables, mrna):
         # translation process
