@@ -10,7 +10,7 @@ RANDOM_SEED = 42
 SIM_TIME = 1000
 NUMBER_RESOURCES = 5
 
-class ProteinSinthesisProcess():
+class ProteinSinthesisProcess:
     def __init__(self, dna_sequences_df, verbose=False):
         self.dna_sequences_df = dna_sequences_df
         self.verbose = verbose

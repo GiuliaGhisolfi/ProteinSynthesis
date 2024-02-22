@@ -32,7 +32,7 @@ LENGTH_EXTRON_SEQUENCE = 3 # length of extron sequence
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
 NUMBER_RNA_POLYMERASES = 5
 
-class Nucleus():
+class Nucleus:
 
     def __init__(self, environment, extron_sequences_list, editing_sites_dict):
         self.env = environment

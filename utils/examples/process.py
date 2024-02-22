@@ -1,44 +1,36 @@
 import simpy
-import itertools
 import random
 
-def process(env, sentences):
-    available = {sentence: True for sentence in sentences}
-    print(f'Process started at {env.now} \n')
-
-    while True:
-        yield env.timeout(random.random())
-        sentence = random.choice(sentences)
-
-        if available[sentence]:
-            print(f'\nTime {env.now}: {sentence}')
-            env.process(splite_sentence(env, sentence))
-            available[sentence] = False
-
-def splite_sentence(env, sentence):
+def process(env, sentence, t_inter, sentence_number):
     words = sentence.split()
-    print(f'Time {env.now:2}: {words}')
-    yield env.timeout(2)
-
     for word in words:
-        env.process(delete_vocal(env, word))
+        word = ''.join([letter for letter in word if letter not in 'aeiou'])
+
+    yield env.timeout(t_inter*3)
+    print(f'Sentence {sentence_number} splited at {env.now}')
     
-def delete_vocal(env, word):
-    word = ''.join([letter for letter in word if letter not in 'aeiou'])
-    print(f'Time {env.now}: {word}')
-    yield env.timeout(1)
 
 def setup(env, sentences, num_machines, t_inter):
-    for _ in range(num_machines):
-        env.process(process(env, sentences))
+    machines = simpy.Resource(env, num_machines)
+    sentence_number = 0
 
     while True:
-        yield env.timeout(t_inter)
-        env.process(process(env, sentences))
+        sentence = sentences[sentence_number]
+
+        while sentence_number < len(sentences):
+            with machines.request() as request:
+                print(f'Sentece {sentence_number} requested at {env.now}')
+                yield request
+                print(f'Sentece {sentence_number} got resource at {env.now}')
+
+                env.process(process(env, sentence, t_inter, sentence_number))
+                sentence_number += 1
+                yield env.timeout(t_inter)
 
 # Setup and start the simulation
 env = simpy.Environment()
-sentences = ['Hello word', 'World cosa caso casa']
+sentences = ['Hello word', 'World cosa caso casa', 'Ciao come stai', 'Io sto bene', 'Tu come stai', 'Io sto'
+    'bene', 'Tu come stai', 'Io sto bene', 'Tu come stai', 'Io sto bene', 'Tu come stai', 'Io sto bene', 'Tu come stai']
 random.seed(42)
-env.process(setup(env, sentences, num_machines=2, t_inter=1))
-env.run(until=10)
+env.process(setup(env, sentences, num_machines=1, t_inter=1))
+env.run(until=5)
