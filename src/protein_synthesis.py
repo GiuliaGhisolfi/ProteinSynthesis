@@ -28,72 +28,65 @@ class EucaryotesCell:
             aminoacids_dict=self.aminoacids_dict,
             )
         
-    def synthesize_protein(self, dna_sequence):
-        self.dna = dna_sequence # template strand (3' to 5' direction)
-
+    def synthesize_protein(self, variables):
         # start transcription
         if self.verbose:
             print(f'Time {self.env.now:.4f}: Transcription started')
 
-        # split the DNA sequence in the promoter regions
-        dna_sequences_to_transcript_list, promoters_count = self.detect_promoter_process(dna_sequence)
+        # split the DNA sequence by promoter regions
+        self.detect_promoter_process(variables)
 
         # continue with transcription and translation if promoters are found
-        if dna_sequences_to_transcript_list is None:
-            self.mrna_list = None
-            self.proteins, self.proteins_extended_name = None, None
+        if variables.dna_sequences_to_transcript_list is None:
+            variables.mrna_sequences_list = None
+            variables.proteins_list, variables.proteins_extended_name_list = None, None
         else:
-            self.init_queue()
             sequences_count = itertools.count()
+            variables.mrna_sequences_list = []
+            variables.proteins_list, variables.proteins_extended_name_list = [], []
             
             # transcription and translation each promoter region
-            for dna_sequence_to_transcript in dna_sequences_to_transcript_list:
+            for _ in variables.dna_sequences_to_transcript_list:
                 seq_count = next(sequences_count)
 
                 if self.verbose:
                     print(f'Time {self.env.now:.4f}: Transcription started for mRNA sequence {seq_count}')
                 
                 yield self.env.process(self.transcription_and_translation_process
-                    (dna_sequence=dna_sequence_to_transcript, seq_count=seq_count))
+                    (variables, seq_count=seq_count))
 
                 if self.verbose:
                     print(f'Time {self.env.now:.4f}: Transcription ended for mRNA sequence {seq_count}')
-                    if seq_count == promoters_count:
+                    if seq_count == variables.promoters_count:
                         print(f'Time {self.env.now:.4f}: Transcription ended')
 
             if self.verbose:
                 print(f'Time {self.env.now:.4f}: Translation ended') 
     
-    def detect_promoter_process(self, dna_sequence):
+    def detect_promoter_process(self, variables):
         # detect promoter
-        dna_sequences_to_transcript_list = self.nucleus.find_promoter(dna_sequence)
+        variables.dna_sequences_to_transcript_list = self.nucleus.find_promoter(variables.dna_sequence)
         
-        promoters_count = len(dna_sequences_to_transcript_list) if dna_sequences_to_transcript_list is not None else 0
+        if variables.dna_sequences_to_transcript_list is not None:
+            variables.promoters_count = len(variables.dna_sequences_to_transcript_list)  
+        else: 
+            variables.promoters_count = 0
+
         if self.verbose:
-            print(f'Promoters found: {promoters_count}')
-
-        return dna_sequences_to_transcript_list, promoters_count
+            print(f'Promoters found: {variables.promoters_count}')
     
-    def init_queue(self):
-        self.transcription_queue = []
-        self.translation_queue = []
-
-        self.mrna_list = []
-        self.proteins = []
-        self.proteins_extended_name = []
-    
-    def transcription_and_translation_process(self, dna_sequence, seq_count):
+    def transcription_and_translation_process(self, variables, seq_count):
         # transcription process
-        transcription_process = self.env.process(self.nucleus.transcript(dna_sequence))
-        self.transcription_queue.append(transcription_process)
+        transcription_process = self.env.process(self.nucleus.transcript(variables.dna_sequence))
+        variables.transcription_queue.append(transcription_process)
         
         yield transcription_process
         mrna = transcription_process.value
-        self.mrna_list.append(mrna)
+        variables.mrna_sequences_list.append(mrna)
 
         # wait for all the transcription process to be completed
-        while self.transcription_queue:
-            yield self.transcription_queue.pop(0)
+        while variables.transcription_queue:
+            variables.transcription_queue.pop(0)
 
         # translation
         if self.verbose:
@@ -101,32 +94,20 @@ class EucaryotesCell:
                 print(f'Time {self.env.now:.4f}: Translation started')
             print(f'Time {self.env.now:.4f}: Translation started for mRNA sequence {seq_count}')
         
-        self.env.process(self.translation_process(self.mrna_list[seq_count]))
+        yield self.env.process(self.translation_process(variables, mrna))
 
         if self.verbose:
             print(f'Time {self.env.now:.4f}: Translation ended for mRNA sequence {seq_count}')
     
-    def translation_process(self, mrna):
+    def translation_process(self, variables, mrna):
         # translation process
         translation_process = self.env.process(self.ribosome.translate(mrna))
-        self.translation_queue.append(translation_process)
+        variables.translation_queue.append(translation_process)
         
         yield translation_process
         protein, protein_extended_name = translation_process.value
-        self.proteins.append(protein) # polypeptides chain
-        self.proteins_extended_name.append(protein_extended_name)
+        variables.proteins_list.append(protein) # polypeptides chain
+        variables.proteins_extended_name_list.append(protein_extended_name)
 
-        while self.translation_queue:
-            yield self.translation_queue.pop(0)
-    
-    def get_dna(self):
-        return self.dna
-    
-    def get_mrna(self):
-        return self.mrna_list
-    
-    def get_proteins(self):
-        return self.proteins
-    
-    def get_extended_proteins_name(self):
-        return self.proteins_extended_name
+        while variables.translation_queue:
+            variables.translation_queue.pop(0)

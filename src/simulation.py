@@ -3,6 +3,7 @@ import random
 import itertools
 from Bio.Seq import Seq
 from src.protein_synthesis import EucaryotesCell
+from src.variables import DNASequenceVariables
 
 LENGTH_AMIO_GROUP = 4 # length of amino acid group
 LENGTH_CARBOXYL_GROUP = 5 # length of carboxyl group
@@ -44,36 +45,39 @@ class ProteinSinthesisProcess:
         sequences_count = itertools.count()
 
         while True:
-            dna_sequence = Seq(random.choice(self.dna_sequences))
+            dna_sequence = random.choice(self.dna_sequences) #TODO: Seq(random.choice(self.dna_sequences))
             if self.available[dna_sequence]:
-                process_queue.append(self.env.process(self.process(
-                    dna_sequence=dna_sequence, seq_count = next(sequences_count))))
+                variables = DNASequenceVariables()
+                variables.dna_sequence = dna_sequence
+                variables.sequence_count = next(sequences_count)
+
+                process_queue.append(self.env.process(self.process(variables)))
                 
                 self.available[dna_sequence] = False
-                yield self.env.timeout(0.05) # time between one protein synthesis and another
+                yield self.env.timeout(random.random()) # time between start of protein synthesis
 
                 while process_queue: # wait for all the protein synthesis to be completed
                     process_queue.pop(0)
         
-    def process(self, dna_sequence, seq_count):
+    def process(self, variables):
         # Synthesize dna sequences while the simulation is running            
         with self.resources.request() as request:
-            print(f'Time {self.env.now:.4f}: DNA Sequence {seq_count} requesting resources')
+            print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} requesting resources')
             yield request # wait for a cell be able to accepts dna sequence
-            print(f'Time {self.env.now:.4f}: DNA Sequence {seq_count} got resource')
+            print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} got resource')
             
             if self.verbose:
-                print(f'Time {self.env.now:.4f}: Protein synthesis started for sequence {seq_count}')
-            yield self.env.process(self.eucaryotes_cell.synthesize_protein(dna_sequence))
+                print(f'Time {self.env.now:.4f}: Protein synthesis started for sequence {variables.sequence_count}')
+            yield self.env.process(self.eucaryotes_cell.synthesize_protein(variables))
 
             self.save_proteins_synthesized(
-                dna_sequence,
-                self.eucaryotes_cell.get_mrna(),
-                self.eucaryotes_cell.get_proteins(),
-                self.eucaryotes_cell.get_extended_proteins_name()
+                variables.get_dna(),
+                variables.get_mrna(),
+                variables.get_proteins(),
+                variables.get_extended_proteins_name()
             )
 
-            print(f'Time {self.env.now:.4f}: DNA Sequence {seq_count} synthetis ended')
+            print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthetis ended')
             self.resources.release(request)
             
     def save_proteins_synthesized(self, dna_sequence, mrna_sequences, polypeptides_chain, polypeptides_chain_ext):
