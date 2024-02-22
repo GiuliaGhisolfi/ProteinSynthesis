@@ -66,14 +66,11 @@ class Nucleus:
     def transcript(self, dna_sequence): # enzime: RNA polymerase
         with self.rna_polymerase.request() as request:
             yield request  # wait for RNA polymerase to be available
-            # FIXME: request.queque non tiene in memoria le richieste
 
             # start transcript processes for DNA sequence
             messenger_rna_sequence = yield self.env.process(self.transcript_process(dna_sequence))
 
-            #FIXME: self.rna_polymerase.release(request) # release RNA polymerase
-
-        return messenger_rna_sequence #TODO: Seq(messenger_rna_sequence)
+        return messenger_rna_sequence
 
     def transcript_process(self, dna_sequence):
         # make sequence univoque to transcript
