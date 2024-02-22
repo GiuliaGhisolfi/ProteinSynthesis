@@ -1,78 +1,99 @@
 import simpy
 import random 
+import itertools
+from Bio.Seq import Seq
 from src.protein_synthesis import EucaryotesCell
-#from src.utils import load_data_from_pickle, load_data_from_csv
+from src.variables import DNASequenceVariables
 
-SAMPLES_DATA_PATH = 'data/samples/data.pkl'
-HUMAN_GENOMA_DATA_PATH = 'data/human_genoma.csv'
 LENGTH_AMIO_GROUP = 4 # length of amino acid group
 LENGTH_CARBOXYL_GROUP = 5 # length of carboxyl group
 RANDOM_SEED = 42
 SIM_TIME = 1000
+NUMBER_RESOURCES = 5
 
-
-class ProteinSinthesisProcess():
+class ProteinSinthesisProcess:
     def __init__(self, dna_sequences_df, verbose=False):
         self.dna_sequences_df = dna_sequences_df
-        self.dna_sequences = dna_sequences_df['sequence'].values
         self.verbose = verbose
 
-        # initialize the simulation environment
-        self.eucaryotes_cell = EucaryotesCell()
-        if self.verbose: print('Eucaryotes cell initialized')
-        self.available = {dna: True for dna in self.dna_sequences} #FIXME
-        self.env = simpy.Environment()
-        self.process = self.env.process(self.start())
-        if self.verbose: print('Simulation environment initialized \t')
-    
-    def save_synthesize_protein(self, dna_sequence, mrna_sequence, polypeptides_chain, polypeptides_chain_ext):
-        row_index = self.dna_sequences_df[self.dna_sequences_df['sequence'] == dna_sequence].index[0]
+        # add columns to store the results
+        columns = ['mrna_sequences', 'polypeptides_chains', 'polypeptides_chains_ext',
+            'number_of_proteins_synthesized', 'protein_synthesized']
+        for col in columns:
+            self.dna_sequences_df[col] = None
         
-        self.dna_sequences_df.loc[row_index, 'mrna_sequence'] = mrna_sequence
-        self.dna_sequences_df.loc[row_index, 'polypeptides_chain_synthetized'] = polypeptides_chain
-        self.dna_sequences_df.loc[row_index, 'polypeptides_chain_extended'] = polypeptides_chain_ext
+        # initialize the simulation environment
+        self.dna_sequences = self.dna_sequences_df['sequence'].values
+        self.available =  {row['sequence']: True if row['protein_synthesized']==None else False
+            for _, row in self.dna_sequences_df.iterrows()}
+        
+        random.seed(RANDOM_SEED)
+        self.env = simpy.Environment()
+        self.resources = simpy.Resource(self.env, capacity=NUMBER_RESOURCES) #TODO: resources: enzimi, basi, ATP, tRNA, aminoacidi
+        self.env.process(self.setup_process())
 
-        if polypeptides_chain:
-            if self.verbose: print('Protein synthesized')
-            self.dna_sequences_df.loc[row_index, 'protein_synthesized'] = True
-            peptides = polypeptides_chain[LENGTH_AMIO_GROUP:-LENGTH_CARBOXYL_GROUP]
-            self.dna_sequences_df.loc[row_index, 'peptides_cardinality'] = len(peptides)
-        else:
-            if self.verbose: print('Protein not synthesized')
-            self.dna_sequences_df.loc[row_index, 'protein_synthesized'] = False
-            self.dna_sequences_df.loc[row_index, 'peptides_cardinality'] = None
-
-    def start(self):
-        while True:
-            yield self.env.timeout(random.random()*10)
-
-            dna_sequence = random.choice(self.dna_sequences)
-            # var: enzimi, basi, ATP, tRNA, aminoacidi
-            #atp = random.randint(1,6)
-
-            if self.available[dna_sequence]:
-                #self.env.process(self.eucaryotes_cell.synthesize_protein(dna_sequence))
-                self.eucaryotes_cell.synthesize_protein(dna_sequence)
-                self.save_synthesize_protein(
-                    dna_sequence, 
-                    self.eucaryotes_cell.get_mrna(),
-                    self.eucaryotes_cell.get_protein(),
-                    self.eucaryotes_cell.get_extended_protein_name()
-                )
-                
+        self.eucaryotes_cell = EucaryotesCell(environment=self.env, verbose=self.verbose)
+        
+        if self.verbose: print('Simulation environment initialized')
+    
     def run(self, simulation_time=SIM_TIME):
-        if self.verbose: print('Simulation started: \t')
+        if self.verbose: print('Simulation started:')
         self.env.run(until=simulation_time)
+        if self.verbose: print('End simulation')
+    
+    def setup_process(self):
+        process_queue = []
+        sequences_count = itertools.count()
 
-"""if __name__ == '__main__':
-    RESULTS_PATH = 'data/samples/results.pkl'
-    SIM_TIME = 1000
-    VERBOSE = True
+        while True:
+            dna_sequence = random.choice(self.dna_sequences) #TODO: Seq(random.choice(self.dna_sequences))
+            if self.available[dna_sequence]:
+                variables = DNASequenceVariables()
+                variables.dna_sequence = dna_sequence
+                variables.sequence_count = next(sequences_count)
 
-    data = 'sample'
-    verbose = VERBOSE
+                process_queue.append(self.env.process(self.process(variables)))
+                
+                self.available[dna_sequence] = False
+                yield self.env.timeout(random.random()) # time between start of protein synthesis
 
-    protein_synthesis_process = ProteinSinthesisProcess(data, verbose)
-    protein_synthesis_process.run() # run the simulation
-    save_data(protein_synthesis_process.dna_sequences_df, RESULTS_PATH, verbose)
-    if verbose: print('Simulation ended')"""
+                while process_queue: # wait for all the protein synthesis to be completed
+                    process_queue.pop(0)
+        
+    def process(self, variables):
+        # Synthesize dna sequences while the simulation is running            
+        with self.resources.request() as request:
+            if self.verbose:
+                print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} requesting to start synthesis')
+            yield request # wait for a cell be able to accepts dna sequence
+
+            if self.verbose:
+                print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthesize started')
+            yield self.env.process(self.eucaryotes_cell.synthesize_protein(variables))
+
+            self.save_proteins_synthesized(
+                variables.get_dna(),
+                variables.get_mrna(),
+                variables.get_proteins(),
+                variables.get_extended_proteins_name()
+            )
+
+            if self.verbose:
+                print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthetis ended')
+            self.resources.release(request)
+            
+    def save_proteins_synthesized(self, dna_sequence, mrna_sequences, polypeptides_chain, polypeptides_chain_ext):
+        # TODO: gestire errori (dna_sequence non trovata nel dataframe)
+        row_index = self.dna_sequences_df[self.dna_sequences_df['sequence'] == dna_sequence].index[0]
+
+        results = {
+            'ID': self.dna_sequences_df.iloc[row_index]['ID'],
+            'sequence': dna_sequence,
+            'category': self.dna_sequences_df.iloc[row_index]['category'],
+            'mrna_sequences': mrna_sequences,
+            'polypeptides_chains': polypeptides_chain,
+            'polypeptides_chains_ext': polypeptides_chain_ext,
+            'number_of_proteins_synthesized': len(mrna_sequences) if mrna_sequences else 0,
+            'protein_synthesized': True if mrna_sequences else False
+        }
+        self.dna_sequences_df.iloc[row_index] = results
