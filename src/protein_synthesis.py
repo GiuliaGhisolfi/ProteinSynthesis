@@ -32,6 +32,8 @@ class EucaryotesCell:
         # start transcription
         if self.verbose:
             print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} start transcription process')
+        variables.found_promoter_time = self.env.now
+
 
         # split the DNA sequence by promoter regions
         self.detect_promoter_process(variables)
@@ -52,6 +54,7 @@ class EucaryotesCell:
                 if self.verbose:
                     print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} '
                         f'(mRNA sequence {seq_count}) start transcription process')
+                variables.start_transcription_time.append(self.env.now)
 
                 yield self.env.process(self.transcription_and_translation_process
                     (variables, seq_count=seq_count))                    
@@ -92,12 +95,14 @@ class EucaryotesCell:
                 print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} start translation process')
             print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} (mRNA sequence {seq_count}) '
                 f'start translation process')
-        
+        variables.start_translation_time.append(self.env.now)
+    
         yield self.env.process(self.translation_process(variables, mrna))
 
         if self.verbose:
             print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} (mRNA sequence {seq_count}) '
                 f'end translation process')
+        variables.end_translation_time.append(self.env.now)
     
     def translation_process(self, variables, mrna):
         # translation process

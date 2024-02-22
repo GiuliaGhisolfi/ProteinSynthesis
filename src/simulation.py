@@ -18,7 +18,9 @@ class ProteinSinthesisProcess:
 
         # add columns to store the results
         columns = ['mrna_sequences', 'polypeptides_chains', 'polypeptides_chains_ext',
-            'number_of_proteins_synthesized', 'protein_synthesized']
+            'number_of_proteins_synthesized', 'protein_synthesized', 'request_start_process_time',
+            'start_process_time', 'start_transcription_time', 'start_translation_time',
+            'end_translation_time', 'end_process_time']
         for col in columns:
             self.dna_sequences_df[col] = None
         
@@ -34,12 +36,17 @@ class ProteinSinthesisProcess:
 
         self.eucaryotes_cell = EucaryotesCell(environment=self.env, verbose=self.verbose)
         
-        if self.verbose: print('Simulation environment initialized')
+        #if self.verbose: 
+        print('Simulation environment initialized')
     
     def run(self, simulation_time=SIM_TIME):
-        if self.verbose: print('Simulation started:')
+        #if self.verbose: 
+        print('Simulation started:')
+
         self.env.run(until=simulation_time)
-        if self.verbose: print('End simulation')
+
+        #if self.verbose: 
+        print('End simulation')
     
     def setup_process(self):
         process_queue = []
@@ -63,26 +70,39 @@ class ProteinSinthesisProcess:
     def process(self, variables):
         # Synthesize dna sequences while the simulation is running            
         with self.resources.request() as request:
-            if self.verbose:
-                print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} requesting to start synthesis')
+            #if self.verbose:
+            print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} requesting to start synthesis')
+            variables.request_start_process_time = self.env.now
+
             yield request # wait for a cell be able to accepts dna sequence
 
-            if self.verbose:
-                print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthesize started')
+            #if self.verbose:
+            print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthesize started')
+            variables.start_process_time = self.env.now
+
             yield self.env.process(self.eucaryotes_cell.synthesize_protein(variables))
+            variables.end_process_time = self.env.now
 
             self.save_proteins_synthesized(
                 variables.get_dna(),
                 variables.get_mrna(),
                 variables.get_proteins(),
-                variables.get_extended_proteins_name()
-            )
+                variables.get_extended_proteins_name(),
+                variables.request_start_process_time,
+                variables.start_process_time,
+                variables.start_transcription_time,
+                variables.start_translation_time,
+                variables.end_translation_time,
+                variables.end_process_time
+                )
 
-            if self.verbose:
-                print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthetis ended')
+            #if self.verbose:
+            print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthetis ended')
             self.resources.release(request)
             
-    def save_proteins_synthesized(self, dna_sequence, mrna_sequences, polypeptides_chain, polypeptides_chain_ext):
+    def save_proteins_synthesized(self, dna_sequence, mrna_sequences, polypeptides_chain, polypeptides_chain_ext,
+        request_start_process_time, start_process_time, start_transcription_time, start_translation_time, 
+        end_translation_time, end_process_time):
         # TODO: gestire errori (dna_sequence non trovata nel dataframe)
         row_index = self.dna_sequences_df[self.dna_sequences_df['sequence'] == dna_sequence].index[0]
 
@@ -94,6 +114,12 @@ class ProteinSinthesisProcess:
             'polypeptides_chains': polypeptides_chain,
             'polypeptides_chains_ext': polypeptides_chain_ext,
             'number_of_proteins_synthesized': len(mrna_sequences) if mrna_sequences else 0,
-            'protein_synthesized': True if mrna_sequences else False
+            'protein_synthesized': True if mrna_sequences else False,
+            'request_start_process_time': request_start_process_time,
+            'start_process_time': start_process_time,
+            'start_transcription_time': start_transcription_time,
+            'start_translation_time': start_translation_time,
+            'end_translation_time': end_translation_time,
+            'end_process_time': end_process_time
         }
         self.dna_sequences_df.iloc[row_index] = results

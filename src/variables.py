@@ -10,6 +10,15 @@ class DNASequenceVariables:
         self.dna_sequences_to_transcript_list = None
         self.promoters_count = None
 
+        # time variables
+        self.request_start_process_time = None
+        self.start_process_time = None
+        self.end_process_time = None
+        self.start_transcription_time = []
+        self.start_translation_time = []
+        self.end_translation_time = []
+        self.end_process_time = None
+
         # output variables
         self.mrna_sequences_list = []
         self.proteins_list = [] # polypeptides chains
