@@ -30,7 +30,7 @@ TERMINATORS = ['UAA', 'UAG', 'UGA']
 RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
 LENGTH_EXTRON_SEQUENCE = 3 # length of extron sequence
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
-NUMBER_RNA_POLYMERASES = 5
+NUMBER_RNA_POLYMERASES = 3
 
 class Nucleus:
 

@@ -33,7 +33,7 @@ class Ribosome:
         mrna_sequence = self.initialization(mrna_sequence)
         polypeptides_chain, polypeptides_chain_ext = yield self.env.process(
             self.elongation(mrna_sequence))
-        #TODO: mechanism to correct transcription errors + translation times
+        #TODO: mechanism to corre   ct transcription errors + translation times
 
         return polypeptides_chain, polypeptides_chain_ext
     
