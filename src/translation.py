@@ -1,7 +1,4 @@
-import random
 import simpy
-from Bio.Seq import Seq
-from Bio import SeqUtils
 
 LENGTH_CODON = 3 # number of nucleotides that code for an amino acid
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap

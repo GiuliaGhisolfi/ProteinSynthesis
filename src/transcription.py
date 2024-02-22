@@ -1,7 +1,5 @@
 import random
 import simpy
-from Bio.Seq import Seq
-from Bio import SeqUtils
 from src.nucleotides import NucleotidesSymbolsAllocations
 
 BASE_COMPLEMENT_DNA2RNA = {
@@ -75,7 +73,7 @@ class Nucleus:
 
             #FIXME: self.rna_polymerase.release(request) # release RNA polymerase
 
-        return Seq(messenger_rna_sequence)
+        return messenger_rna_sequence #TODO: Seq(messenger_rna_sequence)
 
     def transcript_process(self, dna_sequence):
         # make sequence univoque to transcript
