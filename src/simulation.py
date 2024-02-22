@@ -85,7 +85,9 @@ class ProteinSinthesisProcess:
         row_index = self.dna_sequences_df[self.dna_sequences_df['sequence'] == dna_sequence].index[0]
 
         results = {
-            'dna_sequence': dna_sequence,
+            'ID': self.dna_sequences_df.iloc[row_index]['ID'],
+            'sequence': dna_sequence,
+            'category': self.dna_sequences_df.iloc[row_index]['category'],
             'mrna_sequences': mrna_sequences,
             'polypeptides_chains': polypeptides_chain,
             'polypeptides_chains_ext': polypeptides_chain_ext,
