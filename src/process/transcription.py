@@ -1,6 +1,5 @@
 import random
-import simpy
-from src.nucleotides import NucleotidesSymbolsAllocations
+from src.variables.nucleotides_allocations import NucleotidesSymbolsAllocations
 from src.resources.resource import EucaryotesCellResource
 
 BASE_COMPLEMENT_DNA2RNA = {

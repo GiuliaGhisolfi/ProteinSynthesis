@@ -1,8 +1,8 @@
 {
   "UUU": "Phe",  "UCU": "Ser",  "UAU": "Tyr",  "UGU": "Cys",  
   "UUC": "Phe",  "UCC": "Ser",  "UAC": "Tyr",  "UGC": "Cys",  
-  "UUA": "Leu",  "UCA": "Ser",  "UAA": "Stop", "UGA": "Stop",
-  "UUG": "Leu",  "UCG": "Ser",  "UAG": "Stop", "UGG": "Trp",
+  "UUA": "Leu",  "UCA": "Ser",  "UAA": "STOP", "UGA": "STOP",
+  "UUG": "Leu",  "UCG": "Ser",  "UAG": "STOP", "UGG": "Trp",
   
   "CUU": "Leu",  "CCU": "Pro",  "CAU": "His",  "CGU": "Arg",  
   "CUC": "Leu",  "CCC": "Pro",  "CAC": "His",  "CGC": "Arg",  

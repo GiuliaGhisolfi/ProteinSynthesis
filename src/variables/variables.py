@@ -12,7 +12,6 @@ class EucaryotesCellVariables:
         # time variables
         self.request_start_process_time = None
         self.start_process_time = None
-        self.end_process_time = None
         self.start_transcription_time = []
         self.start_translation_time = []
         self.end_translation_time = []

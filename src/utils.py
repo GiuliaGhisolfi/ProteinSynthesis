@@ -2,7 +2,7 @@
 def save_proteins_synthesized(dna_sequences_df, dna_sequence, mrna_sequences, polypeptides_chain, polypeptides_chain_ext,
     request_start_process_time, start_process_time, start_transcription_time, start_translation_time, 
     end_translation_time, end_process_time):
-    # TODO: gestire errori (dna_sequence non trovata nel dataframe)
+
     row_index = dna_sequences_df[dna_sequences_df['sequence'] == dna_sequence].index[0]
 
     results = {

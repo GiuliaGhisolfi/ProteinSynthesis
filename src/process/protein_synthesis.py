@@ -1,7 +1,7 @@
 import json
 import itertools
-from src.transcription import Nucleus
-from src.translation import Ribosome
+from src.process.transcription import Nucleus
+from src.process.translation import Ribosome
 
 DATA_PATH = 'data/'
 CODONS_PATH = DATA_PATH + 'codons.json'

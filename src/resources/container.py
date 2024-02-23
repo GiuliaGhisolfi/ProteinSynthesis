@@ -1,7 +1,7 @@
 import simpy.resources.container as SimpyContainer
 
 class EucaryotesCellContainer(SimpyContainer.Container):
-    def __init__(self, env, capacity, init=0):
+    def __init__(self, env, capacity, init):
         super().__init__(env, capacity, init)
         self._reset_queue_history()
 

@@ -1,6 +1,8 @@
 from Bio.Seq import Seq
 from Bio.SeqUtils import seq3
-from resources.resource import EucaryotesCellResource
+from Bio import BiopythonWarning
+import warnings
+from src.resources.resource import EucaryotesCellResource
 
 LENGTH_CODON = 3 # number of nucleotides that code for an amino acid
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
@@ -19,7 +21,7 @@ class Ribosome:
         self.aminoacids_dict = aminoacids_dict
 
         #self.ribosomes = simpy.Resource(self.env, capacity=NUMBER_RIBOSOMES)
-        self.ribosomes = EucaryotesCellResource(self.env, number_ribosomes=NUMBER_RIBOSOMES)
+        self.ribosomes = EucaryotesCellResource(self.env, capacity=NUMBER_RIBOSOMES)
 
     def translate(self, mrna_sequence): # protein synthesis
         with self.ribosomes.request() as request:
@@ -59,7 +61,9 @@ class Ribosome:
     
     def elongation(self, mrna_sequence):
         mrna_sequence = Seq(mrna_sequence)
-        polypeptides_chain = mrna_sequence.translate(to_stop=True)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', BiopythonWarning)
+            polypeptides_chain = mrna_sequence.translate(stop_symbol='', to_stop=True)
 
         if len(polypeptides_chain) > 0:
             yield self.env.timeout(0.05* len(polypeptides_chain)) # 0.05 seconds to add each amino acid

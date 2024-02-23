@@ -1,8 +1,8 @@
 import simpy.resources.resource as SimpyResource
 
 class EucaryotesCellResource(SimpyResource.Resource):
-    def __init__(self, env, number_ribosomes):
-        super().__init__(env, capacity=number_ribosomes)
+    def __init__(self, env, capacity):
+        super().__init__(env, capacity=capacity)
         self._reset_queue_history()
 
     def queue_history(self):

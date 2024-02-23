@@ -1,9 +1,8 @@
 import simpy
 import random 
 import itertools
-from Bio.Seq import Seq
-from src.protein_synthesis import EucaryotesCell
-from src.variables import EucaryotesCellVariables
+from src.process.protein_synthesis import EucaryotesCell
+from src.variables.variables import EucaryotesCellVariables
 from src.resources.resource import EucaryotesCellResource
 from src.utils import save_proteins_synthesized
 
@@ -92,14 +91,15 @@ class ProteinSinthesisProcess:
         
     def save_proteins_synthesized(self, variables):
         self.dna_sequences_df = save_proteins_synthesized(
-            variables.get_dna(),
-            variables.get_mrna(),
-            variables.get_proteins(),
-            variables.get_extended_proteins_name(),
-            variables.request_start_process_time,
-            variables.start_process_time,
-            variables.start_transcription_time,
-            variables.start_translation_time,
-            variables.end_translation_time,
-            variables.end_process_time
+            dna_sequences_df=self.dna_sequences_df, 
+            dna_sequence=variables.get_dna(),
+            mrna_sequences=variables.get_mrna(),
+            polypeptides_chain=variables.get_proteins(),
+            polypeptides_chain_ext=variables.get_extended_proteins_name(),
+            request_start_process_time=variables.request_start_process_time,
+            start_process_time=variables.start_process_time,
+            start_transcription_time=variables.start_transcription_time,
+            start_translation_time=variables.start_translation_time,
+            end_translation_time=variables.end_translation_time,
+            end_process_time=variables.end_process_time
             )
