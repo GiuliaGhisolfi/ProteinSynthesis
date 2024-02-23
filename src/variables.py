@@ -1,8 +1,7 @@
 
-class DNASequenceVariables:
+class EucaryotesCellVariables:
     def __init__(self):
         # input variables
-        #self.dna_sequence_df_row = None
         self.dna_sequence = None # template strand (3' to 5' direction)
 
         # intermediate variables

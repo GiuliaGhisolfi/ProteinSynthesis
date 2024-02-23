@@ -1,4 +1,3 @@
-import simpy
 from Bio.Seq import Seq
 from Bio.SeqUtils import seq3
 from resources.resource import EucaryotesCellResource
@@ -33,7 +32,7 @@ class Ribosome:
         return polypeptides_chain, polypeptides_chain_ext
     
     def translation_process(self, mrna_sequence):
-        mrna_sequence = self.degradation(mrna_sequence)
+        mrna_sequence = self.degradation_cap_tail(mrna_sequence)
         #mrna_sequence = self.activation(mrna_sequence)
         mrna_sequence = self.initialization(mrna_sequence)
         polypeptides_chain, polypeptides_chain_ext = yield self.env.process(
@@ -42,7 +41,7 @@ class Ribosome:
 
         return polypeptides_chain, polypeptides_chain_ext
     
-    def degradation(self, mrna_sequence):
+    def degradation_cap_tail(self, mrna_sequence):
         # degradation of the 5' cap and poly-A tail, enzime: exonuclease
         return mrna_sequence[LENGTH_METHYL_CAP:-LENGTH_POLY_A_TAIL]
     
@@ -70,32 +69,7 @@ class Ribosome:
             polypeptides_chain_ext = AMINO_GROUP + polypeptides_chain_ext + CARBOXYL_GROUP
         
         return str(polypeptides_chain), str(polypeptides_chain_ext)
-
-    """
-    def elongation(self, mrna_sequence):
-        # enzima: aminoacyl-tRNA synthetases
-        aminoacid = ''
-        polypeptides_chain = 'NH2-' # amino group
-        polypeptides_chain_ext = 'NH2-'
-
-        i = LENGTH_CODON # not translation of the start codon
-        end_mrna_length = LENGTH_CODON + LENGTH_POLY_A_TAIL
-
-        while not self.termination(aminoacid) and i<(len(mrna_sequence)-end_mrna_length):
-            codon = mrna_sequence[i:i+LENGTH_CODON]
-            aminoacid = self.codons2aminoacids_dict[codon]
-            polypeptides_chain = polypeptides_chain + self.aminoacids_dict[aminoacid]
-            polypeptides_chain_ext = polypeptides_chain_ext + aminoacid
-            i += LENGTH_CODON
-            yield self.env.timeout(0.05) # 0.05 seconds to add each amino acid
-        
-        # add the carboxyl group to the polypeptide chain
-        polypeptides_chain = polypeptides_chain + '-COOH'
-        polypeptides_chain_ext = polypeptides_chain_ext.rstrip('Stop') + '-COOH'
     
-        return polypeptides_chain, polypeptides_chain_ext
-    """
-
-    def termination(self, aminoacid):
-        return aminoacid == 'Stop'
-        # TODO: add nucleotide degradation
+    def mrna_degredation(self, mrna_sequence):
+        # enzima: ribonuclease
+        pass

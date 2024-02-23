@@ -1,6 +1,7 @@
 import random
 import simpy
 from src.nucleotides import NucleotidesSymbolsAllocations
+from src.resources.resource import EucaryotesCellResource
 
 BASE_COMPLEMENT_DNA2RNA = {
     'A': 'U', 
@@ -40,7 +41,7 @@ class Nucleus:
         self.editing_sites_dict = dict(sorted(self.editing_sites_dict.items(), 
             key=lambda x: len(x[0]), reverse=False)) # sort by length of key
         
-        self.rna_polymerase = simpy.Resource(self.env, capacity=NUMBER_RNA_POLYMERASES)
+        self.rna_polymerase = EucaryotesCellResource(self.env, capacity=NUMBER_RNA_POLYMERASES)
         self.nucleotides = {'U': 0, 'A': 0, 'G': 0, 'C': 0} 
         # TODO: change e implementare il conteggio prima e dopo degradetion, nel ribosoma (o gestire dentro cell)
     
