@@ -8,6 +8,7 @@ class EucaryotesCellVariables:
         self.sequence_count = None
         self.dna_sequences_to_transcript_list = None
         self.promoters_count = None
+        self.poly_adenine_tail_len = None
 
         # time variables
         self.request_start_process_time = None

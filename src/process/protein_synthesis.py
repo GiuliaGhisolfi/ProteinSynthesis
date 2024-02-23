@@ -8,16 +8,18 @@ DATA_PATH = 'data/'
 CODONS_PATH = DATA_PATH + 'codons.json'
 
 class EucaryotesCell:
-    def __init__(self, environment, number_rna_polymerases,number_ribosomes, random_seed, verbose=False):
+    def __init__(self, environment, number_rna_polymerases,number_ribosomes, 
+            uracil_initial_amount, adenine_initial_amount, guanine_initial_amount,
+            cytosine_initial_amount, random_seed, verbose=False):
         self.env = environment
         self.verbose = verbose
         self.extron_list = json.load(open(CODONS_PATH)).keys()
         self.nucleotides = Nucleotides(
             environment=self.env,
-            uracil_initial_amount=100, #FIXME: change with real values
-            adenine_initial_amount=100,
-            guanine_initial_amount=100,
-            cytosine_initial_amount=100
+            uracil_initial_amount=uracil_initial_amount,
+            adenine_initial_amount=adenine_initial_amount,
+            guanine_initial_amount=guanine_initial_amount,
+            cytosine_initial_amount=cytosine_initial_amount
             )
 
         self.nucleus = Nucleus(
@@ -32,6 +34,7 @@ class EucaryotesCell:
         self.ribosome = Ribosome(
             environment=self.env,
             number_ribosomes=number_ribosomes,
+            nucleotides = self.nucleotides,
             )
         
     def synthesize_protein(self, variables):
@@ -84,7 +87,8 @@ class EucaryotesCell:
     
     def transcription_and_translation_process(self, variables, seq_count):
         # transcription process
-        transcription_process = self.env.process(self.nucleus.transcript(variables.dna_sequence))
+        transcription_process = self.env.process(
+            self.nucleus.transcript(variables.dna_sequence, variables))
         variables.transcription_queue.append(transcription_process)
         
         yield transcription_process
@@ -112,7 +116,7 @@ class EucaryotesCell:
     
     def translation_process(self, variables, mrna):
         # translation process
-        translation_process = self.env.process(self.ribosome.translate(mrna))
+        translation_process = self.env.process(self.ribosome.translate(mrna, variables))
         variables.translation_queue.append(translation_process)
         
         yield translation_process

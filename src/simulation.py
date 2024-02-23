@@ -14,11 +14,17 @@ SIM_TIME = 1000
 NUMBER_RESOURCES = 5
 NUMBER_RNA_POLYMERASES = 3
 NUMBER_RIBOSOMES = 2
+URACIL_INITIAL_AMOUNT = 500
+ADENINE_INITIAL_AMOUNT = 500
+GUANINE_INITIAL_AMOUNT = 500
+CYTOSINE_INITIAL_AMOUNT = 500
 RANDOM_SEED = 42
 
 class ProteinSinthesisProcess:
     def __init__(self, dna_sequences_df, number_resources=NUMBER_RESOURCES,
             number_rna_polymerases=NUMBER_RNA_POLYMERASES, number_ribosomes=NUMBER_RIBOSOMES,
+            uracil_initial_amount=URACIL_INITIAL_AMOUNT, adenine_initial_amount=ADENINE_INITIAL_AMOUNT, 
+            guanine_initial_amount=GUANINE_INITIAL_AMOUNT, cytosine_initial_amount=CYTOSINE_INITIAL_AMOUNT,
             random_seed=RANDOM_SEED, verbose=False):
         self.dna_sequences_df = dna_sequences_df
         self.verbose = verbose
@@ -42,8 +48,17 @@ class ProteinSinthesisProcess:
         #TODO: resources: enzimi, basi, ATP, tRNA, aminoacidi
         self.env.process(self.setup_process())
 
-        self.eucaryotes_cell = EucaryotesCell(environment=self.env, number_rna_polymerases=number_rna_polymerases,
-            number_ribosomes=number_ribosomes, random_seed=random_seed, verbose=self.verbose)
+        self.eucaryotes_cell = EucaryotesCell(
+            environment=self.env, 
+            number_rna_polymerases=number_rna_polymerases,
+            number_ribosomes=number_ribosomes, 
+            uracil_initial_amount=uracil_initial_amount, 
+            adenine_initial_amount=adenine_initial_amount, 
+            guanine_initial_amount=guanine_initial_amount,
+            cytosine_initial_amount=cytosine_initial_amount, 
+            random_seed=random_seed, 
+            verbose=self.verbose
+            )
         
         print('Simulation environment initialized')
     
@@ -102,7 +117,6 @@ class ProteinSinthesisProcess:
 
             if self.verbose:
                 print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthetis ended')
-            yield self.resources.release(request)
         
     def save_protein_synthesized(self, variables):
         self.dna_sequences_df = save_proteins_synthesized(

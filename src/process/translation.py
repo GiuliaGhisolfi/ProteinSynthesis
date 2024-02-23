@@ -12,28 +12,30 @@ CARBOXYL_GROUP = '-COOH' # carboxyl group
 MRNA_DECODED_ERROR_RATE = 1e-4 #TODO: 1 mistake every 10.000 amino acids
 
 class Ribosome:
-    def __init__(self, environment, number_ribosomes):
+    def __init__(self, environment, number_ribosomes, nucleotides):
         # ribonucleoprotein complex in the cytoplasm
         self.env = environment
         self.ribosomes = EucaryotesCellResource(self.env, capacity=number_ribosomes)
+        self.nucleotides = nucleotides
 
-    def translate(self, mrna_sequence): # protein synthesis
+    def translate(self, mrna_sequence, variables): # protein synthesis
         with self.ribosomes.request() as request:
             yield request # wait for a ribosome to be available
             polypeptides_chain, polypeptides_chain_ext = yield self.env.process(
-                self.translation_process(mrna_sequence))
-            
-            self.ribosomes.release(request) # release the ribosome
+                self.translation_process(mrna_sequence, variables.poly_adenine_tail_len))
             
         return polypeptides_chain, polypeptides_chain_ext
     
-    def translation_process(self, mrna_sequence):
+    def translation_process(self, mrna_sequence, poly_adenine_tail_len):
         mrna_sequence = self.degradation_cap_tail(mrna_sequence)
+        initial_mrna_sequence = mrna_sequence
+
         #mrna_sequence = self.activation(mrna_sequence)
         mrna_sequence = self.initialization(mrna_sequence)
         polypeptides_chain, polypeptides_chain_ext = yield self.env.process(
             self.elongation(mrna_sequence))
-        self.mrna_degredation()
+        
+        self.mrna_degredation(initial_mrna_sequence, poly_adenine_tail_len)
         #TODO: mechanism to correct transcription errors + translation times
 
         return polypeptides_chain, polypeptides_chain_ext
@@ -69,6 +71,8 @@ class Ribosome:
         
         return str(polypeptides_chain), str(polypeptides_chain_ext)
     
-    def mrna_degredation(self, mrna_sequence):
+    def mrna_degredation(self, mrna_sequence, poly_adenine_tail_len):
         # enzima: ribonuclease
-        pass
+        [self.nucleotides.release(nucleotide, 1) for nucleotide in mrna_sequence]
+        self.nucleotides.release('A', poly_adenine_tail_len)
+        #TODO: yield self.env.timeout() degradation time

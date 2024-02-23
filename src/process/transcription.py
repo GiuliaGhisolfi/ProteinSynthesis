@@ -20,7 +20,7 @@ PROMOTERS = [
 LENGTH_PROMOTER = 7
 TERMINATORS = ['UAA', 'UAG', 'UGA']
 RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
-REPLICATION_RATE = 50 # nucleotides per second
+REPLICATION_TIME = 2e10-2 # seconds to replicate a nucleotide
 LENGTH_EXTRON_SEQUENCE = 3 # length of extron sequence
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
 
@@ -58,22 +58,24 @@ class Nucleus:
             
             return dna_sequences_list
 
-    def transcript(self, dna_sequence): # enzime: RNA polymerase
+    def transcript(self, dna_sequence, variables): # enzime: RNA polymerase
         with self.rna_polymerase.request() as request:
             yield request  # wait for RNA polymerase to be available
 
             # start transcript processes for DNA sequence
-            messenger_rna_sequence = yield self.env.process(self.transcript_process(dna_sequence))
+            messenger_rna_sequence = yield self.env.process(
+                self.transcript_process(dna_sequence, variables))
 
         return messenger_rna_sequence
 
-    def transcript_process(self, dna_sequence):
+    def transcript_process(self, dna_sequence, variables):
         # make sequence univoque to transcript
         random.seed(self.random_seed)
         dna_sequence = ''.join([random.choice(NucleotidesSymbolsAllocations[n]) for n in dna_sequence])
 
         # transcript from gene to pre-mRNA
-        messenger_rna_sequence = yield self.env.process(self.trascript_gene(dna_sequence))
+        #messenger_rna_sequence = yield self.env.process(self.trascript_gene(dna_sequence))
+        messenger_rna_sequence = self.trascript_gene(dna_sequence)
 
         messenger_rna_sequence = self.capping(messenger_rna_sequence)
 
@@ -83,7 +85,7 @@ class Nucleus:
         
         # post-transcriptional modifications
         messenger_rna_sequence = self.cleavage(messenger_rna_sequence)
-        messenger_rna_sequence = self.polyadenylation(messenger_rna_sequence)
+        messenger_rna_sequence = self.polyadenylation(messenger_rna_sequence, variables)
 
         yield self.env.timeout(1) #TODO: implementare il tempo di trascrizione
 
@@ -91,22 +93,28 @@ class Nucleus:
     
     def trascript_gene(self, dna_sequence):
         # transcript from gene to pre-mRNA
-        #messenger_rna_sequence = ''.join([self.env.process(self.find_complement_base(base)) for base in dna_sequence])
+        messenger_rna_sequence = ''.join([BASE_COMPLEMENT_DNA2RNA[base] for base in dna_sequence])
+        """FIXME
         messenger_rna_sequence = ''
+
         for base in dna_sequence:
-            messenger_rna_sequence += yield self.env.process(self.find_complement_base(base))
+            complement_base = yield self.env.process(self.find_complement_base(base))
+            yield self.env.timeout(REPLICATION_TIME)
+            messenger_rna_sequence += complement_base
+        """
         return messenger_rna_sequence
     
     def find_complement_base(self, base):
         if random.random() > RNA_POLYMERASE_ERROR_RATE:
-            complement = BASE_COMPLEMENT_DNA2RNA[base]  
+            complement_base = BASE_COMPLEMENT_DNA2RNA[base]  
         else: 
-            complement = random.choice([b for b in list(BASE_COMPLEMENT_DNA2RNA.values()) 
+            complement_base = random.choice([b for b in list(BASE_COMPLEMENT_DNA2RNA.values()) 
                 if b != BASE_COMPLEMENT_DNA2RNA[base]])
         
-        with self.nucleotides.request(complement, 1) as request:
+        with self.nucleotides.request(complement_base, 1) as request:
             yield request
-        return complement 
+
+        return complement_base 
     
     def splicing(self, rna_sequence):
         # remove introns: non-coding regions
@@ -127,6 +135,7 @@ class Nucleus:
         return rna_sequence
 
     def capping(self, rna_sequence):
+        #TODO: implement and use resources METHYL_CAP
         return 'CH3GPPP-{}'.format(rna_sequence) # Add 5'-methyl cap
     
     def cleavage(self, rna_sequence): #TODO
@@ -134,6 +143,12 @@ class Nucleus:
         # modifications) it is necessary for producing a mature mRNA molecule
         return rna_sequence
 
-    def polyadenylation(self, rna_sequence):
+    def polyadenylation(self, rna_sequence, variables):
+        variables.poly_adenine_tail_len = random.randint(230, 270)
+        """FIXME
+        with self.nucleotides.request('A', poly_adenine_tail_len) as request:
+            yield request
+        """
+
         return '{}-AAAA'.format(rna_sequence) # Add PolyA tail (250 nucleotides circa)
     
