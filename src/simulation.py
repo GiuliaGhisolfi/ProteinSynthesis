@@ -38,28 +38,36 @@ class ProteinSinthesisProcess:
         
         random.seed(random_seed)
         self.env = simpy.Environment()
-        self.resources = EucaryotesCellResource(self.env, capacity=number_resources) #TODO: resources: enzimi, basi, ATP, tRNA, aminoacidi
+        self.resources = EucaryotesCellResource(self.env, capacity=number_resources) 
+        #TODO: resources: enzimi, basi, ATP, tRNA, aminoacidi
         self.env.process(self.setup_process())
 
         self.eucaryotes_cell = EucaryotesCell(environment=self.env, number_rna_polymerases=number_rna_polymerases,
             number_ribosomes=number_ribosomes, random_seed=random_seed, verbose=self.verbose)
         
-        #if self.verbose: 
         print('Simulation environment initialized')
     
+    def __str__(self):
+        return (f'Protein Sinthesis Process:\n'
+            f'{len(self.dna_sequences)} dna sequences to synthesize,\n'
+            f'{self.resources.capacity} resources available,\n'
+            f'{self.eucaryotes_cell.nucleus.rna_polymerase.capacity} RNA polymerases,\n'
+            f'{self.eucaryotes_cell.ribosome.ribosomes.capacity} ribosomes.')
+    
     def run(self, simulation_time=SIM_TIME):
-        #if self.verbose: 
-        print('Simulation started:')
+        print('Simulation started')
         self.env.run(until=simulation_time)
-        #if self.verbose: 
-        print('End simulation')
+
+        proteins_number = self.dna_sequences_df[self.dna_sequences_df[
+            'protein_synthesized'].notna()]['number_of_proteins_synthesized'].sum()
+        print(f'End simulation: {proteins_number} proteins synthesized.')
     
     def setup_process(self):
         process_queue = []
         sequences_count = itertools.count()
 
         while True:
-            dna_sequence = random.choice(self.dna_sequences) #TODO: Seq(random.choice(self.dna_sequences))
+            dna_sequence = random.choice(self.dna_sequences)
             if self.available[dna_sequence]:
                 variables = EucaryotesCellVariables()
                 variables.dna_sequence = dna_sequence
@@ -76,14 +84,14 @@ class ProteinSinthesisProcess:
     def process(self, variables):
         # Synthesize dna sequences while the simulation is running            
         with self.resources.request() as request:
-            #if self.verbose:
-            print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} requesting to start synthesis')
+            if self.verbose:
+                print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} requesting to start synthesis')
             variables.request_start_process_time = self.env.now
 
             yield request # wait for a cell be able to accepts dna sequence
 
-            #if self.verbose:
-            print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthesize started')
+            if self.verbose:
+                print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthesize started')
             variables.start_process_time = self.env.now
 
             yield self.env.process(self.eucaryotes_cell.synthesize_protein(variables))
@@ -92,8 +100,8 @@ class ProteinSinthesisProcess:
             # save the results
             self.save_protein_synthesized(variables)
 
-            #if self.verbose:
-            print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthetis ended')
+            if self.verbose:
+                print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthetis ended')
             self.resources.release(request)
         
     def save_protein_synthesized(self, variables):
@@ -113,7 +121,7 @@ class ProteinSinthesisProcess:
         
     def save_process(self):
         # save dataframe
-        df_to_save = self.dna_sequences_df[self.dna_sequences_df['protein_synthesized'].notna()] #FIXME
+        df_to_save = self.dna_sequences_df[self.dna_sequences_df['protein_synthesized'].notna()]
         df_to_save.to_csv(RESULTS_FOLDER+'results.csv')
 
         # save resources history 
@@ -122,3 +130,5 @@ class ProteinSinthesisProcess:
             RESULTS_FOLDER+'rna_polymerase_history.csv')
         self.eucaryotes_cell.ribosome.ribosomes.save_history(
             RESULTS_FOLDER+'ribosome_history.csv')
+        
+        print('Process saved.')
