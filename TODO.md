@@ -9,3 +9,5 @@ lib to find promoters
 save error
 
 parametri tutti da chiamata
+
+Memory = simpy.Container(Env, RamCapacity, RamCapacity) # ammount of nucleotides

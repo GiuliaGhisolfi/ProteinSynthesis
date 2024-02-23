@@ -1,6 +1,7 @@
 import simpy
 from Bio.Seq import Seq
 from Bio.SeqUtils import seq3
+from resources.resource import EucaryotesCellResource
 
 LENGTH_CODON = 3 # number of nucleotides that code for an amino acid
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
@@ -18,13 +19,16 @@ class Ribosome:
         self.codons2aminoacids_dict = codons2aminoacids_dict
         self.aminoacids_dict = aminoacids_dict
 
-        self.ribosomes = simpy.Resource(self.env, capacity=NUMBER_RIBOSOMES)
+        #self.ribosomes = simpy.Resource(self.env, capacity=NUMBER_RIBOSOMES)
+        self.ribosomes = EucaryotesCellResource(self.env, number_ribosomes=NUMBER_RIBOSOMES)
 
     def translate(self, mrna_sequence): # protein synthesis
         with self.ribosomes.request() as request:
             yield request # wait for a ribosome to be available
             polypeptides_chain, polypeptides_chain_ext = yield self.env.process(
                 self.translation_process(mrna_sequence))
+            
+            self.ribosomes.release(request) # release the ribosome
             
         return polypeptides_chain, polypeptides_chain_ext
     
