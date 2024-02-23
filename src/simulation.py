@@ -8,12 +8,17 @@ from src.utils import save_proteins_synthesized
 
 LENGTH_AMIO_GROUP = 4 # length of amino acid group
 LENGTH_CARBOXYL_GROUP = 5 # length of carboxyl group
-RANDOM_SEED = 42
+
 SIM_TIME = 1000
 NUMBER_RESOURCES = 5
+NUMBER_RNA_POLYMERASES = 3
+NUMBER_RIBOSOMES = 2
+RANDOM_SEED = 42
 
 class ProteinSinthesisProcess:
-    def __init__(self, dna_sequences_df, verbose=False):
+    def __init__(self, dna_sequences_df, number_resources=NUMBER_RESOURCES,
+            number_rna_polymerases=NUMBER_RNA_POLYMERASES, number_ribosomes=NUMBER_RIBOSOMES,
+            random_seed=RANDOM_SEED, verbose=False):
         self.dna_sequences_df = dna_sequences_df
         self.verbose = verbose
 
@@ -30,12 +35,13 @@ class ProteinSinthesisProcess:
         self.available =  {row['sequence']: True if row['protein_synthesized']==None else False
             for _, row in self.dna_sequences_df.iterrows()}
         
-        random.seed(RANDOM_SEED)
+        random.seed(random_seed)
         self.env = simpy.Environment()
-        self.resources = EucaryotesCellResource(self.env, capacity=NUMBER_RESOURCES) #TODO: resources: enzimi, basi, ATP, tRNA, aminoacidi
+        self.resources = EucaryotesCellResource(self.env, capacity=number_resources) #TODO: resources: enzimi, basi, ATP, tRNA, aminoacidi
         self.env.process(self.setup_process())
 
-        self.eucaryotes_cell = EucaryotesCell(environment=self.env, verbose=self.verbose)
+        self.eucaryotes_cell = EucaryotesCell(environment=self.env, number_rna_polymerases=number_rna_polymerases,
+            number_ribosomes=number_ribosomes, random_seed=random_seed, verbose=self.verbose)
         
         #if self.verbose: 
         print('Simulation environment initialized')

@@ -5,27 +5,24 @@ from src.process.translation import Ribosome
 
 DATA_PATH = 'data/'
 CODONS_PATH = DATA_PATH + 'codons.json'
-PEPTIDES_PATH = DATA_PATH + 'peptides.json'
 
 class EucaryotesCell:
-    def __init__(self, environment, verbose=False):
+    def __init__(self, environment, number_rna_polymerases,number_ribosomes, random_seed, verbose=False):
         self.env = environment
         self.verbose = verbose
-
-        self.codons2aminoacids_dict = json.load(open(CODONS_PATH))
-        self.aminoacids_dict = json.load(open(PEPTIDES_PATH))
-        self.extron_list = self.codons2aminoacids_dict.keys()
+        self.extron_list = json.load(open(CODONS_PATH)).keys()
 
         self.nucleus = Nucleus(
             environment=self.env,
             extron_sequences_list=self.extron_list,
             editing_sites_dict={}, #TODO
+            number_rna_polymerases=number_rna_polymerases,
+            random_seed=random_seed
             )
         
         self.ribosome = Ribosome(
             environment=self.env,
-            codons2aminoacids_dict=self.codons2aminoacids_dict, 
-            aminoacids_dict=self.aminoacids_dict,
+            number_ribosomes=number_ribosomes,
             )
         
     def synthesize_protein(self, variables):

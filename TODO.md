@@ -8,14 +8,16 @@ TODAY:
 
 Memory = simpy.Container(Env, RamCapacity, RamCapacity) # ammount of nucleotides
 
-json con parametri + parametri tutti da chiamata
+json con parametri
+
+parametri tutti da chiamata (done)
 
 altri enzimi come container (implement enzima)
 
 classe per salvare errori (o no)
 
-salvare a fine processo tutte le queque
+salvare a fine processo tutte le queque (cartella results, con anche df finale)
 
 grafico per process
 
-settare tutti i seed e rendere anche quelli parametrici
+settare tutti i seed e rendere anche quelli parametrici (done)

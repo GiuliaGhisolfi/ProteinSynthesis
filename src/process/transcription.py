@@ -17,30 +17,24 @@ BASE_COMPLEMENT_RNA2DNA = {
 PROMOTERS = [
     'TATAAAA', 'TATAAAT', 'TATATAA', 'TATATAT', # TATA box
 ]
-"""    
-    'CAAT', # CAAT box
-    'GC', # GC box
-    'GGGCGG' # Initiator element
-]
-"""
 LENGTH_PROMOTER = 7
 TERMINATORS = ['UAA', 'UAG', 'UGA']
 RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
 LENGTH_EXTRON_SEQUENCE = 3 # length of extron sequence
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
-NUMBER_RNA_POLYMERASES = 3
 
 class Nucleus:
-
-    def __init__(self, environment, extron_sequences_list, editing_sites_dict):
+    def __init__(self, environment, extron_sequences_list, editing_sites_dict, 
+            number_rna_polymerases, random_seed):
         self.env = environment
         self.extron_sequences_list = extron_sequences_list
+        self.random_seed = random_seed
 
         self.editing_sites_dict = editing_sites_dict
         self.editing_sites_dict = dict(sorted(self.editing_sites_dict.items(), 
             key=lambda x: len(x[0]), reverse=False)) # sort by length of key
         
-        self.rna_polymerase = EucaryotesCellResource(self.env, capacity=NUMBER_RNA_POLYMERASES)
+        self.rna_polymerase = EucaryotesCellResource(self.env, capacity=number_rna_polymerases)
         self.nucleotides = {'U': 0, 'A': 0, 'G': 0, 'C': 0} 
         # TODO: change e implementare il conteggio prima e dopo degradetion, nel ribosoma (o gestire dentro cell)
     
@@ -74,6 +68,7 @@ class Nucleus:
 
     def transcript_process(self, dna_sequence):
         # make sequence univoque to transcript
+        random.seed(self.random_seed)
         dna_sequence = ''.join([random.choice(NucleotidesSymbolsAllocations[n]) for n in dna_sequence])
 
         # transcript from gene to pre-mRNA

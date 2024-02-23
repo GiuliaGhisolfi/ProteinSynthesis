@@ -7,21 +7,15 @@ from src.resources.resource import EucaryotesCellResource
 LENGTH_CODON = 3 # number of nucleotides that code for an amino acid
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
 LENGTH_POLY_A_TAIL = 5 # length of poly-A tail
-MRNA_DECODED_ERROR_RATE = 1e-4 # 1 mistake every 10.000 amino acids
-NUMBER_RIBOSOMES = 2
 AMINO_GROUP = 'NH2-' # amino group
 CARBOXYL_GROUP = '-COOH' # carboxyl group
+MRNA_DECODED_ERROR_RATE = 1e-4 #TODO: 1 mistake every 10.000 amino acids
 
 class Ribosome:
-    def __init__(self, environment, codons2aminoacids_dict, aminoacids_dict):
+    def __init__(self, environment, number_ribosomes):
         # ribonucleoprotein complex in the cytoplasm
         self.env = environment
-
-        self.codons2aminoacids_dict = codons2aminoacids_dict
-        self.aminoacids_dict = aminoacids_dict
-
-        #self.ribosomes = simpy.Resource(self.env, capacity=NUMBER_RIBOSOMES)
-        self.ribosomes = EucaryotesCellResource(self.env, capacity=NUMBER_RIBOSOMES)
+        self.ribosomes = EucaryotesCellResource(self.env, capacity=number_ribosomes)
 
     def translate(self, mrna_sequence): # protein synthesis
         with self.ribosomes.request() as request:
