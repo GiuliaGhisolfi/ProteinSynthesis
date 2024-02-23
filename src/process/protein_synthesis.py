@@ -2,6 +2,7 @@ import json
 import itertools
 from src.process.transcription import Nucleus
 from src.process.translation import Ribosome
+from src.resources.nucleotides import Nucleotides
 
 DATA_PATH = 'data/'
 CODONS_PATH = DATA_PATH + 'codons.json'
@@ -11,12 +12,20 @@ class EucaryotesCell:
         self.env = environment
         self.verbose = verbose
         self.extron_list = json.load(open(CODONS_PATH)).keys()
+        self.nucleotides = Nucleotides(
+            environment=self.env,
+            uracil_initial_amount=100, #FIXME: change with real values
+            adenine_initial_amount=100,
+            guanine_initial_amount=100,
+            cytosine_initial_amount=100
+            )
 
         self.nucleus = Nucleus(
             environment=self.env,
             extron_sequences_list=self.extron_list,
             editing_sites_dict={}, #TODO
             number_rna_polymerases=number_rna_polymerases,
+            nucleotides = self.nucleotides,
             random_seed=random_seed
             )
         

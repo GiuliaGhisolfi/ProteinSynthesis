@@ -102,7 +102,7 @@ class ProteinSinthesisProcess:
 
             if self.verbose:
                 print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthetis ended')
-            self.resources.release(request)
+            yield self.resources.release(request)
         
     def save_protein_synthesized(self, variables):
         self.dna_sequences_df = save_proteins_synthesized(

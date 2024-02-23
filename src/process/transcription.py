@@ -20,23 +20,24 @@ PROMOTERS = [
 LENGTH_PROMOTER = 7
 TERMINATORS = ['UAA', 'UAG', 'UGA']
 RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
+REPLICATION_RATE = 50 # nucleotides per second
 LENGTH_EXTRON_SEQUENCE = 3 # length of extron sequence
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
 
 class Nucleus:
     def __init__(self, environment, extron_sequences_list, editing_sites_dict, 
-            number_rna_polymerases, random_seed):
+            number_rna_polymerases, nucleotides, random_seed):
         self.env = environment
-        self.extron_sequences_list = extron_sequences_list
-        self.random_seed = random_seed
 
+        self.extron_sequences_list = extron_sequences_list
         self.editing_sites_dict = editing_sites_dict
         self.editing_sites_dict = dict(sorted(self.editing_sites_dict.items(), 
             key=lambda x: len(x[0]), reverse=False)) # sort by length of key
         
         self.rna_polymerase = EucaryotesCellResource(self.env, capacity=number_rna_polymerases)
-        self.nucleotides = {'U': 0, 'A': 0, 'G': 0, 'C': 0} 
-        # TODO: change e implementare il conteggio prima e dopo degradetion, nel ribosoma (o gestire dentro cell)
+        self.nucleotides = nucleotides
+
+        self.random_seed = random_seed
     
     def find_promoter(self, dna_sequence):
         # find promoter sequences in the DNA sequence
@@ -72,10 +73,7 @@ class Nucleus:
         dna_sequence = ''.join([random.choice(NucleotidesSymbolsAllocations[n]) for n in dna_sequence])
 
         # transcript from gene to pre-mRNA
-        messenger_rna_sequence = ''.join([BASE_COMPLEMENT_DNA2RNA[base] 
-            if random.random() > RNA_POLYMERASE_ERROR_RATE 
-            else random.choice([b for b in list(BASE_COMPLEMENT_DNA2RNA.values()) if b != BASE_COMPLEMENT_DNA2RNA[base]])
-            for base in dna_sequence])
+        messenger_rna_sequence = yield self.env.process(self.trascript_gene(dna_sequence))
 
         messenger_rna_sequence = self.capping(messenger_rna_sequence)
 
@@ -90,16 +88,34 @@ class Nucleus:
         yield self.env.timeout(1) #TODO: implementare il tempo di trascrizione
 
         return messenger_rna_sequence
+    
+    def trascript_gene(self, dna_sequence):
+        # transcript from gene to pre-mRNA
+        #messenger_rna_sequence = ''.join([self.env.process(self.find_complement_base(base)) for base in dna_sequence])
+        messenger_rna_sequence = ''
+        for base in dna_sequence:
+            messenger_rna_sequence += yield self.env.process(self.find_complement_base(base))
+        return messenger_rna_sequence
+    
+    def find_complement_base(self, base):
+        if random.random() > RNA_POLYMERASE_ERROR_RATE:
+            complement = BASE_COMPLEMENT_DNA2RNA[base]  
+        else: 
+            complement = random.choice([b for b in list(BASE_COMPLEMENT_DNA2RNA.values()) 
+                if b != BASE_COMPLEMENT_DNA2RNA[base]])
         
+        with self.nucleotides.request(complement, 1) as request:
+            yield request
+        return complement 
+    
     def splicing(self, rna_sequence):
         # remove introns: non-coding regions
         i = LENGTH_METHYL_CAP # index
         while i+3 < len(rna_sequence):
             if rna_sequence[i:i+LENGTH_EXTRON_SEQUENCE] in self.extron_sequences_list:
                 i += LENGTH_EXTRON_SEQUENCE
-            else: # TODO: implementare il conteggio dei nucleotidi o togliere tutto
-                # remouve nucleotide and save it
-                self.nucleotides[rna_sequence[i]] += 1
+            else: 
+                # TODO: use resources Nucleotides
                 rna_sequence = rna_sequence[:i] + rna_sequence[i+1:]
 
         return rna_sequence
@@ -107,6 +123,7 @@ class Nucleus:
     def editing(self, rna_sequence):
         for editing_site in self.editing_sites_dict.keys():
             rna_sequence = rna_sequence.replace(editing_site, self.editing_sites_dict[editing_site])
+            #TODO: use resources Nucleotides
         return rna_sequence
 
     def capping(self, rna_sequence):

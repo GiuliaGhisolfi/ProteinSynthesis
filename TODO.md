@@ -15,3 +15,5 @@ altri enzimi come container (implement enzima)
 classe per salvare errori (o no)
 
 grafico per process
+
+test if queue resources works (_do_put method)

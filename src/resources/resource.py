@@ -12,11 +12,17 @@ class EucaryotesCellResource(SimpyResource.Resource):
         self._queue_history['request_time'].append(self._env.now)
         return request
     
-    def release(self, *args, **kwargs):
+    def _do_get(self, event):
+        super()._do_get(event)
+        self._queue_history['available_time'].append(self._env.now)
+        self._queue_history['wait_time'].append(
+            self._queue_history['available_time'][-1] - self._queue_history['request_time'][-1])
+    
+    def release(self, *args, **kwargs): #FIXME
         release = super().release(*args, **kwargs)
         self._queue_history['release_time'].append(self._env.now)
-        self._queue_history['wait_time'].append(
-            self._queue_history['release_time'][-1] - self._queue_history['request_time'][-1])
+        self._queue_history['usage_time'].append(
+            self._queue_history['release_time'][-1] - self._queue_history['available_time'][-1])
         return release
     
     def queue_history(self):
@@ -29,8 +35,10 @@ class EucaryotesCellResource(SimpyResource.Resource):
     def _reset_queue_history(self):
         self._queue_history = {
             'queue': [],
-            'request_time': [],
-            'release_time': [], 
-            'wait_time': []
+            'request_time': [], # time when the request is made
+            'available_time': [], # time when the resource is available
+            'wait_time': [], # time the request waited in the queue
+            'release_time': [], # time when the resource is released
+            'usage_time': [] # time the resource is used
             }
         
