@@ -16,7 +16,7 @@ altri enzimi come container (implement enzima)
 
 classe per salvare errori (o no)
 
-salvare a fine processo tutte le queque (cartella results, con anche df finale)
+salvare a fine processo tutte le queque (cartella results, con anche df finale) (to fix)
 
 grafico per process
 

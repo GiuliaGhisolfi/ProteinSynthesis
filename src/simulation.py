@@ -8,6 +8,7 @@ from src.utils import save_proteins_synthesized
 
 LENGTH_AMIO_GROUP = 4 # length of amino acid group
 LENGTH_CARBOXYL_GROUP = 5 # length of carboxyl group
+RESULTS_FOLDER = 'results/'
 
 SIM_TIME = 1000
 NUMBER_RESOURCES = 5
@@ -89,13 +90,13 @@ class ProteinSinthesisProcess:
             variables.end_process_time = self.env.now
 
             # save the results
-            self.save_proteins_synthesized(variables)
+            self.save_protein_synthesized(variables)
 
             #if self.verbose:
             print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthetis ended')
             self.resources.release(request)
         
-    def save_proteins_synthesized(self, variables):
+    def save_protein_synthesized(self, variables):
         self.dna_sequences_df = save_proteins_synthesized(
             dna_sequences_df=self.dna_sequences_df, 
             dna_sequence=variables.get_dna(),
@@ -109,3 +110,15 @@ class ProteinSinthesisProcess:
             end_translation_time=variables.end_translation_time,
             end_process_time=variables.end_process_time
             )
+        
+    def save_process(self):
+        # save dataframe
+        df_to_save = self.dna_sequences_df[self.dna_sequences_df['protein_synthesized'].notna()] #FIXME
+        df_to_save.to_csv(RESULTS_FOLDER+'results.csv')
+
+        # save resources history 
+        self.resources.save_history(RESULTS_FOLDER+'resources_history.csv')
+        self.eucaryotes_cell.nucleus.rna_polymerase.save_history(
+            RESULTS_FOLDER+'rna_polymerase_history.csv')
+        self.eucaryotes_cell.ribosome.ribosomes.save_history(
+            RESULTS_FOLDER+'ribosome_history.csv')
