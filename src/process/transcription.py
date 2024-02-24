@@ -120,16 +120,6 @@ class Nucleus:
 
         return self.request_nucleotide(complement_base)
     
-    def request_nucleotide(self, base, amount=1):
-        with self.nucleotides.request(base, amount) as request:
-            yield request
-            
-            return self.env.process(self.replicate_base(base))
-    
-    def replicate_base(self, base):
-        yield self.env.timeout(REPLICATION_TIME) # time to replicate a nucleotide
-        return base
-    
     def splicing(self, rna_sequence):
         # remove introns: non-coding regions
         i = LENGTH_METHYL_CAP # index
@@ -137,15 +127,26 @@ class Nucleus:
             if rna_sequence[i:i+LENGTH_EXTRON_SEQUENCE] in self.extron_sequences_list:
                 i += LENGTH_EXTRON_SEQUENCE
             else: 
-                # TODO: use resources Nucleotides
+                intron = rna_sequence[i]
+                self.release_nucleotide(intron) # degrade intron
                 rna_sequence = rna_sequence[:i] + rna_sequence[i+1:]
 
         return rna_sequence
 
     def editing(self, rna_sequence):
         for editing_site in self.editing_sites_dict.keys():
+            # find the editing site in the rna sequence
+            editing_site_count = rna_sequence.count(editing_site)
+            for base in editing_site: # request the nucleotides to edit the rna sequence
+                self.request_nucleotide(base, editing_site_count)
+            
+            # edit the rna sequence
             rna_sequence = rna_sequence.replace(editing_site, self.editing_sites_dict[editing_site])
-            #TODO: use resources Nucleotides
+            
+            # degrade the editing site
+            for base in editing_site:
+                self.release_nucleotide(base, editing_site_count)
+
         return rna_sequence
 
     def capping(self, rna_sequence):
@@ -159,7 +160,19 @@ class Nucleus:
 
     def polyadenylation(self, rna_sequence, variables):
         variables.poly_adenine_tail_len = random.randint(230, 270)
-        self.request_nucleotide('A', variables.poly_adenine_tail_len)
+        self.release_nucleotide('A', variables.poly_adenine_tail_len)
         
         return '{}-AAAA'.format(rna_sequence) # Add PolyA tail (250 nucleotides circa)
     
+    def request_nucleotide(self, base, amount=1):
+        with self.nucleotides.request(base, amount) as request:
+            yield request
+            
+            return self.env.process(self.replicate_base(base))
+    
+    def replicate_base(self, base):
+        yield self.env.timeout(REPLICATION_TIME) # time to replicate a nucleotide
+        return base
+    
+    def release_nucleotide(self, base, amount=1):
+        self.nucleotides.release(base, amount)

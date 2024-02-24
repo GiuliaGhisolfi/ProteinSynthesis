@@ -74,6 +74,9 @@ class Ribosome:
     
     def mrna_degredation(self, mrna_sequence, poly_adenine_tail_len):
         # enzima: ribonuclease
-        [self.nucleotides.release(nucleotide, 1) for nucleotide in mrna_sequence]
-        self.nucleotides.release('A', poly_adenine_tail_len)
+        [self.release_nucleotide(nucleotide) for nucleotide in mrna_sequence]
+        self.release_nucleotide('A', poly_adenine_tail_len)
         #TODO: yield self.env.timeout() degradation time
+    
+    def release_nucleotide(self, base, amount=1):
+        self.nucleotides.release(base, amount)
