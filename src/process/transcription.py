@@ -20,7 +20,7 @@ PROMOTERS = [
 LENGTH_PROMOTER = 7
 TERMINATORS = ['UAA', 'UAG', 'UGA']
 RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
-REPLICATION_TIME = 2e10-2 # seconds to replicate a nucleotide
+REPLICATION_TIME = 2e-2 # seconds to replicate a nucleotide
 LENGTH_EXTRON_SEQUENCE = 3 # length of extron sequence
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
 
@@ -58,25 +58,26 @@ class Nucleus:
             
             return dna_sequences_list
 
-    def transcript(self, dna_sequence, variables): # enzime: RNA polymerase
+    def transcript(self, dna_sequence, variables, sequence_count): # enzime: RNA polymerase
         with self.rna_polymerase.request() as request:
             yield request  # wait for RNA polymerase to be available
 
             # start transcript processes for DNA sequence
             messenger_rna_sequence = yield self.env.process(
-                self.transcript_process(dna_sequence, variables))
+                self.transcript_process(dna_sequence, variables, sequence_count))
 
         return messenger_rna_sequence
 
-    def transcript_process(self, dna_sequence, variables):
+    def transcript_process(self, dna_sequence, variables, sequence_count):
         # make sequence univoque to transcript
         random.seed(self.random_seed)
         dna_sequence = ''.join([random.choice(NucleotidesSymbolsAllocations[n]) for n in dna_sequence])
 
         # transcript from gene to pre-mRNA
-        #messenger_rna_sequence = yield self.env.process(self.trascript_gene(dna_sequence))
-        messenger_rna_sequence = self.trascript_gene(dna_sequence)
+        messenger_rna_sequence = yield self.env.process(
+            self.trascript_gene(dna_sequence, variables, sequence_count))
 
+        # pre-transcriptional modifications
         messenger_rna_sequence = self.capping(messenger_rna_sequence)
 
         # elongation phase
@@ -91,17 +92,23 @@ class Nucleus:
 
         return messenger_rna_sequence
     
-    def trascript_gene(self, dna_sequence):
+    def trascript_gene(self, dna_sequence, variables, sequence_count):
         # transcript from gene to pre-mRNA
-        messenger_rna_sequence = ''.join([BASE_COMPLEMENT_DNA2RNA[base] for base in dna_sequence])
-        """FIXME
+        #messenger_rna_sequence = ''.join([BASE_COMPLEMENT_DNA2RNA[base] for base in dna_sequence])
         messenger_rna_sequence = ''
 
         for base in dna_sequence:
-            complement_base = yield self.env.process(self.find_complement_base(base))
-            yield self.env.timeout(REPLICATION_TIME)
+            complement_base_process = yield self.env.process(self.find_complement_base(base))
+            variables.complement_base_queue_dict[sequence_count].append(complement_base_process)
+
+            yield complement_base_process
+            complement_base = complement_base_process.value
             messenger_rna_sequence += complement_base
-        """
+
+            # wait for all the transcription gene process to be completed
+            while variables.complement_base_queue_dict[sequence_count]:
+                variables.complement_base_queue_dict[sequence_count].pop(0)
+
         return messenger_rna_sequence
     
     def find_complement_base(self, base):
@@ -110,11 +117,15 @@ class Nucleus:
         else: 
             complement_base = random.choice([b for b in list(BASE_COMPLEMENT_DNA2RNA.values()) 
                 if b != BASE_COMPLEMENT_DNA2RNA[base]])
-        
+
         with self.nucleotides.request(complement_base, 1) as request:
             yield request
-
-        return complement_base 
+            
+            return self.env.process(self.add_complement_base(complement_base))
+    
+    def add_complement_base(self, complement_base):
+        yield self.env.timeout(REPLICATION_TIME) # time to replicate a nucleotide
+        return complement_base
     
     def splicing(self, rna_sequence):
         # remove introns: non-coding regions

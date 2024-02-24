@@ -86,9 +86,12 @@ class EucaryotesCell:
                 f'{variables.promoters_count} promoters')
     
     def transcription_and_translation_process(self, variables, seq_count):
+        # init list to store simpy processes for finding complement base
+        variables.complement_base_queue_dict[seq_count] = []
+
         # transcription process
         transcription_process = self.env.process(
-            self.nucleus.transcript(variables.dna_sequence, variables))
+            self.nucleus.transcript(variables.dna_sequence, variables, seq_count))
         variables.transcription_queue.append(transcription_process)
         
         yield transcription_process

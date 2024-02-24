@@ -8,7 +8,7 @@ class EucaryotesCellContainer(SimpyContainer.Container):
         self._reset_amount_history(initial_amount=init)
         
     def get(self, *args, **kwargs):
-        get = super().get(*args, **kwargs)
+        get = super().get(*args, **kwargs) # get the amount from the container
         
         # save the amount history
         self._amount_history['amount'].append(self.level)
@@ -17,7 +17,7 @@ class EucaryotesCellContainer(SimpyContainer.Container):
         return get
     
     def put(self, *args, **kwargs):
-        put = super().put(*args, **kwargs)
+        put = super().put(*args, **kwargs) # put the amount into the container
 
         # save the amount history
         self._amount_history['amount'].append(self.level)

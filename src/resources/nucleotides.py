@@ -23,4 +23,5 @@ class Nucleotides:
     
     def save_history(self, path_to_save):
         for nucleotide in self.nucleotides_containers_dict:
-            self.nucleotides_containers_dict[nucleotide].save_history(path_to_save.replace('.json', f'_{nucleotide}.json'))
+            self.nucleotides_containers_dict[nucleotide].save_history(
+                path_to_save.replace('.json', f'_{nucleotide}.json'))

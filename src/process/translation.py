@@ -9,6 +9,7 @@ LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
 LENGTH_POLY_A_TAIL = 5 # length of poly-A tail
 AMINO_GROUP = 'NH2-' # amino group
 CARBOXYL_GROUP = '-COOH' # carboxyl group
+ELONGATION_TIME = 5e-2 # seconds to add each amino acid
 MRNA_DECODED_ERROR_RATE = 1e-4 #TODO: 1 mistake every 10.000 amino acids
 
 class Ribosome:
@@ -63,7 +64,7 @@ class Ribosome:
             polypeptides_chain = mrna_sequence.translate(stop_symbol='', to_stop=True)
 
         if len(polypeptides_chain) > 0:
-            yield self.env.timeout(0.05* len(polypeptides_chain)) # 0.05 seconds to add each amino acid
+            yield self.env.timeout(ELONGATION_TIME * len(polypeptides_chain)) # 0.05 seconds to add each amino acid
             polypeptides_chain_ext = seq3(polypeptides_chain)
 
             polypeptides_chain = AMINO_GROUP + polypeptides_chain + CARBOXYL_GROUP
