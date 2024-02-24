@@ -91,7 +91,7 @@ class ProteinSinthesisProcess:
                 process_queue.append(self.env.process(self.process(variables)))
                 
                 self.available[dna_sequence] = False
-                yield self.env.timeout(random.random()*10) # time between start of protein synthesis
+                yield self.env.timeout(random.random()*100) # time between start of protein synthesis
 
                 while process_queue: # wait for all the protein synthesis to be completed
                     process_queue.pop(0)

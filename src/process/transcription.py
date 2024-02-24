@@ -118,14 +118,17 @@ class Nucleus:
             complement_base = random.choice([b for b in list(BASE_COMPLEMENT_DNA2RNA.values()) 
                 if b != BASE_COMPLEMENT_DNA2RNA[base]])
 
-        with self.nucleotides.request(complement_base, 1) as request:
+        return self.request_nucleotide(complement_base)
+    
+    def request_nucleotide(self, base, amount=1):
+        with self.nucleotides.request(base, amount) as request:
             yield request
             
-            return self.env.process(self.add_complement_base(complement_base))
+            return self.env.process(self.replicate_base(base))
     
-    def add_complement_base(self, complement_base):
+    def replicate_base(self, base):
         yield self.env.timeout(REPLICATION_TIME) # time to replicate a nucleotide
-        return complement_base
+        return base
     
     def splicing(self, rna_sequence):
         # remove introns: non-coding regions
@@ -156,10 +159,7 @@ class Nucleus:
 
     def polyadenylation(self, rna_sequence, variables):
         variables.poly_adenine_tail_len = random.randint(230, 270)
-        """FIXME
-        with self.nucleotides.request('A', poly_adenine_tail_len) as request:
-            yield request
-        """
-
+        self.request_nucleotide('A', variables.poly_adenine_tail_len)
+        
         return '{}-AAAA'.format(rna_sequence) # Add PolyA tail (250 nucleotides circa)
     
