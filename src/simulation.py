@@ -14,11 +14,11 @@ SIM_TIME = 1000
 NUMBER_RESOURCES = 5
 NUMBER_RNA_POLYMERASES = 3
 NUMBER_RIBOSOMES = 2
-URACIL_INITIAL_AMOUNT = 500
-ADENINE_INITIAL_AMOUNT = 500
-GUANINE_INITIAL_AMOUNT = 500
-CYTOSINE_INITIAL_AMOUNT = 500
-RANDOM_SEED = 42
+URACIL_INITIAL_AMOUNT = 5e100
+ADENINE_INITIAL_AMOUNT = 5e100
+GUANINE_INITIAL_AMOUNT = 5e100
+CYTOSINE_INITIAL_AMOUNT = 5e100
+RANDOM_SEED = None
 
 class ProteinSinthesisProcess:
     def __init__(self, dna_sequences_df, number_resources=NUMBER_RESOURCES,
@@ -139,11 +139,11 @@ class ProteinSinthesisProcess:
         df_to_save.to_csv(RESULTS_FOLDER+'results.csv')
 
         # save resources history 
-        self.resources.save_history(RESULTS_FOLDER+'resources_history.csv')
+        self.resources.save_history(RESULTS_FOLDER+'resources_history.json')
         self.eucaryotes_cell.nucleus.rna_polymerase.save_history(
-            RESULTS_FOLDER+'rna_polymerase_history.csv')
+            RESULTS_FOLDER+'rna_polymerase_history.json')
         self.eucaryotes_cell.ribosome.ribosomes.save_history(
-            RESULTS_FOLDER+'ribosome_history.csv')
-        self.eucaryotes_cell.nucleotides.save_history(RESULTS_FOLDER+'nucleotides_history.csv')
+            RESULTS_FOLDER+'ribosome_history.json')
+        self.eucaryotes_cell.nucleotides.save_history(RESULTS_FOLDER+'nucleotides_history.json')
         
         print('Process saved.')

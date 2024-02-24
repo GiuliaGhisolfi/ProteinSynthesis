@@ -1,5 +1,6 @@
 import simpy.resources.container as SimpyContainer
 import json
+import os
 
 class EucaryotesCellContainer(SimpyContainer.Container):
     def __init__(self, env, capacity, init):
@@ -34,9 +35,11 @@ class EucaryotesCellContainer(SimpyContainer.Container):
     def save_history(self, path_to_save):
         with open(path_to_save, 'w') as outfile:
             json.dump(self.queue_history(), outfile)
-        with open(path_to_save.replace('.json', '_amount.json'), 'w') as outfile:
+        
+        base_path, ext = os.path.splitext(path_to_save)
+        with open(base_path + '_amount.json', 'w') as outfile:
             json.dump(self.amount_history(), outfile)
-    
+
     def _reset_queue_history(self):
         self._queue_history = {
             'request_time': [],

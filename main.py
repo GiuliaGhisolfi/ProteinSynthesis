@@ -1,15 +1,15 @@
 from src.simulation import ProteinSinthesisProcess
 from HumanGenomeDataset.load_dataset import load_dataset
 
-SIM_TIME = 3600
+SIM_TIME = 36
 NUMBER_RESOURCES = 5
 NUMBER_RNA_POLYMERASES = 3
 NUMBER_RIBOSOMES = 2
-URACIL_INITIAL_AMOUNT = 5e100
+URACIL_INITIAL_AMOUNT = 10#5e100
 ADENINE_INITIAL_AMOUNT = 5e100
 GUANINE_INITIAL_AMOUNT = 5e100
 CYTOSINE_INITIAL_AMOUNT = 5e100
-RANDOM_SEED = 42
+RANDOM_SEED = None
 
 if __name__ == '__main__':
     data_df = load_dataset('dna_protein_coding_sequences')

@@ -1,4 +1,6 @@
 from src.resources.container import EucaryotesCellContainer
+import os
+NUCLEOTIDES_NAMES = ['uracil', 'adenine', 'guanine', 'cytosine']
 
 class Nucleotides:
     def __init__(self, environment, uracil_initial_amount, adenine_initial_amount, 
@@ -22,6 +24,6 @@ class Nucleotides:
         return self.nucleotides_containers_dict[nucleotide].put(amount)
     
     def save_history(self, path_to_save):
-        for nucleotide in self.nucleotides_containers_dict:
-            self.nucleotides_containers_dict[nucleotide].save_history(
-                path_to_save.replace('.json', f'_{nucleotide}.json'))
+        base_path, ext = os.path.splitext(path_to_save)
+        for nucleotide, container in zip(NUCLEOTIDES_NAMES, self.nucleotides_containers_dict.values()):
+            container.save_history(base_path + f'_{nucleotide}.json')
