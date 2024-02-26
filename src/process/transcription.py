@@ -23,6 +23,7 @@ RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
 REPLICATION_TIME = 2e-2 # seconds to replicate a nucleotide
 LENGTH_EXTRON_SEQUENCE = 3 # length of extron sequence
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
+MIN_LENGHT_PROMOTER = 200 # minimum length between promoters
 
 class Nucleus:
     def __init__(self, environment, extron_sequences_list, editing_sites_dict, 
@@ -44,6 +45,13 @@ class Nucleus:
         promoter_positions_list = sorted([i for promoter in PROMOTERS for i, _ in 
             enumerate(dna_sequence) if dna_sequence[i:].startswith(promoter)])
         
+        # if dist between promoters is less than 100, consider it as a single promoter
+        i = 0
+        while i < len(promoter_positions_list)-1: 
+            if promoter_positions_list[i+1] - promoter_positions_list[i] < MIN_LENGHT_PROMOTER:
+                del promoter_positions_list[i+1]  
+            else: i += 1
+
         if len(promoter_positions_list) == 0:
             return None
         else:

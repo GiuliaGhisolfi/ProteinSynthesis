@@ -13,7 +13,10 @@ class EucaryotesCell:
             cytosine_initial_amount, random_seed, verbose=False):
         self.env = environment
         self.verbose = verbose
+
         self.extron_list = json.load(open(CODONS_PATH)).keys()
+        self.amminoacids = json.load(open(CODONS_PATH)).values()
+
         self.nucleotides = Nucleotides(
             environment=self.env,
             uracil_initial_amount=uracil_initial_amount,
@@ -35,6 +38,7 @@ class EucaryotesCell:
             environment=self.env,
             number_ribosomes=number_ribosomes,
             nucleotides = self.nucleotides,
+            amminoacids = self.amminoacids
             )
         
     def synthesize_protein(self, variables):

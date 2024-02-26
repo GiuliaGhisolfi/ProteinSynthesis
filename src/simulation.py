@@ -4,7 +4,7 @@ import itertools
 from src.process.protein_synthesis import EucaryotesCell
 from src.variables.variables import EucaryotesCellVariables
 from src.resources.resource import EucaryotesCellResource
-from src.utils import save_proteins_synthesized
+from src.utils.utils import save_proteins_synthesized, post_processing_results
 
 LENGTH_AMIO_GROUP = 4 # length of amino acid group
 LENGTH_CARBOXYL_GROUP = 5 # length of carboxyl group
@@ -14,10 +14,10 @@ SIM_TIME = 1000
 NUMBER_RESOURCES = 5
 NUMBER_RNA_POLYMERASES = 3
 NUMBER_RIBOSOMES = 2
-URACIL_INITIAL_AMOUNT = 5e100
-ADENINE_INITIAL_AMOUNT = 5e100
-GUANINE_INITIAL_AMOUNT = 5e100
-CYTOSINE_INITIAL_AMOUNT = 5e100
+URACIL_INITIAL_AMOUNT = 5000
+ADENINE_INITIAL_AMOUNT = 5000
+GUANINE_INITIAL_AMOUNT = 5000
+CYTOSINE_INITIAL_AMOUNT = 5000
 RANDOM_SEED = None
 
 class ProteinSinthesisProcess:
@@ -113,12 +113,12 @@ class ProteinSinthesisProcess:
             variables.end_process_time = self.env.now
 
             # save the results
-            self.save_protein_synthesized(variables)
+            self.save_proteins_synthesized_in_df(variables)
 
             if self.verbose:
                 print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthetis ended')
         
-    def save_protein_synthesized(self, variables):
+    def save_proteins_synthesized_in_df(self, variables):
         self.dna_sequences_df = save_proteins_synthesized(
             dna_sequences_df=self.dna_sequences_df, 
             dna_sequence=variables.get_dna(),
@@ -134,8 +134,9 @@ class ProteinSinthesisProcess:
             )
         
     def save_process(self):
-        # save dataframe
+        # save dataframe        
         df_to_save = self.dna_sequences_df[self.dna_sequences_df['protein_synthesized'].notna()]
+        df_to_save = df_to_save.apply(post_processing_results, axis=1)
         df_to_save.to_csv(RESULTS_FOLDER+'results.csv')
 
         # save resources history 

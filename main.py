@@ -1,11 +1,11 @@
 from src.simulation import ProteinSinthesisProcess
 from HumanGenomeDataset.load_dataset import load_dataset
 
-SIM_TIME = 3600
+SIM_TIME = 1000
 NUMBER_RESOURCES = 5
 NUMBER_RNA_POLYMERASES = 3
 NUMBER_RIBOSOMES = 2
-URACIL_INITIAL_AMOUNT = 50000 #TODO: scegliere ordine di grandezza che venga salvato correttamente
+URACIL_INITIAL_AMOUNT = 50000
 ADENINE_INITIAL_AMOUNT = 50000
 GUANINE_INITIAL_AMOUNT = 50000
 CYTOSINE_INITIAL_AMOUNT = 50000

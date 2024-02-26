@@ -4,6 +4,8 @@ altri enzimi come container (implement enzima)
 
 EDITING SITES
 
+salvare proteine sintetizzate anche se non tutta la seq è stata ancora sviluppata (maybe)
+
 lib to find promoters (anche no, va bene tatabox)
 
 grafico per process
