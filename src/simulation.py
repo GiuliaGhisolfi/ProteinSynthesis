@@ -143,7 +143,8 @@ class ProteinSinthesisProcess:
             start_transcription_time=variables.start_transcription_time,
             start_translation_time=variables.start_translation_time,
             end_translation_time=variables.end_translation_time,
-            end_process_time=variables.end_process_time
+            end_process_time=variables.end_process_time,
+            promoters_box=variables.promoters_box,
             )
         
     def save_process(self, test_name=''):

@@ -1,7 +1,7 @@
 
 def save_proteins_synthesized(dna_sequences_df, dna_sequence, mrna_sequences, polypeptides_chain, polypeptides_chain_ext,
     request_start_process_time, start_process_time, start_transcription_time, start_translation_time, 
-    end_translation_time, end_process_time):
+    end_translation_time, end_process_time, promoters_box):
     row_index = dna_sequences_df[dna_sequences_df['sequence'] == dna_sequence].index[0]
 
     results = {
@@ -18,7 +18,8 @@ def save_proteins_synthesized(dna_sequences_df, dna_sequence, mrna_sequences, po
         'start_transcription_time': start_transcription_time,
         'start_translation_time': start_translation_time,
         'end_translation_time': end_translation_time,
-        'end_process_time': end_process_time
+        'end_process_time': end_process_time, 
+        'promoters_box': promoters_box,
     }
     dna_sequences_df.iloc[row_index] = results
 
@@ -28,11 +29,11 @@ def post_processing_results(row):
     if row['polypeptides_chains'] is not None:
         proteins = row['polypeptides_chains']
         proteins = [p for p in proteins if p != None]
-        row['lenght_proteins'] = compute_lenght_proteins(proteins)
+        row['length_proteins'] = compute_length_proteins(proteins)
         row['number_different_proteins'] = compute_number_different_proteins(proteins)
     return row
 
-def compute_lenght_proteins(proteins):
+def compute_length_proteins(proteins):
     return [len(p)-9 for p in proteins]
 
 def compute_number_different_proteins(proteins):

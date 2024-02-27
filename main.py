@@ -1,7 +1,7 @@
 from src.simulation import ProteinSinthesisProcess
 from HumanGenomeDataset.load_dataset import load_dataset
 
-SIM_TIME = 100
+SIM_TIME = 1000
 NUMBER_RESOURCES = 5
 NUMBER_RNA_POLYMERASES = 3
 NUMBER_RIBOSOMES = 2
@@ -26,6 +26,5 @@ if __name__ == '__main__':
         random_seed=RANDOM_SEED,
         verbose=True
         )
-    print(protein_synthesis_process)
     protein_synthesis_process.run(simulation_time=SIM_TIME) # run the simulation
     protein_synthesis_process.save_process()

@@ -18,6 +18,9 @@ class EucaryotesCellVariables:
         self.end_translation_time = []
         self.end_process_time = None
 
+        # statistics variables
+        self.promoters_box = None #TODO: save in final dataframe or remouve
+
         # output variables
         self.mrna_sequences_list = []
         self.proteins_list = [] # polypeptides chains

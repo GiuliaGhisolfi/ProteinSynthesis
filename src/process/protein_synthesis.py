@@ -78,7 +78,8 @@ class EucaryotesCell:
     
     def detect_promoter_process(self, variables):
         # detect promoter
-        variables.dna_sequences_to_transcript_list = self.nucleus.find_promoter(variables.dna_sequence)
+        variables.dna_sequences_to_transcript_list = self.nucleus.find_promoter(
+            variables.dna_sequence, variables)
         
         if variables.dna_sequences_to_transcript_list is not None:
             variables.promoters_count = len(variables.dna_sequences_to_transcript_list)  
