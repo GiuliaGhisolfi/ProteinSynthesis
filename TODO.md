@@ -22,6 +22,7 @@ Memory = simpy.Container(Env, RamCapacity, RamCapacity) # ammount of nucleotides
 json con parametri
 
 test if queue resources works (_do_put method) -> it doesn't (to test)
+containers: computazionalmente troppo lento, fare preproc dopo
 
 visualize time results
 

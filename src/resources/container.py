@@ -30,7 +30,7 @@ class EucaryotesCellContainer(SimpyContainer.Container):
             'time': []
             }
 
-    def monitor_container(self, env):
+    def monitor_container(self, env): #TODO: change, computazionalmente troppo lento, fare preproc dopo
         while True:
             self._history['level'].append(self.level)
             self._history['time'].append(env.now)
