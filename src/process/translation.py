@@ -5,6 +5,7 @@ import warnings
 import random
 from src.resources.resource import EucaryotesCellResource
 
+START_CODON = 'AUG' # start codon
 LENGTH_CODON = 3 # number of nucleotides that code for an amino acid
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
 LENGTH_POLY_A_TAIL = 5 # length of poly-A tail
@@ -54,7 +55,7 @@ class Ribosome:
         pass
 
     def initialization(self, mrna_sequence):
-        start_codon = 'AUG' # start codon
+        start_codon = START_CODON # start codon
         start_codon_position = str(mrna_sequence).find(start_codon)
 
         return mrna_sequence[start_codon_position+LENGTH_CODON:]

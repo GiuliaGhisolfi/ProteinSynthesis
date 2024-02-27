@@ -29,6 +29,12 @@ class ProteinSinthesisProcess:
         self.dna_sequences_df = dna_sequences_df
         self.verbose = verbose
 
+        # nucleotides
+        self.uracil_initial_amount = uracil_initial_amount
+        self.adenine_initial_amount = adenine_initial_amount
+        self.guanine_initial_amount = guanine_initial_amount
+        self.cytosine_initial_amount = cytosine_initial_amount
+
         # add columns to store the results
         columns = ['mrna_sequences', 'polypeptides_chains', 'polypeptides_chains_ext',
             'number_of_proteins_synthesized', 'protein_synthesized', 'request_start_process_time',
@@ -67,7 +73,11 @@ class ProteinSinthesisProcess:
             f'{len(self.dna_sequences)} dna sequences to synthesize,\n'
             f'{self.resources.capacity} resources available,\n'
             f'{self.eucaryotes_cell.nucleus.rna_polymerase.capacity} RNA polymerases,\n'
-            f'{self.eucaryotes_cell.ribosome.ribosomes.capacity} ribosomes.')
+            f'{self.eucaryotes_cell.ribosome.ribosomes.capacity} ribosomes,\n'
+            f'{self.uracil_initial_amount} uracil bases,\n'
+            f'{self.adenine_initial_amount} adenine bases,\n'
+            f'{self.guanine_initial_amount} guanine bases,\n'
+            f'{self.cytosine_initial_amount} cytosine bases.')
     
     def run(self, simulation_time=SIM_TIME):
         print('Simulation started')
@@ -75,7 +85,10 @@ class ProteinSinthesisProcess:
 
         proteins_number = self.dna_sequences_df[self.dna_sequences_df[
             'protein_synthesized'].notna()]['number_of_proteins_synthesized'].sum()
-        print(f'End simulation: {proteins_number} proteins synthesized.')
+        dna_sequences_processed_number = self.dna_sequences_df[
+            self.dna_sequences_df['protein_synthesized'].notna()].shape[0]
+        print(f'End simulation: {proteins_number} proteins synthesized from '
+            f'{dna_sequences_processed_number} DNA sequences.')
     
     def setup_process(self):
         process_queue = []
@@ -133,18 +146,21 @@ class ProteinSinthesisProcess:
             end_process_time=variables.end_process_time
             )
         
-    def save_process(self):
+    def save_process(self, test_name=''):
+        if test_name != '' and test_name[-1] != '_':
+            test_name = test_name + '_'
+
         # save dataframe        
         df_to_save = self.dna_sequences_df[self.dna_sequences_df['protein_synthesized'].notna()]
         df_to_save = df_to_save.apply(post_processing_results, axis=1)
-        df_to_save.to_csv(RESULTS_FOLDER+'results.csv')
+        df_to_save.to_csv(RESULTS_FOLDER+test_name+'results.csv')
 
         # save resources history 
-        self.resources.save_history(RESULTS_FOLDER+'resources_history.json')
+        self.resources.save_history(RESULTS_FOLDER+test_name+'resources_history.json')
         self.eucaryotes_cell.nucleus.rna_polymerase.save_history(
-            RESULTS_FOLDER+'rna_polymerase_history.json')
+            RESULTS_FOLDER+test_name+'rna_polymerase_history.json')
         self.eucaryotes_cell.ribosome.ribosomes.save_history(
             RESULTS_FOLDER+'ribosome_history.json')
-        self.eucaryotes_cell.nucleotides.save_history(RESULTS_FOLDER+'nucleotides_history.json')
+        self.eucaryotes_cell.nucleotides.save_history(RESULTS_FOLDER+test_name+'nucleotides_history.json')
         
         print('Process saved.')

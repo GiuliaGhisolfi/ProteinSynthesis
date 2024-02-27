@@ -14,10 +14,13 @@ BASE_COMPLEMENT_RNA2DNA = {
     'G': 'C', 
     'C': 'G'
 }
-PROMOTERS = [
-    'TATAAAA', 'TATAAAT', 'TATATAA', 'TATATAT', # TATA box
-]
-LENGTH_PROMOTER = 7
+PROMOTERS = {
+    'TATAbox': ['TATAAAA', 'TATAAAT', 'TATATAA', 'TATATAT'], # TATA box
+    'CAATbox': ['CAAT', 'CCAAT', 'CCAT', 'CCCAT', 'CCCCT', 'CCCCCT'], # CAAT box
+    'GCbox': ['GC', 'GGC', 'GGGC', 'GGGGC', 'GGGGGC', 'GGGGGGC'], # GC box
+}
+LENGTH_PROMOTER = 7 #FIXME
+START_CODEN = 'AUG'
 TERMINATORS = ['UAA', 'UAG', 'UGA']
 RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
 REPLICATION_TIME = 2e-2 # seconds to replicate a nucleotide
