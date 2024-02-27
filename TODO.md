@@ -1,14 +1,10 @@
 alternative splicing: to differencial protein coded by same gene (PROCESS MORE RANDOM)
 
-altri enzimi come container (implement enzima)
-
 EDITING SITES
 
 salvare proteine sintetizzate anche se non tutta la seq è stata ancora sviluppata (maybe)
 
 lib to find promoters (anche no, va bene tatabox)
-
-grafico per process
 
 classe per salvare errori (o no)
 
@@ -19,13 +15,15 @@ URGENTI:
 
 Memory = simpy.Container(Env, RamCapacity, RamCapacity) # ammount of nucleotides (done)
 
-json con parametri
-
 test if queue resources works (_do_put method) -> it doesn't (to test)
-containers: computazionalmente troppo lento, fare preproc dopo
+containers: computazionalmente troppo lento, fare preproc dopo (done*0.5) (done)
 
 visualize time results
+plot distribuzione tempi di sintesi (e uso di ogni risorsa)
+
+altri enzimi come risorse o container (implement enzima)
 
 plot di come variano i processi al variare dei parametri
+json con parametri
 
-plot distribuzione tempi di sintesi (e uso di ogni risorsa)
+grafico per process

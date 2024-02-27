@@ -1,5 +1,9 @@
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import plotly.express as px
 import ast
+TIME_UNIT = 0.0001
 
 def barplot_proteins_number(results_df):
     plt.figure(figsize=(20, 5))
@@ -55,8 +59,48 @@ def barplot_proteins_length(results_df):
         protein_length_frequncy.append(count)
     
     plt.figure(figsize=(20, 5))
-    plt.bar(protein_length_final, protein_length_frequncy);
+    plt.bar(protein_length_final, protein_length_frequncy)
     plt.title('Proteins length')
     plt.xlabel('Proteins length')
     plt.ylabel('Number of proteins')
     plt.show()
+
+def level_series_over_time(nucleotide_dict):
+    levels_list = nucleotide_dict['level']
+    time_list = nucleotide_dict['time']
+
+    levels = [levels_list[0]]
+    current_time = 0
+    for level, time in zip(levels_list[1:], time_list[1:]):
+        delta_t = time - current_time # approx alla 4 decimali
+        delta_t = np.round(delta_t, 4)
+        time_steps = int(delta_t / TIME_UNIT)
+        levels.extend([level] * time_steps)
+        current_time = time
+
+    return levels
+
+def plot_nucleotide_level_over_time(uracil_dict, adenine_dict, guanine_dict, cytosine_dict):
+    uracil_levels = level_series_over_time(uracil_dict)
+    adenine_levels = level_series_over_time(adenine_dict)
+    guanine_levels = level_series_over_time(guanine_dict)
+    cytosine_levels = level_series_over_time(cytosine_dict)
+
+    len_min = min(len(uracil_levels), len(adenine_levels), len(guanine_levels), len(cytosine_levels))
+
+    df = pd.DataFrame({
+        'time': np.arange(0, len_min*TIME_UNIT, TIME_UNIT),
+        'Uracil': uracil_levels[:len_min],
+        'Adenine': adenine_levels[:len_min],
+        'Guanine': guanine_levels[:len_min],
+        'Cytosine': cytosine_levels[:len_min]
+        })
+    
+    fig = px.bar(df, 
+        x=['time'],
+        y=['Uracil', 'Adenine', 'Guanine', 'Cytosine'],
+        animation_frame='time',
+        title='Nucleotides levels over time',
+        labels={'value': 'Nucleotides level', 'time': 'Time (s)'},
+        template='plotly_white')
+    fig.show()

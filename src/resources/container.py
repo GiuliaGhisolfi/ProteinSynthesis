@@ -1,20 +1,27 @@
 import simpy.resources.container as SimpyContainer
 import json
-import os
-TIME_UNIT = 1e-4 # 0.0001 seconds
 
 class EucaryotesCellContainer(SimpyContainer.Container):
     def __init__(self, env, capacity, init):
         super().__init__(env, capacity, init)
         self._reset_history()
-        env.process(self.monitor_container(env))
         
     def get(self, *args, **kwargs):
         get = super().get(*args, **kwargs) # get the amount from the container
+
+        # save level and time in the history
+        self._history['level'].append(self.level)
+        self._history['time'].append(self._env.now)
+
         return get
     
     def put(self, *args, **kwargs):
         put = super().put(*args, **kwargs) # put the amount into the container
+
+        # save level and time in the history
+        self._history['level'].append(self.level)
+        self._history['time'].append(self._env.now)
+
         return put
     
     def level_history(self):
@@ -26,12 +33,6 @@ class EucaryotesCellContainer(SimpyContainer.Container):
         
     def _reset_history(self):
         self._history = {
-            'level': [],
-            'time': []
+            'level': [self.level],
+            'time': [self._env.now]
             }
-
-    def monitor_container(self, env): #TODO: change, computazionalmente troppo lento, fare preproc dopo
-        while True:
-            self._history['level'].append(self.level)
-            self._history['time'].append(env.now)
-            yield env.timeout(TIME_UNIT)
