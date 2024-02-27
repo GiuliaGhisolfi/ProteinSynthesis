@@ -66,7 +66,7 @@ class ProteinSinthesisProcess:
             verbose=self.verbose
             )
         
-        print('Simulation environment initialized')
+        print('Simulation environment initialized, time unit: 0.0001 second.')
     
     def __str__(self):
         return (f'Protein Sinthesis Process:\n'
@@ -104,7 +104,7 @@ class ProteinSinthesisProcess:
                 process_queue.append(self.env.process(self.process(variables)))
                 
                 self.available[dna_sequence] = False
-                yield self.env.timeout(random.random()*100) # time between start of protein synthesis
+                yield self.env.timeout(round(random.random()*100, ndigits=4)) # time between start of protein synthesis
 
                 while process_queue: # wait for all the protein synthesis to be completed
                     process_queue.pop(0)
