@@ -2,27 +2,38 @@ import simpy.resources.resource as SimpyResource
 import json
 
 class EucaryotesCellResource(SimpyResource.Resource):
-    def __init__(self, env, capacity):
+    def __init__(self, env, capacity, save_history=True):
         super().__init__(env, capacity=capacity)
-        self._reset_queue_history()
+        self.save_history_flag = save_history
+
+        if self.save_history_flag:
+            self._reset_queue_history()
     
     def request(self, *args, **kwargs):
         request = super().request(*args, **kwargs)
-        self._queue_history['queue'].append(len(self.queue))
-        self._queue_history['request_time'].append(self._env.now)
-        return request
 
-    #TODO: implement method to track the wait time for each request
-    """self._queue_history['available_time'].append(self._env.now)
-    self._queue_history['wait_time'].append(
-        self._queue_history['available_time'][-1] - self._queue_history['request_time'][-1]) """
+        if self.save_history_flag:
+            self._queue_history['queue'].append(len(self.queue))
+            self._queue_history['request_time'].append(self._env.now)
+
+        return request
     
-    """
-    self._queue_history['end_time'].append(self._env.now)
-    self._queue_history['usage_time'].append(
-        self._queue_history['end_time'][-1] - self._queue_history['available_time'][-1])
-        """
-        
+    def available(self):
+        if self.save_history_flag:
+            self._queue_history['available_time'].append(self._env.now)
+            self._queue_history['wait_time'].append(
+                self._queue_history['available_time'][-1] - self._queue_history['request_time'][-1])
+
+    def release(self, *args, **kwargs):
+        release = super().release(*args, **kwargs)
+
+        if self.save_history_flag:
+            self._queue_history['end_time'].append(self._env.now)
+            self._queue_history['usage_time'].append(
+                self._queue_history['end_time'][-1] - self._queue_history['available_time'][-1])
+   
+        return release
+
     def queue_history(self):
         return self._queue_history
     

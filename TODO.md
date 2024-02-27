@@ -21,8 +21,10 @@ Memory = simpy.Container(Env, RamCapacity, RamCapacity) # ammount of nucleotides
 
 json con parametri
 
-test if queue resources works (_do_put method) -> it doesn't
+test if queue resources works (_do_put method) -> it doesn't (to test)
 
 visualize time results
 
 plot di come variano i processi al variare dei parametri
+
+plot distribuzione tempi di sintesi (e uso di ogni risorsa)

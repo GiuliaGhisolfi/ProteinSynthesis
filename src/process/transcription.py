@@ -86,6 +86,7 @@ class Nucleus:
     def transcript(self, dna_sequence, variables, sequence_count): # enzime: RNA polymerase
         with self.rna_polymerase.request() as request:
             yield request  # wait for RNA polymerase to be available
+            self.rna_polymerase.available() # register the time when the resource is available
 
             # start transcript processes for DNA sequence
             messenger_rna_sequence = yield self.env.process(

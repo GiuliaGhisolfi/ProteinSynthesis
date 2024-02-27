@@ -11,7 +11,7 @@ LENGTH_CARBOXYL_GROUP = 5 # length of carboxyl group
 RESULTS_FOLDER = 'results/'
 
 SIM_TIME = 1000
-NUMBER_RESOURCES = 5
+NUMBER_RESOURCES = 200
 NUMBER_RNA_POLYMERASES = 3
 NUMBER_RIBOSOMES = 2
 URACIL_INITIAL_AMOUNT = 5000
@@ -50,7 +50,8 @@ class ProteinSinthesisProcess:
         
         random.seed(random_seed)
         self.env = simpy.Environment()
-        self.resources = EucaryotesCellResource(self.env, capacity=number_resources) 
+        self.resources = EucaryotesCellResource(
+            self.env, capacity=number_resources, save_history=False) 
         #TODO: resources: enzimi, basi, ATP, tRNA, aminoacidi
         self.env.process(self.setup_process())
 
@@ -157,11 +158,12 @@ class ProteinSinthesisProcess:
         df_to_save.to_csv(RESULTS_FOLDER+test_name+'results.csv')
 
         # save resources history 
-        self.resources.save_history(RESULTS_FOLDER+test_name+'resources_history.json')
         self.eucaryotes_cell.nucleus.rna_polymerase.save_history(
             RESULTS_FOLDER+test_name+'rna_polymerase_history.json')
+        
         self.eucaryotes_cell.ribosome.ribosomes.save_history(
             RESULTS_FOLDER+'ribosome_history.json')
+        
         self.eucaryotes_cell.nucleotides.save_history(RESULTS_FOLDER+test_name+'nucleotides_history.json')
         
         print('Process saved.')

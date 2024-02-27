@@ -25,6 +25,8 @@ class Ribosome:
     def translate(self, mrna_sequence, variables): # protein synthesis
         with self.ribosomes.request() as request:
             yield request # wait for a ribosome to be available
+            self.ribosomes.available()
+            
             polypeptides_chain, polypeptides_chain_ext = yield self.env.process(
                 self.translation_process(mrna_sequence, variables.poly_adenine_tail_len))
             
