@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
+import ast
 
 def barplot_proteins_number(results_df):
     plt.figure(figsize=(20, 5))
     plt.bar(results_df['number_of_proteins_synthesized'].value_counts().index,
             results_df['number_of_proteins_synthesized'].value_counts().values)
-    plt.title('Number of proteins synthesized')
+    plt.title('Number of proteins synthesized from one DNA sequence')
     plt.xlabel('Number of proteins')
     plt.ylabel('Number of DNA sequences')
     plt.show()
@@ -35,5 +36,27 @@ def plot_proteins_number_over_time(results_df):
     plt.plot(time, number_of_proteins_synthesized, '.')
     plt.title('Number of proteins synthesized over time')
     plt.xlabel('Time')
+    plt.ylabel('Number of proteins')
+    plt.show()
+
+def barplot_proteins_length(results_df):
+    protein_length = []
+    protein_length_frequncy = []
+
+    for lenght_list in [ast.literal_eval(x) if isinstance(x, str) else x for x in 
+        results_df['length_proteins'].value_counts().index]:
+        for element in lenght_list:
+            protein_length.append(element)
+
+    # agregate same number of proteins
+    protein_length_final = list(set(protein_length))
+    for value in protein_length_final:
+        count = protein_length.count(value)
+        protein_length_frequncy.append(count)
+    
+    plt.figure(figsize=(20, 5))
+    plt.bar(protein_length_final, protein_length_frequncy);
+    plt.title('Proteins length')
+    plt.xlabel('Proteins length')
     plt.ylabel('Number of proteins')
     plt.show()

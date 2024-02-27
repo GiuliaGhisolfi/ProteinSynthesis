@@ -1,3 +1,4 @@
+LENGTH_AMINO_CARBOXYL_GROUP = 9
 
 def save_proteins_synthesized(dna_sequences_df, dna_sequence, mrna_sequences, polypeptides_chain, polypeptides_chain_ext,
     request_start_process_time, start_process_time, start_transcription_time, start_translation_time, 
@@ -34,7 +35,7 @@ def post_processing_results(row):
     return row
 
 def compute_length_proteins(proteins):
-    return [len(p)-9 for p in proteins]
+    return [len(p)-LENGTH_AMINO_CARBOXYL_GROUP for p in proteins]
 
 def compute_number_different_proteins(proteins):
     return len(set(proteins))
