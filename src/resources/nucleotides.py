@@ -24,7 +24,6 @@ class Nucleotides:
     
     def release(self, nucleotide, amount):
         self.env.process(self.nucleotides_containers_dict[nucleotide].put(amount))
-        #self.nucleotides_containers_dict[nucleotide].put(amount)
     
     def save_history(self, path_to_save):
         base_path, ext = os.path.splitext(path_to_save)

@@ -35,6 +35,7 @@ def plot_cumulative_proteins_number_over_time(results_df):
 def plot_proteins_number_over_time(results_df):
     number_of_proteins_synthesized = results_df[results_df['mrna_sequences'].notna()]['number_of_proteins_synthesized']
     time = results_df[results_df['mrna_sequences'].notna()]['end_process_time']
+    time, number_of_proteins_synthesized = zip(*sorted(zip(time, number_of_proteins_synthesized)))
 
     plt.figure(figsize=(20, 5))
     plt.plot(time, number_of_proteins_synthesized, '.--')
