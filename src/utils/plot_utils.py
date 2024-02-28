@@ -98,7 +98,7 @@ def barplot_nucleotide_level_over_time(
     
     fig = px.bar(
         df, 
-        y=['Uracil', 'Adenine', 'Guanine', 'Cytosine'],
+        y=['Uracil', 'Adenine', 'Guanine', 'Cytosine'], #FIXME
         animation_frame='time',
         title='Nucleotides levels over time',
         labels={'value': 'Nucleotides level', 'index': 'Time'},
