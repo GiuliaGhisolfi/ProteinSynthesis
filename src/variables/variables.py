@@ -18,8 +18,8 @@ class EucaryotesCellVariables:
         self.end_translation_time = []
         self.end_process_time = None
 
-        # statistics variables
-        self.promoters_box = None #TODO: save in final dataframe or remouve
+        # others variables
+        self.promoters_box = None # promoters found in the DNA sequence
 
         # output variables
         self.mrna_sequences_list = []

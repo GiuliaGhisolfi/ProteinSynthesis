@@ -15,12 +15,14 @@ ELONGATION_TIME = 5e-2 # seconds to add each amino acid
 MRNA_DECODED_ERROR_RATE = 1e-4 # 1 mistake every 10.000 amino acids
 
 class Ribosome:
-    def __init__(self, environment, number_ribosomes, nucleotides, amminoacids):
+    def __init__(self, environment, number_ribosomes, nucleotides, amminoacids, random_seed):
         # ribonucleoprotein complex in the cytoplasm
         self.env = environment
         self.ribosomes = EucaryotesCellResource(self.env, capacity=number_ribosomes)
         self.nucleotides = nucleotides
         self.amminoacids = amminoacids
+        
+        random.seed(random_seed)
 
     def translate(self, mrna_sequence, variables): # protein synthesis
         with self.ribosomes.request() as request:
@@ -93,7 +95,6 @@ class Ribosome:
         # enzima: ribonuclease
         [self.release_nucleotide(nucleotide) for nucleotide in mrna_sequence]
         self.release_nucleotide('A', poly_adenine_tail_len)
-        #TODO: yield self.env.timeout() degradation time
     
     def release_nucleotide(self, base, amount=1):
         self.nucleotides.release(base, amount)

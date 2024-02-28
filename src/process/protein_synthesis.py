@@ -22,7 +22,8 @@ class EucaryotesCell:
             uracil_initial_amount=uracil_initial_amount,
             adenine_initial_amount=adenine_initial_amount,
             guanine_initial_amount=guanine_initial_amount,
-            cytosine_initial_amount=cytosine_initial_amount
+            cytosine_initial_amount=cytosine_initial_amount,
+            random_seed=random_seed
             )
 
         self.nucleus = Nucleus(
@@ -38,7 +39,8 @@ class EucaryotesCell:
             environment=self.env,
             number_ribosomes=number_ribosomes,
             nucleotides = self.nucleotides,
-            amminoacids = self.amminoacids
+            amminoacids = self.amminoacids,
+            random_seed=random_seed
             )
         
     def synthesize_protein(self, variables):

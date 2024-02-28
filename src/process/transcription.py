@@ -45,7 +45,7 @@ class Nucleus:
         self.rna_polymerase = EucaryotesCellResource(self.env, capacity=number_rna_polymerases)
         self.nucleotides = nucleotides
 
-        self.random_seed = random_seed
+        random.seed(random_seed)
     
     def find_promoter(self, dna_sequence, variables):
         for promoter in PROMOTERS:
@@ -97,7 +97,6 @@ class Nucleus:
         self.rna_polymerase.available() # register the time when the resource is available
         
         # make sequence univoque to transcript
-        random.seed(self.random_seed)
         dna_sequence = ''.join([random.choice(NucleotidesSymbolsAllocations[n]) for n in dna_sequence])
 
         # transcript from gene to pre-mRNA

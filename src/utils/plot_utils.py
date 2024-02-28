@@ -37,7 +37,7 @@ def plot_proteins_number_over_time(results_df):
     time = results_df[results_df['mrna_sequences'].notna()]['end_process_time']
 
     plt.figure(figsize=(20, 5))
-    plt.plot(time, number_of_proteins_synthesized, '.')
+    plt.plot(time, number_of_proteins_synthesized, '.--')
     plt.title('Number of proteins synthesized over time')
     plt.xlabel('Time')
     plt.ylabel('Number of proteins')
@@ -65,7 +65,7 @@ def barplot_proteins_length(results_df):
     plt.ylabel('Number of proteins')
     plt.show()
 
-def _level_series_over_time(nucleotide_dict, time_unit=TIME_UNIT):
+def level_series_over_time(nucleotide_dict, time_unit=TIME_UNIT):
     levels_list = nucleotide_dict['level']
     time_list = nucleotide_dict['time']
 
@@ -73,7 +73,7 @@ def _level_series_over_time(nucleotide_dict, time_unit=TIME_UNIT):
     current_time = 0
     for level, time in zip(levels_list[1:], time_list[1:]):
         delta_t = np.round(time - current_time, 4)
-        time_steps = int(delta_t / TIME_UNIT)
+        time_steps = int(delta_t / time_unit)
         levels.extend([level] * time_steps)
         current_time = time
 
@@ -81,10 +81,10 @@ def _level_series_over_time(nucleotide_dict, time_unit=TIME_UNIT):
 
 def barplot_nucleotide_level_over_time(
         uracil_dict, adenine_dict, guanine_dict, cytosine_dict, time_unit=TIME_UNIT):
-    uracil_levels = _level_series_over_time(uracil_dict, time_unit)
-    adenine_levels = _level_series_over_time(adenine_dict, time_unit)
-    guanine_levels = _level_series_over_time(guanine_dict, time_unit)
-    cytosine_levels = _level_series_over_time(cytosine_dict, time_unit)
+    uracil_levels = level_series_over_time(uracil_dict, time_unit)
+    adenine_levels = level_series_over_time(adenine_dict, time_unit)
+    guanine_levels = level_series_over_time(guanine_dict, time_unit)
+    cytosine_levels = level_series_over_time(cytosine_dict, time_unit)
 
     len_min = min(len(uracil_levels), len(adenine_levels), len(guanine_levels), len(cytosine_levels))
 
@@ -107,10 +107,10 @@ def barplot_nucleotide_level_over_time(
 
 def plot_nucleotide_level_over_time(
         uracil_dict, adenine_dict, guanine_dict, cytosine_dict, time_unit=TIME_UNIT):
-    uracil_levels = _level_series_over_time(uracil_dict)
-    adenine_levels = _level_series_over_time(adenine_dict)
-    guanine_levels = _level_series_over_time(guanine_dict)
-    cytosine_levels = _level_series_over_time(cytosine_dict)
+    uracil_levels = level_series_over_time(uracil_dict)
+    adenine_levels = level_series_over_time(adenine_dict)
+    guanine_levels = level_series_over_time(guanine_dict)
+    cytosine_levels = level_series_over_time(cytosine_dict)
 
     len_min = min(len(uracil_levels), len(adenine_levels), len(guanine_levels), len(cytosine_levels))
 

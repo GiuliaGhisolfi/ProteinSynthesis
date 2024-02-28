@@ -18,7 +18,7 @@ class EucaryotesCellResource(SimpyResource.Resource):
 
         return request
     
-    def available(self): #FIXME: NON FUNZIONA, wait_time sempre == 0
+    def available(self):
         if self.save_history_flag:
             self._queue_history['available_time'].append(self._env.now)
             self._queue_history['wait_time'].append(
