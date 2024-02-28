@@ -65,28 +65,28 @@ def barplot_proteins_length(results_df):
     plt.ylabel('Number of proteins')
     plt.show()
 
-def level_series_over_time(nucleotide_dict):
+def _level_series_over_time(nucleotide_dict):
     levels_list = nucleotide_dict['level']
     time_list = nucleotide_dict['time']
 
     levels = [levels_list[0]]
     current_time = 0
     for level, time in zip(levels_list[1:], time_list[1:]):
-        delta_t = time - current_time # approx alla 4 decimali
-        delta_t = np.round(delta_t, 4)
+        delta_t = np.round(time - current_time, 4)
         time_steps = int(delta_t / TIME_UNIT)
         levels.extend([level] * time_steps)
         current_time = time
 
     return levels
 
-def plot_nucleotide_level_over_time(uracil_dict, adenine_dict, guanine_dict, cytosine_dict):
-    uracil_levels = level_series_over_time(uracil_dict)
-    adenine_levels = level_series_over_time(adenine_dict)
-    guanine_levels = level_series_over_time(guanine_dict)
-    cytosine_levels = level_series_over_time(cytosine_dict)
+def barplot_nucleotide_level_over_time(uracil_dict, adenine_dict, guanine_dict, cytosine_dict):
+    uracil_levels = _level_series_over_time(uracil_dict)
+    adenine_levels = _level_series_over_time(adenine_dict)
+    guanine_levels = _level_series_over_time(guanine_dict)
+    cytosine_levels = _level_series_over_time(cytosine_dict)
 
     len_min = min(len(uracil_levels), len(adenine_levels), len(guanine_levels), len(cytosine_levels))
+    len_min=10
 
     df = pd.DataFrame({
         'time': np.arange(0, len_min*TIME_UNIT, TIME_UNIT),
@@ -97,10 +97,29 @@ def plot_nucleotide_level_over_time(uracil_dict, adenine_dict, guanine_dict, cyt
         })
     
     fig = px.bar(df, 
-        x=['time'],
+        #x=['time'],
         y=['Uracil', 'Adenine', 'Guanine', 'Cytosine'],
         animation_frame='time',
         title='Nucleotides levels over time',
         labels={'value': 'Nucleotides level', 'time': 'Time (s)'},
         template='plotly_white')
     fig.show()
+
+def plot_nucleotide_level_over_time(uracil_dict, adenine_dict, guanine_dict, cytosine_dict):
+    uracil_levels = _level_series_over_time(uracil_dict)
+    adenine_levels = _level_series_over_time(adenine_dict)
+    guanine_levels = _level_series_over_time(guanine_dict)
+    cytosine_levels = _level_series_over_time(cytosine_dict)
+
+    len_min = min(len(uracil_levels), len(adenine_levels), len(guanine_levels), len(cytosine_levels))
+
+    plt.figure(figsize=(20, 5))
+    plt.plot(np.arange(0, len_min*TIME_UNIT, TIME_UNIT), uracil_levels[:len_min], label='Uracil')
+    plt.plot(np.arange(0, len_min*TIME_UNIT, TIME_UNIT), adenine_levels[:len_min], label='Adenine')
+    plt.plot(np.arange(0, len_min*TIME_UNIT, TIME_UNIT), guanine_levels[:len_min], label='Guanine')
+    plt.plot(np.arange(0, len_min*TIME_UNIT, TIME_UNIT), cytosine_levels[:len_min], label='Cytosine')
+    plt.title('Nucleotides levels over time')
+    plt.xlabel('Time')
+    plt.ylabel('Nucleotides level')
+    plt.legend()
+    plt.show()
