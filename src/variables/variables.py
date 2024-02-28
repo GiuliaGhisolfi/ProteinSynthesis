@@ -29,6 +29,7 @@ class EucaryotesCellVariables:
         # simulation variables: list of simpy processes
         self.transcription_queue = []
         self.complement_base_queue_dict = dict()
+        self.polyadenylation_queue = []
         self.translation_queue = []
     
     def get_dna(self):

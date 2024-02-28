@@ -113,7 +113,8 @@ class Nucleus:
         
         # post-transcriptional modifications
         messenger_rna_sequence = self.cleavage(messenger_rna_sequence)
-        messenger_rna_sequence = self.polyadenylation(messenger_rna_sequence, variables)
+        messenger_rna_sequence = yield self.env.process(
+            self.polyadenylation(messenger_rna_sequence, variables))
 
         yield self.env.timeout(1) #TODO: implementare il tempo di trascrizione
 
@@ -187,9 +188,20 @@ class Nucleus:
 
     def polyadenylation(self, rna_sequence, variables):
         variables.poly_adenine_tail_len = random.randint(230, 270)
-        self.release_nucleotide('A', variables.poly_adenine_tail_len)
+
+        polyadenylation_process = self.env.process(
+            self.find_adenosine_for_polyadenylation(variables.poly_adenine_tail_len))
+        variables.polyadenylation_queue.append(polyadenylation_process)
+        yield polyadenylation_process
+
+        # wait for all the transcription gene process to be completed
+        while variables.polyadenylation_queue:
+                variables.polyadenylation_queue.pop(0)
         
         return '{}-AAAA'.format(rna_sequence) # Add PolyA tail (250 nucleotides circa)
+    
+    def find_adenosine_for_polyadenylation(self, amount):
+        return self.request_nucleotide('A', amount)
     
     def request_nucleotide(self, base, amount=1):
         with self.nucleotides.request(base, amount) as request:

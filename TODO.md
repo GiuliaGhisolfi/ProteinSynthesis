@@ -13,11 +13,6 @@ Ribosome Binding Site (RBS): sequence in mRNA to which ribosomes can bind and in
 
 URGENTI:
 
-Memory = simpy.Container(Env, RamCapacity, RamCapacity) # ammount of nucleotides (done)
-
-test if queue resources works (_do_put method) -> it doesn't (to test)
-containers: computazionalmente troppo lento, fare preproc dopo (done*0.5) (done)
-
 visualize time results
 plot distribuzione tempi di sintesi (e uso di ogni risorsa)
 
