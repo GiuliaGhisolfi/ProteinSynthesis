@@ -15,4 +15,4 @@ class TransferRNA:
     def save_history(self, path_to_save):
         base_path, ext = os.path.splitext(path_to_save)
         for codons, resource in self.trna_resources_dict.items():
-            resource.save_history(base_path + f'_{codons}.json')
+            resource.save_history(base_path+f'_{codons}.json')

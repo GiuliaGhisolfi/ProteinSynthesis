@@ -29,4 +29,4 @@ if __name__ == '__main__':
         verbose=False
         )
     protein_synthesis_process.run(simulation_time=SIM_TIME) # run the simulation
-    protein_synthesis_process.save_process()
+    protein_synthesis_process.save_process(folder_test_name='test')

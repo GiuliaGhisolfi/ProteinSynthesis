@@ -12,6 +12,7 @@ LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
 LENGTH_POLY_A_TAIL = 5 # length of poly-A tail
 AMINO_GROUP = 'NH2-' # amino group
 CARBOXYL_GROUP = '-COOH' # carboxyl group
+TRANSFER_RNA_ATTACH_TIME = 1e-3 # seconds to attach each transfer RNA
 ELONGATION_TIME = 5e-2 # seconds to add each amino acid
 MRNA_DECODED_ERROR_RATE = 1e-4 # 1 mistake every 10.000 amino acids
 
@@ -72,9 +73,10 @@ class Ribosome:
     
     def elongation(self, mrna_sequence):
         # request transfer RNA with the correct anticodon
-        for i in range(0, len(mrna_sequence), LENGTH_CODON):
-            codon = mrna_sequence[i:i+LENGTH_CODON]
-            with self.rna_transfer[codon].request() as request:
+        for i in range(int(len(mrna_sequence) // LENGTH_CODON)):
+            j = i * LENGTH_CODON
+            codon = mrna_sequence[j:j+LENGTH_CODON]
+            with self.rna_transfer.trna_resources_dict[codon].request() as request:
                 yield request
                 yield self.env.process(self.request_trna(codon))
 
@@ -103,7 +105,8 @@ class Ribosome:
             return None, None
     
     def request_trna(self, codon):
-        self.rna_transfer[codon].available()
+        self.rna_transfer.trna_resources_dict[codon].available()
+        yield self.env.timeout(TRANSFER_RNA_ATTACH_TIME)
 
     def mrna_degredation(self, mrna_sequence, poly_adenine_tail_len):
         # enzima: ribonuclease

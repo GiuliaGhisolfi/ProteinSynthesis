@@ -1,6 +1,7 @@
 import simpy
 import random 
 import itertools
+import os
 from src.process.protein_synthesis import EucaryotesCell
 from src.variables.variables import EucaryotesCellVariables
 from src.resources.resource import EucaryotesCellResource
@@ -159,25 +160,33 @@ class ProteinSinthesisProcess:
             promoters_box=variables.promoters_box,
             )
         
-    def save_process(self, test_name=''):
-        if test_name != '' and test_name[-1] != '_':
-            test_name = test_name + '_'
+    def save_process(self, folder_test_name=''):
+        # create folder to save the results
+        if folder_test_name != '':
+            if not os.path.exists(RESULTS_FOLDER+folder_test_name):
+                os.mkdir(RESULTS_FOLDER+folder_test_name)
+            folder_test_name = folder_test_name + '/'
 
         # save dataframe        
         df_to_save = self.dna_sequences_df[self.dna_sequences_df['protein_synthesized'].notna()]
         df_to_save = df_to_save.apply(post_processing_results, axis=1)
-        df_to_save.to_csv(RESULTS_FOLDER+test_name+'results.csv')
+        df_to_save.to_csv(RESULTS_FOLDER+folder_test_name+'results.csv')
 
         # save resources history 
         self.eucaryotes_cell.nucleus.rna_polymerase.save_history(
-            RESULTS_FOLDER+test_name+'rna_polymerase_history.json')
+            RESULTS_FOLDER+folder_test_name+'rna_polymerase_history.json')
         
         self.eucaryotes_cell.ribosome.ribosomes.save_history(
-            RESULTS_FOLDER+'ribosome_history.json')
+            RESULTS_FOLDER+folder_test_name+'ribosome_history.json')
         
-        self.eucaryotes_cell.nucleotides.save_history(RESULTS_FOLDER+test_name+'nucleotides_history.json')
+        if not os.path.exists(RESULTS_FOLDER+folder_test_name+'nucleotides'):
+            os.mkdir(RESULTS_FOLDER+folder_test_name+'nucleotides')
+        self.eucaryotes_cell.nucleotides.save_history(
+            RESULTS_FOLDER+folder_test_name+'nucleotides/'+'nucleotides_history.json')
 
+        if not os.path.exists(RESULTS_FOLDER+folder_test_name+'rna_transfer'):
+            os.mkdir(RESULTS_FOLDER+folder_test_name+'rna_transfer')
         self.eucaryotes_cell.ribosome.rna_transfer.save_history(
-            RESULTS_FOLDER+test_name+'rna_transfer_history.json')
+            RESULTS_FOLDER+folder_test_name+'rna_transfer/'+'rna_transfer_history.json')
         
         print('Process saved.')
