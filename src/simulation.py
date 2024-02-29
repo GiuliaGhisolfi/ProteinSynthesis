@@ -84,6 +84,17 @@ class ProteinSinthesisProcess:
         print('Simulation environment initialized, time unit: 0.0001 second.')
     
     def __str__(self):
+        return (f'Protein Sinthesis Process:\n'
+            f'{len(self.dna_sequences)} dna sequences to synthesize,\n'
+            f'{self.resources.capacity} resources available,\n'
+            f'{self.eucaryotes_cell.nucleus.rna_polymerase.capacity} RNA polymerases,\n'
+            f'{self.eucaryotes_cell.ribosome.ribosomes.capacity} ribosomes,\n'
+            f'{self.uracil_initial_amount} uracil bases,\n'
+            f'{self.adenine_initial_amount} adenine bases,\n'
+            f'{self.guanine_initial_amount} guanine bases,\n'
+            f'{self.cytosine_initial_amount} cytosine bases.')
+    
+    def __repr__(self):
         trna_info = ''.join([f",\n{self.eucaryotes_cell.ribosome.rna_transfer.trna_resources_dict[codon].capacity} transfer RNA for {codon} codon"for codon in self.codons])
         return (f'Protein Sinthesis Process:\n'
             f'{len(self.dna_sequences)} dna sequences to synthesize,\n'

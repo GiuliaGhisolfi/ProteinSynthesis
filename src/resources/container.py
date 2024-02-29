@@ -20,12 +20,12 @@ class EucaryotesCellContainer(SimpyContainer.Container):
 
         return get
     
-    def put(self, amount, **kwargs):
+    def put(self, amount):
         degradation_time = round(random.uniform(
             MIN_DEGRADATION_TIME*amount, MAX_DEGRADATION_TIME*amount), 4)
         yield self._env.timeout(degradation_time)
 
-        super().put(amount, **kwargs) # put the amount into the container
+        super().put(amount) # put the amount into the container
 
         # save level and time in the history
         self._history['level'].append(self.level)

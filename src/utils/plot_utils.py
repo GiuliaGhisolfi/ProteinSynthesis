@@ -150,10 +150,10 @@ def resources_request_wait_time(rna_polymerase_df, ribosome_df):
     plt.legend()
     plt.show()
 
-def plot_codons_request(file_path, len_min, time_unit=TIME_UNIT):
+def plot_codons_request(file_path, time_unit=TIME_UNIT):
     codon_dict_list = []
     for codon in CODONS:
-        with open(f'results/test/rna_transfer/rna_transfer_history_{codon}.json') as f:
+        with open(file_path+f'rna_transfer_history_{codon}.json') as f:
             codon_dict_list.append(json.load(f))
     
     len_min = min([len(codon_dict['request_time']) for codon_dict in codon_dict_list])
