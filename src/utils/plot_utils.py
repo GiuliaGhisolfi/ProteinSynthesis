@@ -96,8 +96,8 @@ def plot_nucleotide_level_over_time(
     guanine_levels = level_series_over_time(guanine_dict, time_unit)
     cytosine_levels = level_series_over_time(cytosine_dict, time_unit)
 
-    max_time = max([max(uracil_dict['time']), max(adenine_dict['time']), 
-        max(guanine_dict['time']), max(cytosine_dict['time'])])
+    max_time = int(max([max(uracil_dict['time']), max(adenine_dict['time']), 
+        max(guanine_dict['time']), max(cytosine_dict['time'])]))
     time = np.arange(0, max_time, time_unit)
     uracil_levels.extend([uracil_levels[-1]] * (max_time - len(uracil_levels)))
     adenine_levels.extend([adenine_levels[-1]] * (max_time - len(adenine_levels)))
@@ -146,9 +146,9 @@ def plot_codons_request(file_path, time_unit=TIME_UNIT):
         requestes.extend([0] * (len(time) - len(requestes)))
         plt.plot(time, requestes, '.--', alpha=0.5, label=codon)
     plt.title('Number of requests of tRNA')
-    plt.xlabel('Number of requests')
-    plt.ylabel('Request time (s)')
-    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=4)
+    plt.ylabel('Number of requests')
+    plt.xlabel('Request time (s)')
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=2)
     plt.show()
 
 def requestes_serie_over_time(codons_dict, time_unit=TIME_UNIT):
@@ -168,3 +168,26 @@ def requestes_serie_over_time(codons_dict, time_unit=TIME_UNIT):
         current_time = time
 
     return requestes
+
+def compare_wait_time(df_list):
+    plt.figure(figsize=(20, 5))
+    for i, df in enumerate(df_list):
+        plt.plot(df['request_time'], df['wait_time'], label=f'Model {i}')
+    plt.title('Resources request time vs wait time')
+    plt.xlabel('Request time (s)')
+    plt.ylabel('Wait time (s)')
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.show()
+
+def compare_proteins_number_over_time(results_df_list):
+    plt.figure(figsize=(20, 5))
+    for i, results_df in enumerate(results_df_list):
+        number_of_proteins_synthesized = results_df[results_df['mrna_sequences'].notna()]['number_of_proteins_synthesized']
+        time = results_df[results_df['mrna_sequences'].notna()]['end_process_time']
+        time, number_of_proteins_synthesized = zip(*sorted(zip(time, number_of_proteins_synthesized)))
+        plt.plot(time, number_of_proteins_synthesized, '.--', label=f'Model {i}')
+    plt.title('Number of proteins synthesized over time')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Number of proteins')
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.show()

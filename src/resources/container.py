@@ -22,7 +22,7 @@ class EucaryotesCellContainer(SimpyContainer.Container):
     
     def put(self, amount):
         degradation_time = round(random.uniform(
-            MIN_DEGRADATION_TIME*amount, MAX_DEGRADATION_TIME*amount), 4)
+            MIN_DEGRADATION_TIME, MAX_DEGRADATION_TIME), 4)
         yield self._env.timeout(degradation_time)
 
         super().put(amount) # put the amount into the container
