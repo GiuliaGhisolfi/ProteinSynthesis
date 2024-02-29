@@ -1,6 +1,7 @@
 import simpy
 import random 
 import itertools
+import json
 import os
 from src.process.protein_synthesis import EucaryotesCell
 from src.variables.variables import EucaryotesCellVariables
@@ -9,6 +10,8 @@ from src.utils.utils import save_proteins_synthesized, post_processing_results
 
 LENGTH_AMIO_GROUP = 4 # length of amino acid group
 LENGTH_CARBOXYL_GROUP = 5 # length of carboxyl group
+DATA_PATH = 'data/'
+CODONS_PATH = DATA_PATH + 'codons.json'
 RESULTS_FOLDER = 'results/'
 
 SIM_TIME = 1000
@@ -43,6 +46,9 @@ class ProteinSinthesisProcess:
         self.guanine_initial_amount = guanine_initial_amount
         self.cytosine_initial_amount = cytosine_initial_amount
 
+        # codons to translate into amino acids
+        self.codons = list(json.load(open(CODONS_PATH)).keys())
+
         # add columns to store the results
         columns = ['mrna_sequences', 'polypeptides_chains', 'polypeptides_chains_ext',
             'number_of_proteins_synthesized', 'protein_synthesized', 'request_start_process_time',
@@ -60,7 +66,6 @@ class ProteinSinthesisProcess:
         self.env = simpy.Environment()
         self.resources = EucaryotesCellResource(
             self.env, capacity=number_resources, save_history=False) 
-        #TODO: resources: enzimi, ATP
         self.env.process(self.setup_process())
 
         self.eucaryotes_cell = EucaryotesCell(
@@ -79,16 +84,17 @@ class ProteinSinthesisProcess:
         print('Simulation environment initialized, time unit: 0.0001 second.')
     
     def __str__(self):
+        trna_info = ''.join([f",\n{self.eucaryotes_cell.ribosome.rna_transfer.trna_resources_dict[codon].capacity} transfer RNA for {codon} codon"for codon in self.codons])
         return (f'Protein Sinthesis Process:\n'
             f'{len(self.dna_sequences)} dna sequences to synthesize,\n'
             f'{self.resources.capacity} resources available,\n'
             f'{self.eucaryotes_cell.nucleus.rna_polymerase.capacity} RNA polymerases,\n'
             f'{self.eucaryotes_cell.ribosome.ribosomes.capacity} ribosomes,\n'
-            f'{self.eucaryotes_cell.ribosome.rna_transfer.capacity} RNA transfer,\n'
             f'{self.uracil_initial_amount} uracil bases,\n'
             f'{self.adenine_initial_amount} adenine bases,\n'
             f'{self.guanine_initial_amount} guanine bases,\n'
-            f'{self.cytosine_initial_amount} cytosine bases.')
+            f'{self.cytosine_initial_amount} cytosine bases'
+            f'{trna_info}.')
     
     def run(self, simulation_time=SIM_TIME):
         print('Simulation started')

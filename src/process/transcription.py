@@ -26,11 +26,13 @@ LENGTH_PROMOTER = {
 }
 START_CODEN = 'AUG'
 TERMINATORS = ['UAA', 'UAG', 'UGA']
-RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
-REPLICATION_TIME = 2e-2 # seconds to replicate a nucleotide
 LENGTH_EXTRON_SEQUENCE = 3 # length of extron sequence
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
 MIN_LENGTH_PROMOTER = 200 # minimum length between promoters
+REPLICATION_TIME = 2e-2 # seconds to replicate a nucleotide
+CLEAVAGE_TIME = 1e-2 # seconds to cleave the mRNA
+TRANSCRIPTION_TIMEOUT = 1
+RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
 
 class Nucleus:
     def __init__(self, environment, extron_sequences_list, editing_sites_dict, 
@@ -111,17 +113,16 @@ class Nucleus:
         messenger_rna_sequence = self.editing(messenger_rna_sequence)
         
         # post-transcriptional modifications
-        messenger_rna_sequence = self.cleavage(messenger_rna_sequence)
+        yield self.env.process(self.cleavage())
         messenger_rna_sequence = yield self.env.process(
             self.polyadenylation(messenger_rna_sequence, variables))
 
-        yield self.env.timeout(1) #TODO: implementare il tempo di trascrizione
+        yield self.env.timeout(TRANSCRIPTION_TIMEOUT)
 
         return messenger_rna_sequence
     
     def trascript_gene(self, dna_sequence, variables, sequence_count):
         # transcript from gene to pre-mRNA
-        #messenger_rna_sequence = ''.join([BASE_COMPLEMENT_DNA2RNA[base] for base in dna_sequence])
         messenger_rna_sequence = ''
 
         for base in dna_sequence:
@@ -177,13 +178,10 @@ class Nucleus:
         return rna_sequence
 
     def capping(self, rna_sequence):
-        #TODO: implement and use resources METHYL_CAP
         return 'CH3GPPP-{}'.format(rna_sequence) # Add 5'-methyl cap
     
-    def cleavage(self, rna_sequence): #TODO
-        # first step in adding a polyadenine tail to the pre-mRNA (post-transcriptional
-        # modifications) it is necessary for producing a mature mRNA molecule
-        return rna_sequence
+    def cleavage(self):
+        yield self.env.timeout(CLEAVAGE_TIME)
 
     def polyadenylation(self, rna_sequence, variables):
         variables.poly_adenine_tail_len = random.randint(230, 270)

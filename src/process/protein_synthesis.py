@@ -29,7 +29,7 @@ class EucaryotesCell:
         self.nucleus = Nucleus(
             environment=self.env,
             extron_sequences_list=self.extron_list,
-            editing_sites_dict={}, #TODO
+            editing_sites_dict={},
             number_rna_polymerases=number_rna_polymerases,
             nucleotides = self.nucleotides,
             random_seed=random_seed

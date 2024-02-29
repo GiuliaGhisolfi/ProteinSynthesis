@@ -7,13 +7,15 @@ from src.resources.resource import EucaryotesCellResource
 from src.resources.transfer_mrna import TransferRNA
 
 START_CODON = 'AUG' # start codon
+AMINO_GROUP = 'NH2-' # amino group
+CARBOXYL_GROUP = '-COOH' # carboxyl group
 LENGTH_CODON = 3 # number of nucleotides that code for an amino acid
 LENGTH_METHYL_CAP = 8 # length of 5'-methyl cap
 LENGTH_POLY_A_TAIL = 5 # length of poly-A tail
-AMINO_GROUP = 'NH2-' # amino group
-CARBOXYL_GROUP = '-COOH' # carboxyl group
+ATTIVATION_TIME = 1
 TRANSFER_RNA_ATTACH_TIME = 1e-3 # seconds to attach each transfer RNA
 ELONGATION_TIME = 5e-2 # seconds to add each amino acid
+TRANSLATION_TIMEOUT = 10
 MRNA_DECODED_ERROR_RATE = 1e-4 # 1 mistake every 10.000 amino acids
 
 class Ribosome:
@@ -23,7 +25,7 @@ class Ribosome:
         self.env = environment
         self.ribosomes = EucaryotesCellResource(self.env, capacity=number_ribosomes)
         self.rna_transfer = TransferRNA(self.env, amount=number_rna_transfers_per_codon,
-            codons_list=codons_list, random_seed=random_seed) #FIXME: gestire codoni con errori
+            codons_list=codons_list, random_seed=random_seed)
         self.nucleotides = nucleotides
         self.amminoacids = amminoacids
         
@@ -41,17 +43,17 @@ class Ribosome:
     def translation_process(self, mrna_sequence, poly_adenine_tail_len):
         self.ribosomes.available() # register the time when the resource is available
 
-        # start translation
+        # translation process
         mrna_sequence = self.degradation_cap_tail(mrna_sequence)
         initial_mrna_sequence = mrna_sequence
 
-        #mrna_sequence = self.activation(mrna_sequence)
+        yield self.env.process(self.activation())
         mrna_sequence = self.initialization(mrna_sequence)
         polypeptides_chain, polypeptides_chain_ext = yield self.env.process(
             self.elongation(mrna_sequence))
-        
         self.mrna_degredation(initial_mrna_sequence, poly_adenine_tail_len)
-        #TODO: mechanism to correct transcription errors + translation times
+        
+        yield self.env.timeout(TRANSLATION_TIMEOUT)
 
         return polypeptides_chain, polypeptides_chain_ext
     
@@ -59,11 +61,8 @@ class Ribosome:
         # degradation of the 5' cap and poly-A tail, enzime: exonuclease
         return mrna_sequence[LENGTH_METHYL_CAP:-LENGTH_POLY_A_TAIL]
     
-    def activation(self): #TODO
-        # required energy from adenosine triphosphate (ATP) to activate tRNA
-        # reaction catalyzed by the enzyme aminoacyl-tRNA synthetase
-        # reaction: amino acid + ATP + tRNA -> aminoacyl-tRNA + AMP + PPi
-        pass
+    def activation(self):
+        yield self.env.timeout(ATTIVATION_TIME)
 
     def initialization(self, mrna_sequence):
         start_codon = START_CODON # start codon

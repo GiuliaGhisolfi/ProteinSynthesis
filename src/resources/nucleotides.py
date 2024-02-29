@@ -23,6 +23,8 @@ class Nucleotides:
         return self.nucleotides_containers_dict[nucleotide].get(amount)
     
     def release(self, nucleotide, amount):
+        if amount > 1:
+            print(f'{amount} molecules of {self.name} were degraded in {degradation_time} seconds')
         self.env.process(self.nucleotides_containers_dict[nucleotide].put(amount))
     
     def save_history(self, path_to_save):
