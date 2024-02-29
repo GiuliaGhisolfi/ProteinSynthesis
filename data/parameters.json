@@ -1,12 +1,13 @@
 {
-    "number_resources": [200],
-    "number_rna_polymerases": [],
-    "number_ribosomes": [],
-    "number_rna_transfers_per_codon": [],
-    "uracil_initial_amount": [],
-    "adenine_initial_amount": [],
-    "guanine_initial_amount": [],
-    "cytosine_initial_amount": [],
+    "simulation_time": [4e+6],
+    "number_resources": [5e+5],
+    "number_rna_polymerases": [10, 500, 1e+3],
+    "number_ribosomes": [2, 100, 4e+2],
+    "number_rna_transfers_per_codon": [400, 1e+3],
+    "uracil_initial_amount": [1e+5],
+    "adenine_initial_amount": [1e+5],
+    "guanine_initial_amount": [1e+5],
+    "cytosine_initial_amount": [1e+5],
     "random_seed": [42],
     "verbose": [false]
 }

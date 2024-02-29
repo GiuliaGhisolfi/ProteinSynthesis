@@ -13,14 +13,6 @@ Ribosome Binding Site (RBS): sequence in mRNA to which ribosomes can bind and in
 
 URGENTI:
 
-altri enzimi come risorse o container (implement enzima) + aminoacidi (analogo a nucleotidi) (done)
-
 plot di come variano i processi al variare dei parametri
-json con parametri (done, add values)
 
 grafico per process
-
-DA MODIFICARE SE SI AGGIUNGONO ALTRE RISORSE:
-
-visualize time results
-plot distribuzione tempi di sintesi (e uso di ogni risorsa)
