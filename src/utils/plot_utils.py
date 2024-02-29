@@ -88,38 +88,12 @@ def level_series_over_time(nucleotide_dict, time_unit=TIME_UNIT):
 
     return levels
 
-def barplot_nucleotide_level_over_time(
+def plot_nucleotide_level_over_time(
         uracil_dict, adenine_dict, guanine_dict, cytosine_dict, time_unit=TIME_UNIT):
     uracil_levels = level_series_over_time(uracil_dict, time_unit)
     adenine_levels = level_series_over_time(adenine_dict, time_unit)
     guanine_levels = level_series_over_time(guanine_dict, time_unit)
     cytosine_levels = level_series_over_time(cytosine_dict, time_unit)
-
-    len_min = min(len(uracil_levels), len(adenine_levels), len(guanine_levels), len(cytosine_levels))
-
-    df = pd.DataFrame({
-        'time': np.arange(0, len_min*time_unit, time_unit),
-        'Uracil': uracil_levels[:len_min],
-        'Adenine': adenine_levels[:len_min],
-        'Guanine': guanine_levels[:len_min],
-        'Cytosine': cytosine_levels[:len_min]
-        })
-    
-    fig = px.bar(
-        df, 
-        y=['Uracil', 'Adenine', 'Guanine', 'Cytosine'], #FIXME
-        animation_frame='time',
-        title='Nucleotides levels over time',
-        labels={'value': 'Nucleotides level', 'index': 'Time'},
-        template='plotly_white')
-    fig.show()
-
-def plot_nucleotide_level_over_time(
-        uracil_dict, adenine_dict, guanine_dict, cytosine_dict, time_unit=TIME_UNIT):
-    uracil_levels = level_series_over_time(uracil_dict)
-    adenine_levels = level_series_over_time(adenine_dict)
-    guanine_levels = level_series_over_time(guanine_dict)
-    cytosine_levels = level_series_over_time(cytosine_dict)
 
     len_min = min(len(uracil_levels), len(adenine_levels), len(guanine_levels), len(cytosine_levels))
 
@@ -156,27 +130,35 @@ def plot_codons_request(file_path, time_unit=TIME_UNIT):
         with open(file_path+f'rna_transfer_history_{codon}.json') as f:
             codon_dict_list.append(json.load(f))
     
-    len_min = min([len(codon_dict['request_time']) for codon_dict in codon_dict_list])
+    max_time = max([max(codon_dict['request_time']) for codon_dict in codon_dict_list])
+    time = np.arange(0, max_time, time_unit)
 
-    plt.figure(figsize=(20, 5))
+    plt.figure(figsize=(18, 10))
     for codon_dict, codon in zip(codon_dict_list, CODONS):
         requestes = requestes_serie_over_time(codon_dict, time_unit)
-        plt.plot(np.arange(0, len_min*time_unit, time_unit), requestes, label=codon)
+        requestes.extend([0] * (len(time) - len(requestes)))
+        plt.plot(time, requestes, '.--', alpha=0.5, label=codon)
+    #plt.yscale('log')
     plt.title('Number of requests of tRNA')
     plt.xlabel('Number of requests')
     plt.ylabel('Request time (s)')
-    plt.legend()
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=4)
     plt.show()
 
-def requestes_serie_over_time(codons_dict, len_min, time_unit=TIME_UNIT):
+def requestes_serie_over_time(codons_dict, time_unit=TIME_UNIT):
     time_list = codons_dict['request_time']
 
-    requestes = []
+    requestes = [0]
     current_time = 0
-    for time in time_list[:len_min]:
+    req = 0
+    for time in time_list:
         delta_t = np.round(time - current_time, 4)
         time_steps = int(delta_t / time_unit)
-        requestes.extend([1] * time_steps)
+        if time_steps > 0:
+            requestes.extend([req] * time_steps)
+            req = 0
+        else:
+            req += 1
         current_time = time
 
     return requestes
