@@ -8,7 +8,7 @@ DATA_PATH = 'data/'
 CODONS_PATH = DATA_PATH + 'codons.json'
 
 class EucaryotesCell:
-    def __init__(self, environment, number_rna_polymerases,number_ribosomes, 
+    def __init__(self, environment, number_rna_polymerases,number_ribosomes, number_rna_transfers_per_codon, 
             uracil_initial_amount, adenine_initial_amount, guanine_initial_amount,
             cytosine_initial_amount, random_seed, verbose=False):
         self.env = environment
@@ -38,6 +38,8 @@ class EucaryotesCell:
         self.ribosome = Ribosome(
             environment=self.env,
             number_ribosomes=number_ribosomes,
+            number_rna_transfers_per_codon=number_rna_transfers_per_codon,
+            codons_list=self.extron_list,
             nucleotides = self.nucleotides,
             amminoacids = self.amminoacids,
             random_seed=random_seed

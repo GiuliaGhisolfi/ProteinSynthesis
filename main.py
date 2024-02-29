@@ -5,6 +5,7 @@ SIM_TIME = 1000
 NUMBER_RESOURCES = 5
 NUMBER_RNA_POLYMERASES = 3
 NUMBER_RIBOSOMES = 2
+NUMBER_RNA_TRANSFER = 800
 URACIL_INITIAL_AMOUNT = 50000
 ADENINE_INITIAL_AMOUNT = 50000
 GUANINE_INITIAL_AMOUNT = 50000
@@ -19,6 +20,7 @@ if __name__ == '__main__':
         number_resources=NUMBER_RESOURCES,
         number_rna_polymerases=NUMBER_RNA_POLYMERASES, 
         number_ribosomes=NUMBER_RIBOSOMES,
+        number_rna_transfers_per_codon=NUMBER_RNA_TRANSFER,
         uracil_initial_amount=URACIL_INITIAL_AMOUNT,
         adenine_initial_amount=ADENINE_INITIAL_AMOUNT,
         guanine_initial_amount=GUANINE_INITIAL_AMOUNT,

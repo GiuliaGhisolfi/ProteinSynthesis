@@ -4,6 +4,7 @@ from Bio import BiopythonWarning
 import warnings
 import random
 from src.resources.resource import EucaryotesCellResource
+from src.resources.transfer_mrna import TransferRNA
 
 START_CODON = 'AUG' # start codon
 LENGTH_CODON = 3 # number of nucleotides that code for an amino acid
@@ -15,10 +16,13 @@ ELONGATION_TIME = 5e-2 # seconds to add each amino acid
 MRNA_DECODED_ERROR_RATE = 1e-4 # 1 mistake every 10.000 amino acids
 
 class Ribosome:
-    def __init__(self, environment, number_ribosomes, nucleotides, amminoacids, random_seed):
+    def __init__(self, environment, number_ribosomes, number_rna_transfers_per_codon,
+            codons_list, nucleotides, amminoacids, random_seed):
         # ribonucleoprotein complex in the cytoplasm
         self.env = environment
         self.ribosomes = EucaryotesCellResource(self.env, capacity=number_ribosomes)
+        self.rna_transfer = TransferRNA(self.env, amount=number_rna_transfers_per_codon,
+            codons_list=codons_list, random_seed=random_seed) #FIXME: gestire codoni con errori
         self.nucleotides = nucleotides
         self.amminoacids = amminoacids
         
@@ -67,6 +71,14 @@ class Ribosome:
         return mrna_sequence[start_codon_position+LENGTH_CODON:]
     
     def elongation(self, mrna_sequence):
+        # request transfer RNA with the correct anticodon
+        for i in range(0, len(mrna_sequence), LENGTH_CODON):
+            codon = mrna_sequence[i:i+LENGTH_CODON]
+            with self.rna_transfer[codon].request() as request:
+                yield request
+                yield self.env.process(self.request_trna(codon))
+
+        # translation of the mRNA sequence
         mrna_sequence = Seq(mrna_sequence)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', BiopythonWarning)
@@ -89,8 +101,10 @@ class Ribosome:
             return str(polypeptides_chain), str(polypeptides_chain_ext)
         else:
             return None, None
-        
     
+    def request_trna(self, codon):
+        self.rna_transfer[codon].available()
+
     def mrna_degredation(self, mrna_sequence, poly_adenine_tail_len):
         # enzima: ribonuclease
         [self.release_nucleotide(nucleotide) for nucleotide in mrna_sequence]
