@@ -80,6 +80,7 @@ def level_series_over_time(nucleotide_dict, time_unit=TIME_UNIT):
 
     levels = [levels_list[0]]
     current_time = 0
+    level = levels_list[0]
     for level, time in zip(levels_list[1:], time_list[1:]):
         delta_t = np.round(time - current_time, 4)
         time_steps = int(delta_t / time_unit)
@@ -95,13 +96,18 @@ def plot_nucleotide_level_over_time(
     guanine_levels = level_series_over_time(guanine_dict, time_unit)
     cytosine_levels = level_series_over_time(cytosine_dict, time_unit)
 
-    len_min = min(len(uracil_levels), len(adenine_levels), len(guanine_levels), len(cytosine_levels))
+    max_time = max([len(uracil_levels), len(adenine_levels), len(guanine_levels), len(cytosine_levels)])
+    time = np.arange(0, max_time*time_unit, time_unit)
+    uracil_levels.extend([uracil_levels[-1]] * (max_time - len(uracil_levels)))
+    adenine_levels.extend([adenine_levels[-1]] * (max_time - len(adenine_levels)))
+    guanine_levels.extend([guanine_levels[-1]] * (max_time - len(guanine_levels)))
+    cytosine_levels.extend([cytosine_levels[-1]] * (max_time - len(cytosine_levels)))
 
     plt.figure(figsize=(20, 5))
-    plt.plot(np.arange(0, len_min*time_unit, time_unit), uracil_levels[:len_min], label='Uracil')
-    plt.plot(np.arange(0, len_min*time_unit, time_unit), adenine_levels[:len_min], label='Adenine')
-    plt.plot(np.arange(0, len_min*time_unit, time_unit), guanine_levels[:len_min], label='Guanine')
-    plt.plot(np.arange(0, len_min*time_unit, time_unit), cytosine_levels[:len_min], label='Cytosine')
+    plt.plot(time, uracil_levels, label='Uracil')
+    plt.plot(time, adenine_levels, label='Adenine')
+    plt.plot(time, guanine_levels, label='Guanine')
+    plt.plot(time, cytosine_levels, label='Cytosine')
     plt.title('Nucleotides levels over time')
     plt.xlabel('Time (s)')
     plt.ylabel('Nucleotides level')
@@ -138,7 +144,6 @@ def plot_codons_request(file_path, time_unit=TIME_UNIT):
         requestes = requestes_serie_over_time(codon_dict, time_unit)
         requestes.extend([0] * (len(time) - len(requestes)))
         plt.plot(time, requestes, '.--', alpha=0.5, label=codon)
-    #plt.yscale('log')
     plt.title('Number of requests of tRNA')
     plt.xlabel('Number of requests')
     plt.ylabel('Request time (s)')
