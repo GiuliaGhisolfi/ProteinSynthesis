@@ -1,37 +1,56 @@
 import json
 import itertools
-from src.transcription import Nucleus
-from src.translation import Ribosome
+from src.process.transcription import Nucleus
+from src.process.translation import Ribosome
+from src.resources.nucleotides import Nucleotides
 
 DATA_PATH = 'data/'
 CODONS_PATH = DATA_PATH + 'codons.json'
-PEPTIDES_PATH = DATA_PATH + 'peptides.json'
 
 class EucaryotesCell:
-    def __init__(self, environment, verbose=False):
+    def __init__(self, environment, number_rna_polymerases,number_ribosomes, number_rna_transfers_per_codon, 
+            uracil_initial_amount, adenine_initial_amount, guanine_initial_amount,
+            cytosine_initial_amount, random_seed, verbose=False):
         self.env = environment
         self.verbose = verbose
 
-        self.codons2aminoacids_dict = json.load(open(CODONS_PATH))
-        self.aminoacids_dict = json.load(open(PEPTIDES_PATH))
-        self.extron_list = self.codons2aminoacids_dict.keys()
+        self.extron_list = json.load(open(CODONS_PATH)).keys()
+        self.amminoacids = json.load(open(CODONS_PATH)).values()
+
+        self.nucleotides = Nucleotides(
+            environment=self.env,
+            uracil_initial_amount=uracil_initial_amount,
+            adenine_initial_amount=adenine_initial_amount,
+            guanine_initial_amount=guanine_initial_amount,
+            cytosine_initial_amount=cytosine_initial_amount,
+            random_seed=random_seed
+            )
 
         self.nucleus = Nucleus(
             environment=self.env,
             extron_sequences_list=self.extron_list,
-            editing_sites_dict={}, #TODO
+            editing_sites_dict={},
+            number_rna_polymerases=number_rna_polymerases,
+            nucleotides = self.nucleotides,
+            random_seed=random_seed
             )
         
         self.ribosome = Ribosome(
             environment=self.env,
-            codons2aminoacids_dict=self.codons2aminoacids_dict, 
-            aminoacids_dict=self.aminoacids_dict,
+            number_ribosomes=number_ribosomes,
+            number_rna_transfers_per_codon=number_rna_transfers_per_codon,
+            codons_list=self.extron_list,
+            nucleotides = self.nucleotides,
+            amminoacids = self.amminoacids,
+            random_seed=random_seed
             )
         
     def synthesize_protein(self, variables):
         # start transcription
         if self.verbose:
             print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} start transcription process')
+        variables.found_promoter_time = self.env.now
+
 
         # split the DNA sequence by promoter regions
         self.detect_promoter_process(variables)
@@ -52,6 +71,7 @@ class EucaryotesCell:
                 if self.verbose:
                     print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} '
                         f'(mRNA sequence {seq_count}) start transcription process')
+                variables.start_transcription_time.append(self.env.now)
 
                 yield self.env.process(self.transcription_and_translation_process
                     (variables, seq_count=seq_count))                    
@@ -62,7 +82,8 @@ class EucaryotesCell:
     
     def detect_promoter_process(self, variables):
         # detect promoter
-        variables.dna_sequences_to_transcript_list = self.nucleus.find_promoter(variables.dna_sequence)
+        variables.dna_sequences_to_transcript_list = self.nucleus.find_promoter(
+            variables.dna_sequence, variables)
         
         if variables.dna_sequences_to_transcript_list is not None:
             variables.promoters_count = len(variables.dna_sequences_to_transcript_list)  
@@ -74,8 +95,12 @@ class EucaryotesCell:
                 f'{variables.promoters_count} promoters')
     
     def transcription_and_translation_process(self, variables, seq_count):
+        # init list to store simpy processes for finding complement base
+        variables.complement_base_queue_dict[seq_count] = []
+
         # transcription process
-        transcription_process = self.env.process(self.nucleus.transcript(variables.dna_sequence))
+        transcription_process = self.env.process(
+            self.nucleus.transcript(variables.dna_sequence, variables, seq_count))
         variables.transcription_queue.append(transcription_process)
         
         yield transcription_process
@@ -92,16 +117,18 @@ class EucaryotesCell:
                 print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} start translation process')
             print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} (mRNA sequence {seq_count}) '
                 f'start translation process')
-        
+        variables.start_translation_time.append(self.env.now)
+    
         yield self.env.process(self.translation_process(variables, mrna))
 
         if self.verbose:
             print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} (mRNA sequence {seq_count}) '
                 f'end translation process')
+        variables.end_translation_time.append(self.env.now)
     
     def translation_process(self, variables, mrna):
         # translation process
-        translation_process = self.env.process(self.ribosome.translate(mrna))
+        translation_process = self.env.process(self.ribosome.translate(mrna, variables))
         variables.translation_queue.append(translation_process)
         
         yield translation_process

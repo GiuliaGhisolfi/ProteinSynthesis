@@ -1,16 +1,26 @@
-implement enzima
+alternative splicing: to differencial protein coded by same gene (PROCESS MORE RANDOM)
 
-gestire seq con più di una TATA box (done, to fix)
+EDITING SITES
 
-gestire NH2-COOH (del from list)
+salvare proteine sintetizzate anche se non tutta la seq è stata ancora sviluppata (maybe)
 
-alternative splicing: to differencial protein coded by same gene
+lib to find promoters (anche no, va bene tatabox)
+
+classe per salvare errori (o no)
 
 Ribosome Binding Site (RBS): sequence in mRNA to which ribosomes can bind and initiate translation. (maybe not)
 
-lib to find promoters
 
-implementare:
-from Bio.SeqUtils import seq3
-seq3("MAIVMGRWKGAR*")
-output: 'MetAlaIleValMetGlyArgTrpLysGlyAlaArgTer'
+URGENTI:
+
+altri enzimi come risorse o container (implement enzima) + aminoacidi (analogo a nucleotidi) (done)
+
+plot di come variano i processi al variare dei parametri
+json con parametri (done, add values)
+
+grafico per process
+
+DA MODIFICARE SE SI AGGIUNGONO ALTRE RISORSE:
+
+visualize time results
+plot distribuzione tempi di sintesi (e uso di ogni risorsa)
