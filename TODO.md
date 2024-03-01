@@ -13,6 +13,10 @@ Ribosome Binding Site (RBS): sequence in mRNA to which ribosomes can bind and in
 
 URGENTI:
 
-plot di come variano i processi al variare dei parametri
+gestire mrna che possono entra più volte nei robosomi e possono sintetizzare più proteine
+gestire ribosome.degradition con prob invers proporzionale a lunghezza mrna, else: continue
 
-grafico per process
+plot di come variano i processi al variare dei parametri
+salvare + plot: numero di proteine sintetizzate da uno stesso mrna
+
+grafico per process (in readme) + tutte le risorse usate e i tempi necessari
