@@ -2,7 +2,7 @@ LENGTH_AMINO_CARBOXYL_GROUP = 9
 
 def save_proteins_synthesized(dna_sequences_df, dna_sequence, mrna_sequences, polypeptides_chain, polypeptides_chain_ext,
     request_start_process_time, start_process_time, start_transcription_time, start_translation_time, 
-    end_translation_time, end_process_time, promoters_box):
+    end_translation_time, end_process_time, promoters_box, proteins_sintetized):
     row_index = dna_sequences_df[dna_sequences_df['sequence'] == dna_sequence].index[0]
 
     results = {
@@ -10,9 +10,11 @@ def save_proteins_synthesized(dna_sequences_df, dna_sequence, mrna_sequences, po
         'sequence': dna_sequence,
         'category': dna_sequences_df.iloc[row_index]['category'],
         'mrna_sequences': mrna_sequences,
+        'length_mrna_sequences': [len(mrna) for mrna in mrna_sequences] if mrna_sequences else 0,
         'polypeptides_chains': polypeptides_chain,
         'polypeptides_chains_ext': polypeptides_chain_ext,
-        'number_of_proteins_synthesized': len(mrna_sequences) if mrna_sequences else 0,
+        'number_of_proteins_synthesized_per_mrna': proteins_sintetized,
+        'number_of_proteins_synthesized': sum(proteins_sintetized) if proteins_sintetized else 0,
         'protein_synthesized': True if mrna_sequences else False,
         'request_start_process_time': request_start_process_time,
         'start_process_time': start_process_time,
@@ -20,7 +22,7 @@ def save_proteins_synthesized(dna_sequences_df, dna_sequence, mrna_sequences, po
         'start_translation_time': start_translation_time,
         'end_translation_time': end_translation_time,
         'end_process_time': end_process_time, 
-        'promoters_box': promoters_box,
+        'promoters_box': promoters_box
     }
     dna_sequences_df.iloc[row_index] = results
 

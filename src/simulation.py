@@ -51,6 +51,7 @@ class ProteinSinthesisProcess:
 
         # add columns to store the results
         columns = ['mrna_sequences', 'polypeptides_chains', 'polypeptides_chains_ext',
+            'length_mrna_sequences', 'number_of_proteins_synthesized_per_mrna', 
             'number_of_proteins_synthesized', 'protein_synthesized', 'request_start_process_time',
             'start_process_time', 'start_transcription_time', 'start_translation_time',
             'end_translation_time', 'end_process_time']
@@ -175,6 +176,7 @@ class ProteinSinthesisProcess:
             end_translation_time=variables.end_translation_time,
             end_process_time=variables.end_process_time,
             promoters_box=variables.promoters_box,
+            proteins_sintetized=variables.proteins_sintetized
             )
         
     def save_process(self, folder_test_name=''):

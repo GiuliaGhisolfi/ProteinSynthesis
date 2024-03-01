@@ -31,17 +31,18 @@ class Ribosome:
         
         random.seed(random_seed)
 
-    def translate(self, mrna_sequence, variables): # protein synthesis
+    def translate(self, mrna_sequence, variables, seq_count): # protein synthesis
         with self.ribosomes.request() as request:
             yield request # wait for a ribosome to be available
             
-            polypeptides_chain, polypeptides_chain_ext = yield self.env.process(
-                self.translation_process(mrna_sequence, variables.poly_adenine_tail_len))
+            polypeptides_chain, polypeptides_chain_ext, mrna_degradated = yield self.env.process(
+                self.translation_process(mrna_sequence, variables, seq_count))
             
-        return polypeptides_chain, polypeptides_chain_ext
+        return polypeptides_chain, polypeptides_chain_ext, mrna_degradated
     
-    def translation_process(self, mrna_sequence, poly_adenine_tail_len):
+    def translation_process(self, mrna_sequence, variables, seq_count):
         self.ribosomes.available() # register the time when the resource is available
+        variables.proteins_sintetized[seq_count] += 1
 
         # translation process
         mrna_sequence = self.degradation_cap_tail(mrna_sequence)
@@ -51,11 +52,21 @@ class Ribosome:
         mrna_sequence = self.initialization(mrna_sequence)
         polypeptides_chain, polypeptides_chain_ext = yield self.env.process(
             self.elongation(mrna_sequence))
-        self.mrna_degredation(initial_mrna_sequence, poly_adenine_tail_len)
         
         yield self.env.timeout(TRANSLATION_TIMEOUT)
 
-        return polypeptides_chain, polypeptides_chain_ext
+        # mRNA degradation
+        if self.compute_degradation_probability(initial_mrna_sequence, 
+            variables.mrna_degradation_rate[seq_count]) >= random.random():
+            self.mrna_degradation(initial_mrna_sequence, variables.poly_adenine_tail_len[seq_count])
+            mrna_degradated = True
+        else:
+            variables.mrna_degradation_rate[seq_count] += 1e-4
+            variables.mrna_degradation_rate[seq_count] = min(
+                variables.mrna_degradation_rate[seq_count], 1)
+            mrna_degradated = False
+
+        return polypeptides_chain, polypeptides_chain_ext, mrna_degradated
     
     def degradation_cap_tail(self, mrna_sequence):
         # degradation of the 5' cap and poly-A tail, enzime: exonuclease
@@ -107,7 +118,11 @@ class Ribosome:
         self.rna_transfer.trna_resources_dict[codon].available()
         yield self.env.timeout(TRANSFER_RNA_ATTACH_TIME)
 
-    def mrna_degredation(self, mrna_sequence, poly_adenine_tail_len):
+    def compute_degradation_probability(self, mrna_sequence, mrna_degradation_rate):
+        # compute the probability of the mRNA degradation
+        return 1 - (1 - mrna_degradation_rate) ** len(mrna_sequence)
+
+    def mrna_degradation(self, mrna_sequence, poly_adenine_tail_len):
         # enzima: ribonuclease
         [self.release_nucleotide(nucleotide) for nucleotide in mrna_sequence]
         self.release_nucleotide('A', poly_adenine_tail_len)

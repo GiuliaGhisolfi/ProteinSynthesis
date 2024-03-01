@@ -56,16 +56,12 @@ class EucaryotesCell:
         self.detect_promoter_process(variables)
 
         # continue with transcription and translation if promoters are found
-        if variables.dna_sequences_to_transcript_list is None:
-            variables.mrna_sequences_list = None
-            variables.proteins_list, variables.proteins_extended_name_list = None, None
-        else:
+        if variables.dna_sequences_to_transcript_list is not None:
             sequences_count = itertools.count()
-            variables.mrna_sequences_list = []
-            variables.proteins_list, variables.proteins_extended_name_list = [], []
+            variables.init_transcription_translation_var() # init variables
             
             # transcription and translation each promoter region
-            for _ in variables.dna_sequences_to_transcript_list:
+            for dna_sequence in variables.dna_sequences_to_transcript_list:
                 seq_count = next(sequences_count)
 
                 if self.verbose:
@@ -74,7 +70,7 @@ class EucaryotesCell:
                 variables.start_transcription_time.append(self.env.now)
 
                 yield self.env.process(self.transcription_and_translation_process
-                    (variables, seq_count=seq_count))                    
+                    (dna_sequence, variables, seq_count=seq_count))                    
 
             if self.verbose:
                 print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} '
@@ -94,18 +90,18 @@ class EucaryotesCell:
             print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} contains '
                 f'{variables.promoters_count} promoters')
     
-    def transcription_and_translation_process(self, variables, seq_count):
+    def transcription_and_translation_process(self, dna_sequence, variables, seq_count):
         # init list to store simpy processes for finding complement base
         variables.complement_base_queue_dict[seq_count] = []
 
         # transcription process
         transcription_process = self.env.process(
-            self.nucleus.transcript(variables.dna_sequence, variables, seq_count))
+            self.nucleus.transcript(dna_sequence, variables, seq_count))
         variables.transcription_queue.append(transcription_process)
         
         yield transcription_process
         mrna = transcription_process.value
-        variables.mrna_sequences_list.append(mrna)
+        variables.mrna_sequences_list[seq_count] = mrna
 
         # wait for all the transcription process to be completed
         while variables.transcription_queue:
@@ -119,22 +115,27 @@ class EucaryotesCell:
                 f'start translation process')
         variables.start_translation_time.append(self.env.now)
     
-        yield self.env.process(self.translation_process(variables, mrna))
+        yield self.env.process(self.translation_process(variables, mrna, seq_count))
 
         if self.verbose:
             print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} (mRNA sequence {seq_count}) '
                 f'end translation process')
         variables.end_translation_time.append(self.env.now)
     
-    def translation_process(self, variables, mrna):
+    def translation_process(self, variables, mrna, seq_count):
         # translation process
-        translation_process = self.env.process(self.ribosome.translate(mrna, variables))
+        translation_process = self.env.process(self.ribosome.translate(mrna, variables, seq_count))
         variables.translation_queue.append(translation_process)
         
         yield translation_process
-        protein, protein_extended_name = translation_process.value
-        variables.proteins_list.append(protein) # polypeptides chain
-        variables.proteins_extended_name_list.append(protein_extended_name)
+        protein, protein_extended_name, mrna_degradated = translation_process.value
+
+        if variables.proteins_sintetized[seq_count] == 1:
+            variables.proteins_list[seq_count] = protein # polypeptides chain
+            variables.proteins_extended_name_list[seq_count] = protein_extended_name
 
         while variables.translation_queue:
             variables.translation_queue.pop(0)
+        
+        if not mrna_degradated:
+            yield self.env.process(self.translation_process(variables, mrna, seq_count))

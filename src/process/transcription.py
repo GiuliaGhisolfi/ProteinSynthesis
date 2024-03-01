@@ -85,17 +85,17 @@ class Nucleus:
         
         return promoter_positions_list
 
-    def transcript(self, dna_sequence, variables, sequence_count): # enzime: RNA polymerase
+    def transcript(self, dna_sequence, variables, seq_count): # enzime: RNA polymerase
         with self.rna_polymerase.request() as request:
             yield request  # wait for RNA polymerase to be available
 
             # start transcript processes for DNA sequence
             messenger_rna_sequence = yield self.env.process(
-                self.transcript_process(dna_sequence, variables, sequence_count))
+                self.transcript_process(dna_sequence, variables, seq_count))
 
         return messenger_rna_sequence
     
-    def transcript_process(self, dna_sequence, variables, sequence_count):
+    def transcript_process(self, dna_sequence, variables, seq_count):
         self.rna_polymerase.available() # register the time when the resource is available
         
         # make sequence univoque to transcript
@@ -103,7 +103,7 @@ class Nucleus:
 
         # transcript from gene to pre-mRNA
         messenger_rna_sequence = yield self.env.process(
-            self.trascript_gene(dna_sequence, variables, sequence_count))
+            self.trascript_gene(dna_sequence, variables, seq_count))
 
         # pre-transcriptional modifications
         messenger_rna_sequence = self.capping(messenger_rna_sequence)
@@ -115,7 +115,7 @@ class Nucleus:
         # post-transcriptional modifications
         yield self.env.process(self.cleavage())
         messenger_rna_sequence = yield self.env.process(
-            self.polyadenylation(messenger_rna_sequence, variables))
+            self.polyadenylation(messenger_rna_sequence, variables, seq_count))
 
         yield self.env.timeout(TRANSCRIPTION_TIMEOUT)
 
@@ -183,11 +183,11 @@ class Nucleus:
     def cleavage(self):
         yield self.env.timeout(CLEAVAGE_TIME)
 
-    def polyadenylation(self, rna_sequence, variables):
-        variables.poly_adenine_tail_len = random.randint(230, 270)
+    def polyadenylation(self, rna_sequence, variables, seq_count):
+        variables.poly_adenine_tail_len[seq_count] = random.randint(230, 270)
 
         polyadenylation_process = self.env.process(
-            self.find_adenosine_for_polyadenylation(variables.poly_adenine_tail_len))
+            self.find_adenosine_for_polyadenylation(variables.poly_adenine_tail_len[seq_count]))
         variables.polyadenylation_queue.append(polyadenylation_process)
         yield polyadenylation_process
 

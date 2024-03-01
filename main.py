@@ -26,7 +26,7 @@ if __name__ == '__main__':
         guanine_initial_amount=GUANINE_INITIAL_AMOUNT,
         cytosine_initial_amount=CYTOSINE_INITIAL_AMOUNT,
         random_seed=RANDOM_SEED,
-        verbose=False
+        verbose=True
         )
     protein_synthesis_process.run(simulation_time=SIM_TIME) # run the simulation
     protein_synthesis_process.save_process(folder_test_name='test')
