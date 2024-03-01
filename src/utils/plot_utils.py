@@ -74,6 +74,28 @@ def barplot_proteins_length(results_df):
     plt.ylabel('Number of proteins')
     plt.show()
 
+def hist_process_time(results_df):
+    data_df = results_df[results_df['mrna_sequences'].notna()]
+    process_time = data_df['end_process_time'] - data_df['start_process_time']
+    plt.figure(figsize=(20, 5))
+    plt.hist(process_time, bins=100)
+    plt.title('Process time')
+    plt.xlabel('Process time (s)')
+    plt.ylabel('Number of DNA sequences')
+    plt.show()
+
+def plot_process_time(results_df):
+    data_df = results_df[results_df['mrna_sequences'].notna()]
+    process_time = data_df['end_process_time'] - data_df['start_process_time']
+    time = data_df['start_process_time']
+    time, process_time = zip(*sorted(zip(time, process_time)))
+    plt.figure(figsize=(20, 5))
+    plt.plot(time, process_time, '.--')
+    plt.title('Process time')
+    plt.xlabel('Start process time (s)')
+    plt.ylabel('Process time (s)')
+    plt.show()
+
 def level_series_over_time(nucleotide_dict, time_unit=TIME_UNIT):
     levels_list = nucleotide_dict['level']
     time_list = nucleotide_dict['time']
@@ -85,7 +107,8 @@ def level_series_over_time(nucleotide_dict, time_unit=TIME_UNIT):
         delta_t = np.round(time - current_time, 4)
         time_steps = int(delta_t / time_unit)
         levels.extend([level] * time_steps)
-        current_time = time
+        if time_steps > 0:
+            current_time = time
 
     return levels
 
@@ -99,10 +122,10 @@ def plot_nucleotide_level_over_time(
     max_time = int(max([max(uracil_dict['time']), max(adenine_dict['time']), 
         max(guanine_dict['time']), max(cytosine_dict['time'])]))
     time = np.arange(0, max_time, time_unit)
-    uracil_levels.extend([uracil_levels[-1]] * (max_time - len(uracil_levels)))
-    adenine_levels.extend([adenine_levels[-1]] * (max_time - len(adenine_levels)))
-    guanine_levels.extend([guanine_levels[-1]] * (max_time - len(guanine_levels)))
-    cytosine_levels.extend([cytosine_levels[-1]] * (max_time - len(cytosine_levels)))
+    uracil_levels.extend([uracil_levels[-1]] * (len(time) - len(uracil_levels)))
+    adenine_levels.extend([adenine_levels[-1]] * (len(time) - len(adenine_levels)))
+    guanine_levels.extend([guanine_levels[-1]] * (len(time) - len(guanine_levels)))
+    cytosine_levels.extend([cytosine_levels[-1]] * (len(time) - len(cytosine_levels)))
 
     plt.figure(figsize=(20, 5))
     plt.plot(time, uracil_levels, label='Uracil')
@@ -169,10 +192,14 @@ def requestes_serie_over_time(codons_dict, time_unit=TIME_UNIT):
 
     return requestes
 
+def create_model_df(parameters_dict_list):
+    df = pd.DataFrame(parameters_dict_list)
+    return(df)
+
 def compare_wait_time(df_list):
     plt.figure(figsize=(20, 5))
     for i, df in enumerate(df_list):
-        plt.plot(df['request_time'], df['wait_time'], label=f'Model {i}')
+        plt.plot(df['request_time'], df['wait_time'], '.--', label=f'Model {i}')
     plt.title('Resources request time vs wait time')
     plt.xlabel('Request time (s)')
     plt.ylabel('Wait time (s)')
@@ -190,4 +217,17 @@ def compare_proteins_number_over_time(results_df_list):
     plt.xlabel('Time (s)')
     plt.ylabel('Number of proteins')
     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.show()
+
+def compare_process_time(results_df_list):
+    plt.figure(figsize=(20, 5))
+    for i, results_df in enumerate(results_df_list):
+        data_df = results_df[results_df['mrna_sequences'].notna()]
+        process_time = data_df['end_process_time'] - data_df['start_process_time']
+        time = data_df['start_process_time']
+        time, process_time = zip(*sorted(zip(time, process_time)))
+        plt.plot(time, process_time, '.--', label=f'Model {i}')
+    plt.title('Process time')
+    plt.xlabel('Start process time (s)')
+    plt.ylabel('Process time (s)')
     plt.show()

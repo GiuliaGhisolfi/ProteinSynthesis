@@ -1,8 +1,8 @@
 {
     "simulation_time": [3600],
-    "number_resources": [200],
-    "number_rna_polymerases": [10, 50, 100],
-    "number_ribosomes": [2, 20, 40],
+    "number_resources": [500],
+    "number_rna_polymerases": [10, 100],
+    "number_ribosomes": [2, 40],
     "number_rna_transfers_per_codon": [1000],
     "uracil_initial_amount": [5e+4],
     "adenine_initial_amount": [5e+4],
