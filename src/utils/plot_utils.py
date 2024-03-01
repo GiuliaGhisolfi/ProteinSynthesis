@@ -6,6 +6,7 @@ import ast
 import json
 
 TIME_UNIT = 0.0001
+CODONS_PATH = 'data\codons.json'
 CODONS = [
     'UUU', 'UUC', 'UUA', 'UUG', 'UCU', 'UCC', 'UCA', 'UCG', 'UAU', 'UAC', 'UAA', 'UAG', 'UGU', 'UGC', 'UGA', 'UGG',
     'CUU', 'CUC', 'CUA', 'CUG', 'CCU', 'CCC', 'CCA', 'CCG','CAU', 'CAC', 'CAA', 'CAG', 'CGU', 'CGC', 'CGA', 'CGG',
@@ -20,6 +21,44 @@ def barplot_proteins_number(results_df):
     plt.title('Number of proteins synthesized from one DNA sequence')
     plt.xlabel('Number of proteins')
     plt.ylabel('Number of DNA sequences')
+    plt.show()
+
+def barplot_number_proteins_per_mrna(results_df):
+    number_of_proteins_synthesized_per_mrna = results_df[
+        results_df['mrna_sequences'].notna()]['number_of_proteins_synthesized_per_mrna']
+    number_of_proteins_synthesized_per_mrna = [ast.literal_eval(x) if isinstance(x, str) 
+        else x for x in number_of_proteins_synthesized_per_mrna]
+    number_of_proteins_synthesized_per_mrna = [int(item) for sublist in 
+        number_of_proteins_synthesized_per_mrna for item in sublist]
+    
+    plt.figure(figsize=(20, 5))
+    plt.bar(*np.unique(number_of_proteins_synthesized_per_mrna, return_counts=True))
+    plt.title('Number of proteins synthesized per mRNA')
+    plt.xlabel('Number of proteins synthesized per mRNA')
+    plt.ylabel('Frequency')
+    plt.show()
+
+def plot_number_proteins_per_length_mrna(results_df):
+    length_mrna = results_df[results_df['mrna_sequences'].notna()]['length_mrna_sequences']
+    length_mrna = [ast.literal_eval(x) if isinstance(x, str) else x for x in length_mrna]
+    length_mrna = [int(item) for sublist in length_mrna for item in sublist]
+
+    number_of_proteins_synthesized_per_mrna = results_df[
+        results_df['mrna_sequences'].notna()]['number_of_proteins_synthesized_per_mrna']
+    number_of_proteins_synthesized_per_mrna = [ast.literal_eval(x) if isinstance(x, str) 
+        else x for x in number_of_proteins_synthesized_per_mrna]
+    number_of_proteins_synthesized_per_mrna = [int(item) for sublist in 
+        number_of_proteins_synthesized_per_mrna for item in sublist]
+    
+    # sort the lists
+    length_mrna, number_of_proteins_synthesized_per_mrna = zip(*sorted(
+        zip(length_mrna, number_of_proteins_synthesized_per_mrna)))
+    
+    plt.figure(figsize=(20, 5))
+    plt.plot(length_mrna, number_of_proteins_synthesized_per_mrna, '.--')
+    plt.title('Number of proteins synthesized per mRNA length')
+    plt.xlabel('mRNA length')
+    plt.ylabel('Number of proteins')
     plt.show()
 
 def plot_cumulative_proteins_number_over_time(results_df):
@@ -174,6 +213,33 @@ def plot_codons_request(file_path, time_unit=TIME_UNIT):
     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=2)
     plt.show()
 
+def plot_codons_request_per_aminoacid(file_path, time_unit=TIME_UNIT):
+    codon_dict_list = []
+    for codon in CODONS:
+        with open(file_path+f'rna_transfer_history_{codon}.json') as f:
+            codon_dict_list.append(json.load(f))
+    
+    with open(CODONS_PATH) as f:
+        codons_dict = json.load(f)
+    
+    max_time = max([max(codon_dict['request_time']) for codon_dict in codon_dict_list])
+    time = np.arange(0, max_time, time_unit)
+
+    plt.subplots(4, 5, figsize=(20, 10))
+    # subplot for each aminoacid (codons_dict keys: codon, value: aminoacid)
+    for i, (aminoacid, codons) in enumerate(codons_dict.items()):
+        for codon in codons:
+            print(codon) # FIXME
+            requestes = requestes_serie_over_time(codon_dict_list[CODONS.index(codon)], time_unit)
+            requestes.extend([0] * (len(time) - len(requestes)))
+            plt.subplot(4, 5, i+1)
+            plt.plot(time, requestes, '.--', alpha=0.5, label=codon)
+            plt.title(aminoacid)
+            plt.ylabel('Number of requests')
+            plt.xlabel('Request time (s)')
+            plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=2)
+    plt.show()
+
 def requestes_serie_over_time(codons_dict, time_unit=TIME_UNIT):
     time_list = codons_dict['request_time']
 
@@ -192,6 +258,7 @@ def requestes_serie_over_time(codons_dict, time_unit=TIME_UNIT):
 
     return requestes
 
+##################### Compare models #####################
 def create_model_df(parameters_dict_list):
     df = pd.DataFrame(parameters_dict_list)
     return(df)
