@@ -10,7 +10,8 @@ CODONS_PATH = DATA_PATH + 'codons.json'
 
 class EucaryotesCell:
     """
-    Eucaryotes Cell class, this class models the eucaryotes cell and rhe protein synthesis process.
+    Eucaryotes Cell class, this class models the eucaryotes cell and 
+    simulates the protein synthesis through the transcription and translation processes.
 
     Parameters
     ----------

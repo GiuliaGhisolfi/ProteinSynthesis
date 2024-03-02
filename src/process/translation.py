@@ -19,6 +19,61 @@ TRANSLATION_TIMEOUT = 10
 MRNA_DECODED_ERROR_RATE = 1e-4 # 1 mistake every 10.000 amino acids
 
 class Ribosome:
+    """
+    Ribosome class, this class models the ribosome and simulates the translation process.
+
+    Parameters
+    ----------
+    environment : simpy.Environment
+        The simulation environment.
+    number_ribosomes : int
+        The number of ribosomes in the cell.
+    number_rna_transfers_per_codon : int
+        Number of RNA transfer per codon in the simulation environment is a random integer in
+        [0.9*number_rna_transfers_per_codon, 1.1*number_rna_transfers_per_codon].
+    codons_list : list
+        The list of codons.
+    nucleotides : Nucleotides
+        The nucleotides in the cell.
+    amminoacids : list
+        The list of amminoacids.
+    random_seed : int
+        The random seed for the simulation environment.
+
+    Attributes
+    ----------
+    env : simpy.Environment
+        The simulation environment.
+    ribosomes : EucaryotesCellResource 
+        The ribonucleoprotein complex in the cytoplasm.
+    rna_transfer : TransferRNA
+        The transfer RNA in the cell.
+    nucleotides : Nucleotides
+        The nucleotides in the cell.
+
+    Methods
+    -------
+    translate(mrna_sequence, variables, seq_count)
+        Start the translation process.
+    translation_process(mrna_sequence, variables, seq_count)
+        Start the translation process.
+    degradation_cap_tail(mrna_sequence)
+        Degradation of the 5' cap and poly-A tail, enzime: exonuclease.
+    activation()
+        Activation of the translation process.
+    initialization(mrna_sequence)
+        Initialization of the translation process.
+    elongation(mrna_sequence)
+        Elongation of the translation process.
+    request_trna(codon)
+        Request transfer RNA with the correct anticodon.
+    compute_degradation_probability(mrna_sequence, mrna_degradation_rate)
+        Compute the probability of the mRNA degradation.
+    mrna_degradation(mrna_sequence, poly_adenine_tail_len)
+        Degradation of the mRNA sequence, enzima: ribonuclease.
+    release_nucleotide(base, amount=1)
+        Release a nucleotide in the cell.
+    """ 
     def __init__(self, environment, number_ribosomes, number_rna_transfers_per_codon,
             codons_list, nucleotides, amminoacids, random_seed):
         # ribonucleoprotein complex in the cytoplasm

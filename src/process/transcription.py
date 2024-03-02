@@ -35,6 +35,71 @@ TRANSCRIPTION_TIMEOUT = 1
 RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
 
 class Nucleus:
+    """
+    Nucleus class, this class models the nucleus of the eucaryotes cell 
+    and simulates the transcription process.
+
+    Parameters
+    ----------
+    environment : simpy.Environment
+        The simulation environment.
+    extron_sequences_list : list
+        The list of extron sequences.
+    editing_sites_dict : dict
+        The dictionary of editing sites.
+    number_rna_polymerases : int
+        The number of RNA polymerases in the cell.
+    nucleotides : Nucleotides
+        The nucleotides in the cell.
+    random_seed : int
+        The random seed for the simulation environment.
+
+    Attributes
+    ----------
+    env : simpy.Environment
+        The simulation environment.
+    extron_sequences_list : list
+        The list of extron sequences.
+    editing_sites_dict : dict
+        The dictionary of editing sites.
+    rna_polymerase : EucaryotesCellResource
+        The RNA polymerase resource.
+    nucleotides : Nucleotides
+        The nucleotides in the cell.
+
+    Methods
+    -------
+    find_promoter(dna_sequence, variables)
+        Find the promoter of a DNA sequence.
+    find_promoters_positions(dna_sequence, promoters_list)
+        Find the positions of the promoters in a DNA sequence.
+    transcript(dna_sequence, variables, seq_count)
+        Start the transcription of a DNA sequence.
+    transcript_process(dna_sequence, variables, seq_count)
+        Start the transcription process of a DNA sequence.
+    trascript_gene(dna_sequence, variables, sequence_count)
+        Start the transcription of a gene.
+    find_complement_base(base)
+        Find the complement base of a base.
+    splicing(rna_sequence)
+        Remove the introns from a RNA sequence.
+    editing(rna_sequence)
+        Edit a RNA sequence, replacing the editing sites with the edited sites.
+    capping(rna_sequence)
+        Add a 5'-methyl cap to a RNA sequence.
+    cleavage()
+        Cleavage a RNA sequence, start post-transcriptional modifications.
+    polyadenylation(rna_sequence, variables, seq_count)
+        Add a PolyA tail to a RNA sequence.
+    find_adenosine_for_polyadenylation(amount)
+        Find the adenosine for the polyadenylation.
+    request_nucleotide(base, amount=1)
+        Request a nucleotide.
+    replicate_base(base)
+        Replicate a nucleotide.
+    release_nucleotide(base, amount=1)
+        Release a nucleotide.
+    """
     def __init__(self, environment, extron_sequences_list, editing_sites_dict, 
             number_rna_polymerases, nucleotides, random_seed):
         self.env = environment

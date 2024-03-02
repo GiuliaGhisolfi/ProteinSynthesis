@@ -59,18 +59,8 @@ class ProteinSinthesisProcess:
     -------
     run(simulation_time)
         Run the simulation process.
-
-        parameters:
-            simulation_time: int, optional
-                Simulation time. The default is 1000.
-
     save_process(folder_test_name)
         Save the results of the simulation process.
-
-        parameters:
-            folder_test_name: str, optional
-                Name of the folder generated into the results folder to save the results. 
-                By default, the results are saved in the root of the results folder.
     """
     def __init__(self, 
             dna_sequences_df, 
