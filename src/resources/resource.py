@@ -2,6 +2,38 @@ import simpy.resources.resource as SimpyResource
 import json
 
 class EucaryotesCellResource(SimpyResource.Resource):
+    """
+    This class extends the simpy Resource class to add the history of the queue
+    and the usage of the resource. The history is saved in a dictionary with the
+    queue, request time, available time, wait time, end time and usage time.
+
+    Parameters:
+    -----------
+    env : simpy.Environment
+        The simulation environment
+    capacity : int
+        The capacity of the resource
+    save_history : bool
+        If True, the history of the queue and the usage of the resource is saved
+
+    Attributes:
+    -----------
+    _queue_history : dict
+        The history of the queue and the usage of the resource
+
+    Methods:
+    --------
+    request(*args, **kwargs)
+        Request the resource
+    available()
+        Save the time when the resource is available
+    release(*args, **kwargs)
+        Release the resource
+    queue_history()
+        Return the queue history
+    save_history(path_to_save)
+        Save the queue history in a json file
+    """
     def __init__(self, env, capacity, save_history=True):
         super().__init__(env, capacity=capacity)
         self.save_history_flag = save_history

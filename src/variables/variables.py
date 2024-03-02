@@ -53,6 +53,16 @@ class EucaryotesCellVariables:
         List of simpy processes for the translation, 
         this list is used to store and relase the simpy processes for each mRNA sequence
 
+    Methods
+    -------
+    get_dna()
+        Return the DNA sequence
+    get_mrna()
+        Return the list of mature mRNA sequences
+    get_proteins()
+        Return the list of polypeptides chains
+    get_extended_proteins_name()
+        Return the list of polypeptides chains extended name
     """
     def __init__(self):
         # input variables
@@ -90,17 +100,12 @@ class EucaryotesCellVariables:
         self.polyadenylation_queue = []
         self.translation_queue = []
 
-    def init_transcription_translation_var(self):
+    def _init_transcription_translation_var(self):
         # variables
         self.mrna_sequences_list = [None] * len(self.dna_sequences_to_transcript_list)
         self.poly_adenine_tail_len = [0] * len(self.dna_sequences_to_transcript_list)
         self.proteins_list = [None] * len(self.dna_sequences_to_transcript_list)
         self.proteins_extended_name_list = [None] * len(self.dna_sequences_to_transcript_list)
-
-        # time variables #TODO (?)
-        """self.start_transcription_time = dict()
-        self.start_translation_time = []
-        self.end_translation_time = []"""
 
         self.proteins_sintetized = [0] * len(self.dna_sequences_to_transcript_list)
         self.mrna_degradation_rate = [1e-4] * len(self.dna_sequences_to_transcript_list)

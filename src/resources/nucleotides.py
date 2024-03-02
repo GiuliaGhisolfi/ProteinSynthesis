@@ -1,9 +1,45 @@
 from src.resources.container import EucaryotesCellContainer
 import os
-
 NUCLEOTIDES_NAMES = ['uracil', 'adenine', 'guanine', 'cytosine']
 
 class Nucleotides:
+    """
+    This class represents the nucleotides in the cell. It has a container for
+    each nucleotide. The containers are used to request and release the nucleotides
+    in the cell. The containers are saved in a dictionary with the nucleotide name
+    as the key.
+
+    Parameters:
+    -----------
+    environment : simpy.Environment
+        The simulation environment
+    uracil_initial_amount : int
+        The initial amount of uracil in the cell
+    adenine_initial_amount : int
+        The initial amount of adenine in the cell
+    guanine_initial_amount : int
+        The initial amount of guanine in the cell
+    cytosine_initial_amount : int
+        The initial amount of cytosine in the cell
+    random_seed : int
+        The random seed for the degradation time
+
+    Attributes:
+    -----------
+    env : simpy.Environment
+        The simulation environment
+    nucleotides_containers_dict : dict
+        The dictionary with the nucleotide name as the key and the container as the value
+    
+    Methods:
+    --------
+    request(nucleotide, amount)
+        Request the amount of the nucleotide
+    release(nucleotide, amount)
+        Release the amount of the nucleotide
+    save_history(path_to_save)
+        Save the level history of the containers in a json file
+    """
     def __init__(self, environment, uracil_initial_amount, adenine_initial_amount, 
             guanine_initial_amount, cytosine_initial_amount, random_seed):
         self.env = environment
