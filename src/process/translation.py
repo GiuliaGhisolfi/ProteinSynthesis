@@ -87,6 +87,9 @@ class Ribosome:
         random.seed(random_seed)
 
     def translate(self, mrna_sequence, variables, seq_count): # protein synthesis
+        """
+        Start the translation process.
+        """
         with self.ribosomes.request() as request:
             yield request # wait for a ribosome to be available
             
@@ -96,6 +99,9 @@ class Ribosome:
         return polypeptides_chain, polypeptides_chain_ext, mrna_degradated
     
     def translation_process(self, mrna_sequence, variables, seq_count):
+        """
+        Translation process.
+        """
         self.ribosomes.available() # register the time when the resource is available
         variables.proteins_sintetized[seq_count] += 1
 
@@ -124,20 +130,31 @@ class Ribosome:
         return polypeptides_chain, polypeptides_chain_ext, mrna_degradated
     
     def degradation_cap_tail(self, mrna_sequence):
-        # degradation of the 5' cap and poly-A tail, enzime: exonuclease
+        """
+        Degradation of the 5' cap and poly-A tail, enzime: exonuclease.
+        """
         return mrna_sequence[LENGTH_METHYL_CAP:-LENGTH_POLY_A_TAIL]
     
     def activation(self):
+        """
+        Activation of the translation process.
+        """
         yield self.env.timeout(ATTIVATION_TIME)
 
     def initialization(self, mrna_sequence):
+        """
+        Initialization of the translation process, find the start codon for the translation.
+        """
         start_codon = START_CODON # start codon
         start_codon_position = str(mrna_sequence).find(start_codon)
 
         return mrna_sequence[start_codon_position+LENGTH_CODON:]
     
     def elongation(self, mrna_sequence):
-        # request transfer RNA with the correct anticodon
+        """
+        Elongation of the translation process.
+        Request transfer RNA with the correct anticodon.
+        """
         for i in range(int(len(mrna_sequence) // LENGTH_CODON)):
             j = i * LENGTH_CODON
             codon = mrna_sequence[j:j+LENGTH_CODON]
@@ -170,17 +187,28 @@ class Ribosome:
             return None, None
     
     def request_trna(self, codon):
+        """
+        Request transfer RNA with the correct anticodon.
+        """
         self.rna_transfer.trna_resources_dict[codon].available()
         yield self.env.timeout(TRANSFER_RNA_ATTACH_TIME)
 
     def compute_degradation_probability(self, mrna_sequence, mrna_degradation_rate):
-        # compute the probability of the mRNA degradation
+        """
+        Compute the probability of the mRNA degradation according to the length of the mRNA sequence.
+        """
         return 1 - (1 - mrna_degradation_rate) ** len(mrna_sequence)
 
     def mrna_degradation(self, mrna_sequence, poly_adenine_tail_len):
+        """
+        Degradation of the mRNA sequence, enzime: ribonuclease.
+        """
         # enzima: ribonuclease
         [self.release_nucleotide(nucleotide) for nucleotide in mrna_sequence]
         self.release_nucleotide('A', poly_adenine_tail_len)
     
     def release_nucleotide(self, base, amount=1):
+        """
+        Release a nucleotide in the cell.
+        """
         self.nucleotides.release(base, amount)

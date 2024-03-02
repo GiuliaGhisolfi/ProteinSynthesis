@@ -147,6 +147,11 @@ class ProteinSinthesisProcess:
     def run(self, simulation_time=SIM_TIME):
         """
         Run the simulation process.
+
+        Parameters
+        ----------
+        simulation_time: int
+            Time to run the simulation process in seconds.
         """
         print('Simulation started')
         self.env.run(until=simulation_time)
@@ -189,6 +194,11 @@ class ProteinSinthesisProcess:
     def _process(self, variables):
         """
         Start the protein synthesis process.
+
+        Parameters
+        ----------
+        variables: EucaryotesCellVariables
+            Variables related to the dna sequence to be synthesized.
         """
         # Synthesize dna sequences while the simulation is running       
         with self.resources.request() as request:
@@ -214,6 +224,11 @@ class ProteinSinthesisProcess:
     def _save_proteins_synthesized_in_df(self, variables):
         """
         Save the results of the protein synthesis process in the dataframe.
+
+        Parameters
+        ----------
+        variables: EucaryotesCellVariables
+            Variables related to the dna sequence to be synthesized.
         """
         self.dna_sequences_df = save_proteins_synthesized(
             dna_sequences_df=self.dna_sequences_df, 
@@ -234,6 +249,11 @@ class ProteinSinthesisProcess:
     def save_process(self, folder_test_name=''):
         """
         Save the results of the simulation process.
+
+        Parameters
+        ----------
+        folder_test_name: str, optional
+            By default, the results are saved in the root of the results folder.
         """
         # create folder to save the results
         if folder_test_name != '':

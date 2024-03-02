@@ -115,6 +115,11 @@ class Nucleus:
         random.seed(random_seed)
     
     def find_promoter(self, dna_sequence, variables):
+        """
+        Find the promoter of a DNA sequence, if present.
+        The promoter is the region of a DNA sequence where the RNA polymerase binds to start the transcription.
+        The DNA sequence is split in the promoter regions.
+        """
         for promoter in PROMOTERS:
             promoter_positions_list = self.find_promoters_positions(dna_sequence, PROMOTERS[promoter])
             if len(promoter_positions_list) != 0:
@@ -137,6 +142,9 @@ class Nucleus:
             return dna_sequences_list
     
     def find_promoters_positions(self, dna_sequence, promoters_list):
+        """
+        Find the positions of the promoters in a DNA sequence.
+        """
         # find promoter sequences in the DNA sequence
         promoter_positions_list = sorted([i for promoter in promoters_list for i, _ in 
             enumerate(dna_sequence) if dna_sequence[i:].startswith(promoter)])
@@ -151,6 +159,9 @@ class Nucleus:
         return promoter_positions_list
 
     def transcript(self, dna_sequence, variables, seq_count): # enzime: RNA polymerase
+        """
+        Start the transcription process of a DNA sequence.
+        """
         with self.rna_polymerase.request() as request:
             yield request  # wait for RNA polymerase to be available
 
@@ -161,6 +172,9 @@ class Nucleus:
         return messenger_rna_sequence
     
     def transcript_process(self, dna_sequence, variables, seq_count):
+        """
+        Transcription process of a DNA sequence.
+        """
         self.rna_polymerase.available() # register the time when the resource is available
         
         # make sequence univoque to transcript
@@ -187,7 +201,10 @@ class Nucleus:
         return messenger_rna_sequence
     
     def trascript_gene(self, dna_sequence, variables, sequence_count):
-        # transcript from gene to pre-mRNA
+        """
+        Transcription from a gene to a pre-mRNA, the first step of the transcription process.
+        The DNA sequence is transcribed to a messenger RNA sequence.
+        """
         messenger_rna_sequence = ''
 
         for base in dna_sequence:
@@ -205,6 +222,9 @@ class Nucleus:
         return messenger_rna_sequence
     
     def find_complement_base(self, base):
+        """
+        Find the complement base of a base.
+        """
         if random.random() > RNA_POLYMERASE_ERROR_RATE:
             complement_base = BASE_COMPLEMENT_DNA2RNA[base]
         else: 
@@ -214,6 +234,9 @@ class Nucleus:
         return self.request_nucleotide(complement_base)
     
     def splicing(self, rna_sequence):
+        """
+        Remove the introns (non coding regions) from a RNA sequence.
+        """
         # remove introns: non-coding regions
         i = LENGTH_METHYL_CAP # index
         while i+3 < len(rna_sequence):
@@ -227,6 +250,9 @@ class Nucleus:
         return rna_sequence
 
     def editing(self, rna_sequence):
+        """
+        Edit a RNA sequence, replacing the editing sites with the edited sites.
+        """
         for editing_site in self.editing_sites_dict.keys():
             # find the editing site in the rna sequence
             editing_site_count = rna_sequence.count(editing_site)
@@ -243,12 +269,21 @@ class Nucleus:
         return rna_sequence
 
     def capping(self, rna_sequence):
+        """
+        Add a 5'-methyl cap to a RNA sequence.
+        """
         return 'CH3GPPP-{}'.format(rna_sequence) # Add 5'-methyl cap
     
     def cleavage(self):
+        """
+        Cleavage a RNA sequence, start post-transcriptional modifications.
+        """
         yield self.env.timeout(CLEAVAGE_TIME)
 
     def polyadenylation(self, rna_sequence, variables, seq_count):
+        """
+        Add a PolyA tail to a RNA sequence.
+        """
         variables.poly_adenine_tail_len[seq_count] = random.randint(230, 270)
 
         polyadenylation_process = self.env.process(
@@ -263,17 +298,29 @@ class Nucleus:
         return '{}-AAAA'.format(rna_sequence) # Add PolyA tail (250 nucleotides circa)
     
     def find_adenosine_for_polyadenylation(self, amount):
+        """
+        Request the adenosine for the polyadenylation.
+        """
         return self.request_nucleotide('A', amount)
     
     def request_nucleotide(self, base, amount=1):
+        """
+        Request a nucleotide.
+        """
         with self.nucleotides.request(base, amount) as request:
             yield request
             
             return self.env.process(self.replicate_base(base))
     
     def replicate_base(self, base):
+        """
+        Replicate a nucleotide.
+        """
         yield self.env.timeout(REPLICATION_TIME) # time to replicate a nucleotide
         return base
     
     def release_nucleotide(self, base, amount=1):
+        """
+        Release a nucleotide, degrade the nucleotide if not used.
+        """
         self.nucleotides.release(base, amount)

@@ -104,6 +104,14 @@ class EucaryotesCell:
             )
         
     def synthesize_protein(self, variables):
+        """
+        Start the transcription and translation of a DNA sequence.
+
+        Parameters
+        ----------
+        variables : object
+            The variables object.
+        """
         # start transcription
         if self.verbose:
             print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} start transcription process')
@@ -135,6 +143,10 @@ class EucaryotesCell:
                     f'end transcription and translation process')
     
     def detect_promoter_process(self, variables):
+        """
+        Detect the promoter of a DNA sequence, if found, the promoter is stored in the variables object.
+        The DNA sequence is split by the promoter regions and stored in the variables object.
+        """
         # detect promoter
         variables.dna_sequences_to_transcript_list = self.nucleus.find_promoter(
             variables.dna_sequence, variables)
@@ -149,6 +161,9 @@ class EucaryotesCell:
                 f'{variables.promoters_count} promoters')
     
     def transcription_and_translation_process(self, dna_sequence, variables, seq_count):
+        """
+        Start the transcription and translation of a DNA sequence.
+        """
         # init list to store simpy processes for finding complement base
         variables.complement_base_queue_dict[seq_count] = []
 
@@ -181,6 +196,9 @@ class EucaryotesCell:
         variables.end_translation_time.append(self.env.now)
     
     def translation_process(self, variables, mrna, seq_count):
+        """
+        Start the translation of a mRNA sequence.
+        """
         # translation process
         translation_process = self.env.process(self.ribosome.translate(mrna, variables, seq_count))
         variables.translation_queue.append(translation_process)

@@ -219,13 +219,13 @@ def dict_to_dataframe(resources_dict):
 def resources_request_wait_time(rna_polymerase_df, ribosome_df):
     plt.figure(figsize=(20, 5))
     plt.plot(rna_polymerase_df['request_time'], rna_polymerase_df['wait_time'], 
-        '.', label='RNA polymerase')
+        'm.', label='RNA polymerase')
     plt.plot(rna_polymerase_df['request_time'], rna_polymerase_df['wait_time'], 
-        '--', alpha=0.5, label='RNA polymerase')
+        'm--', alpha=0.5)
     plt.plot(ribosome_df['request_time'], ribosome_df['wait_time'], 
-        '.', label='Ribosome')
+        'g.', label='Ribosome')
     plt.plot(ribosome_df['request_time'], ribosome_df['wait_time'], 
-        '--', alpha=0.5, label='Ribosome')
+        'g--', alpha=0.5)
     plt.title('Resources request time vs wait time')
     plt.xlabel('Request time (s)')
     plt.ylabel('Wait time (s)')
@@ -341,5 +341,21 @@ def compare_process_time(results_df_list):
     plt.title('Process time')
     plt.xlabel('Start process time (s)')
     plt.ylabel('Process time (s)')
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.show()
+
+def compare_mrna_lifetime(results_df_list):
+    plt.figure(figsize=(20, 5))
+    for i, results_df in enumerate(results_df_list):
+        mrna_lifetime = compute_mrna_lifetime(results_df)
+        length_mrna = results_df[results_df['mrna_sequences'].notna()]['length_mrna_sequences']
+        length_mrna = [ast.literal_eval(x) if isinstance(x, str) else x for x in length_mrna]
+        length_mrna = [item for sublist in length_mrna for item in sublist]
+        plt.scatter(length_mrna, mrna_lifetime, label=f'Model {i}')
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.title('Mature mRNA lifetime')
+    plt.xlabel('mRNA length')
+    plt.ylabel('mRNA lifetime (s)')
     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     plt.show()
