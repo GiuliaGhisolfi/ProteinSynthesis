@@ -9,6 +9,61 @@ DATA_PATH = 'data/'
 CODONS_PATH = DATA_PATH + 'codons.json'
 
 class EucaryotesCell:
+    """
+    Eucaryotes Cell class, this class models the eucaryotes cell and rhe protein synthesis process.
+
+    Parameters
+    ----------
+    environment : simpy.Environment
+        The simulation environment.
+    number_rna_polymerases : int
+        The number of RNA polymerases in the cell.
+    number_ribosomes : int
+        The number of ribosomes in the cell.
+    number_rna_transfers_per_codon : int
+        Number of RNA transfer per codon in the simulation environment is a random integer in 
+        [0.9*number_rna_transfers_per_codon, 1.1*number_rna_transfers_per_codon].
+    uracil_initial_amount : int
+        The initial amount of uracil in the cell.
+    adenine_initial_amount : int
+        The initial amount of adenine in the cell.
+    guanine_initial_amount : int
+        The initial amount of guanine in the cell.
+    cytosine_initial_amount : int
+        The initial amount of cytosine in the cell.
+    random_seed : int
+        The random seed for the simulation environment.
+    verbose : bool, optional
+        If True, print simulation information. Default is False.
+
+    Attributes
+    ----------
+    env : simpy.Environment
+        The simulation environment.
+    verbose : bool
+        If True, print simulation information.
+    extron_list : list
+        The list of extron sequences.
+    amminoacids : list
+        The list of amminoacids.
+    nucleotides : Nucleotides
+        The nucleotides in the cell.
+    nucleus : Nucleus
+        The nucleus of the cell.
+    ribosome : Ribosome
+        The ribosome of the cell.
+
+    Methods
+    -------
+    synthesize_protein(variables)
+        Start the transcription and translation of a DNA sequence.
+    detect_promoter_process(variables)
+        Detect the promoter of a DNA sequence.
+    transcription_and_translation_process(dna_sequence, variables, seq_count)  
+        Start the transcription and translation of a DNA sequence.
+    translation_process(variables, mrna, seq_count)
+        Start the translation of a mRNA sequence.
+    """
     def __init__(self, environment, number_rna_polymerases,number_ribosomes, number_rna_transfers_per_codon, 
             uracil_initial_amount, adenine_initial_amount, guanine_initial_amount,
             cytosine_initial_amount, random_seed, verbose=False):
