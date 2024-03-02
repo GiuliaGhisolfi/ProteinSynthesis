@@ -13,6 +13,12 @@ CODONS = [
     'AUU', 'AUC', 'AUA', 'AUG', 'AGU', 'AGC', 'AGA', 'AGG', 'AAU', 'AAC', 'AAA', 'AAG', 'ACU', 'ACC', 'ACA', 'ACG',
     'GUU', 'GUC', 'GUA', 'GUG', 'GCU', 'GCC', 'GCA', 'GCG', 'GAU', 'GAC', 'GAA', 'GAG', 'GGU', 'GGC', 'GGA', 'GGG'
     ]
+AMINOACIDS = {
+    'Trp': 'Tryptophan', 'Cys': 'Cysteine', 'Tyr': 'Tyrosine', 'Phe': 'Phenylalanine', 'Leu': 'Leucine',
+    'Ser': 'Serine', 'Pro': 'Proline', 'His': 'Histidine', 'Gln': 'Glutamine', 'Arg': 'Arginine', 
+    'Ile': 'Isoleucine', 'Met': 'Methionine', 'Thr': 'Threonine', 'Asn': 'Asparagine', 'Lys': 'Lysine', 
+    'Val': 'Valine', 'Ala': 'Alanine', 'Asp': 'Aspartic acid', 'Glu': 'Glutamic acid', 'Gly': 'Glycine'
+}
 
 def barplot_proteins_number(results_df):
     plt.figure(figsize=(20, 5))
@@ -50,12 +56,10 @@ def plot_number_proteins_per_length_mrna(results_df):
     number_of_proteins_synthesized_per_mrna = [int(item) for sublist in 
         number_of_proteins_synthesized_per_mrna for item in sublist]
     
-    # sort the lists
-    length_mrna, number_of_proteins_synthesized_per_mrna = zip(*sorted(
-        zip(length_mrna, number_of_proteins_synthesized_per_mrna)))
-    
     plt.figure(figsize=(20, 5))
-    plt.plot(length_mrna, number_of_proteins_synthesized_per_mrna, '.--')
+    plt.scatter(length_mrna, number_of_proteins_synthesized_per_mrna)
+    plt.xscale('log')
+    plt.yscale('log')
     plt.title('Number of proteins synthesized per mRNA length')
     plt.xlabel('mRNA length')
     plt.ylabel('Number of proteins')
@@ -117,7 +121,7 @@ def hist_process_time(results_df):
     data_df = results_df[results_df['mrna_sequences'].notna()]
     process_time = data_df['end_process_time'] - data_df['start_process_time']
     plt.figure(figsize=(20, 5))
-    plt.hist(process_time, bins=100)
+    plt.hist(process_time, bins=100, edgecolor='black')
     plt.title('Process time')
     plt.xlabel('Process time (s)')
     plt.ylabel('Number of DNA sequences')
@@ -133,6 +137,35 @@ def plot_process_time(results_df):
     plt.title('Process time')
     plt.xlabel('Start process time (s)')
     plt.ylabel('Process time (s)')
+    plt.show()
+
+def compute_mrna_lifetime(results_df):
+    end_translation_time = series_to_list(results_df[results_df['mrna_sequences'].notna()]['end_translation_time'])
+    start_transcription_time = series_to_list(results_df[results_df['mrna_sequences'].notna()]['start_translation_time'])
+
+    mrna_lifetime = np.array(end_translation_time) - np.array(start_transcription_time)
+
+    return mrna_lifetime
+
+def series_to_list(series):
+    series = [ast.literal_eval(x) if isinstance(x, str) else x for x in series]
+    series = [int(item) for sublist in series for item in sublist]
+    return series
+
+def plot_mrna_lifetime(results_df):
+    mrna_lifetime = compute_mrna_lifetime(results_df)
+
+    length_mrna = results_df[results_df['mrna_sequences'].notna()]['length_mrna_sequences']
+    length_mrna = [ast.literal_eval(x) if isinstance(x, str) else x for x in length_mrna]
+    length_mrna = [item for sublist in length_mrna for item in sublist]
+    
+    plt.figure(figsize=(20, 5))
+    plt.scatter(length_mrna, mrna_lifetime)
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.title('Mature mRNA lifetime')
+    plt.xlabel('mRNA length')
+    plt.ylabel('mRNA lifetime (s)')
     plt.show()
 
 def level_series_over_time(nucleotide_dict, time_unit=TIME_UNIT):
@@ -184,7 +217,7 @@ def dict_to_dataframe(resources_dict):
     return df
 
 def resources_request_wait_time(rna_polymerase_df, ribosome_df):
-    plt.figure(figsize=(10, 5))
+    plt.figure(figsize=(20, 5))
     plt.plot(rna_polymerase_df['request_time'], rna_polymerase_df['wait_time'], label='RNA polymerase')
     plt.plot(ribosome_df['request_time'], ribosome_df['wait_time'], label='Ribosome')
     plt.title('Resources request time vs wait time')
@@ -202,15 +235,16 @@ def plot_codons_request(file_path, time_unit=TIME_UNIT):
     max_time = max([max(codon_dict['request_time']) for codon_dict in codon_dict_list])
     time = np.arange(0, max_time, time_unit)
 
-    plt.figure(figsize=(18, 10))
+    plt.figure(figsize=(20, 7))
     for codon_dict, codon in zip(codon_dict_list, CODONS):
         requestes = requestes_serie_over_time(codon_dict, time_unit)
         requestes.extend([0] * (len(time) - len(requestes)))
-        plt.plot(time, requestes, '.--', alpha=0.5, label=codon)
+        plt.plot(time, requestes, '.', alpha=0.5, label=codon)
     plt.title('Number of requests of tRNA')
+    plt.yscale('log')
     plt.ylabel('Number of requests')
     plt.xlabel('Request time (s)')
-    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=2)
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=3)
     plt.show()
 
 def plot_codons_request_per_aminoacid(file_path, time_unit=TIME_UNIT):
@@ -221,26 +255,29 @@ def plot_codons_request_per_aminoacid(file_path, time_unit=TIME_UNIT):
     
     with open(CODONS_PATH) as f:
         codons_dict = json.load(f)
-    
-    max_time = max([max(codon_dict['request_time']) for codon_dict in codon_dict_list])
-    time = np.arange(0, max_time, time_unit)
 
-    plt.subplots(4, 5, figsize=(20, 10))
-    # subplot for each aminoacid (codons_dict keys: codon, value: aminoacid)
-    for i, (aminoacid, codons) in enumerate(codons_dict.items()):
-        for codon in codons:
-            print(codon) # FIXME
-            requestes = requestes_serie_over_time(codon_dict_list[CODONS.index(codon)], time_unit)
-            requestes.extend([0] * (len(time) - len(requestes)))
-            plt.subplot(4, 5, i+1)
-            plt.plot(time, requestes, '.--', alpha=0.5, label=codon)
-            plt.title(aminoacid)
-            plt.ylabel('Number of requests')
+    # map each aminoacid to a number, exclude stop codons
+    aminoacids = list(set(codons_dict.values()))
+    aminoacids.remove('STOP')
+
+    plt.figure(figsize=(20, 18))
+    for codon, aminoacid in codons_dict.items():
+        if aminoacid != 'STOP':
+            i = aminoacids.index(aminoacid)
+            #requestes = requestes_serie_over_time(codon_dict_list[CODONS.index(codon)], time_unit)
+            time_list = codon_dict_list[CODONS.index(codon)]['request_time']
+            plt.subplot(5, 4, i+1)
+            plt.hist(time_list, bins=50, alpha=0.3, edgecolor='black', label=codon)
+            plt.title(AMINOACIDS[aminoacid])
             plt.xlabel('Request time (s)')
-            plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=2)
+            plt.ylabel('Number of requests')
+            plt.subplots_adjust(hspace=0.3)
+            plt.legend()
+    #plt.axes().set_aspect('equal')
     plt.show()
 
 def requestes_serie_over_time(codons_dict, time_unit=TIME_UNIT):
+    # return a serie of requests over time
     time_list = codons_dict['request_time']
 
     requestes = [0]
@@ -297,4 +334,5 @@ def compare_process_time(results_df_list):
     plt.title('Process time')
     plt.xlabel('Start process time (s)')
     plt.ylabel('Process time (s)')
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     plt.show()

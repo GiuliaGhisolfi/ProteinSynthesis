@@ -1,5 +1,6 @@
 import json
 import itertools
+import random
 from src.process.transcription import Nucleus
 from src.process.translation import Ribosome
 from src.resources.nucleotides import Nucleotides
@@ -13,6 +14,7 @@ class EucaryotesCell:
             cytosine_initial_amount, random_seed, verbose=False):
         self.env = environment
         self.verbose = verbose
+        random.seed(random_seed)
 
         self.extron_list = json.load(open(CODONS_PATH)).keys()
         self.amminoacids = json.load(open(CODONS_PATH)).values()
@@ -138,4 +140,5 @@ class EucaryotesCell:
             variables.translation_queue.pop(0)
         
         if not mrna_degradated:
+            yield self.env.timeout(round(random.random()*10, ndigits=4)) # time to find the next ribosome
             yield self.env.process(self.translation_process(variables, mrna, seq_count))
