@@ -218,8 +218,14 @@ def dict_to_dataframe(resources_dict):
 
 def resources_request_wait_time(rna_polymerase_df, ribosome_df):
     plt.figure(figsize=(20, 5))
-    plt.plot(rna_polymerase_df['request_time'], rna_polymerase_df['wait_time'], label='RNA polymerase')
-    plt.plot(ribosome_df['request_time'], ribosome_df['wait_time'], label='Ribosome')
+    plt.plot(rna_polymerase_df['request_time'], rna_polymerase_df['wait_time'], 
+        '.', label='RNA polymerase')
+    plt.plot(rna_polymerase_df['request_time'], rna_polymerase_df['wait_time'], 
+        '--', alpha=0.5, label='RNA polymerase')
+    plt.plot(ribosome_df['request_time'], ribosome_df['wait_time'], 
+        '.', label='Ribosome')
+    plt.plot(ribosome_df['request_time'], ribosome_df['wait_time'], 
+        '--', alpha=0.5, label='Ribosome')
     plt.title('Resources request time vs wait time')
     plt.xlabel('Request time (s)')
     plt.ylabel('Wait time (s)')
@@ -303,7 +309,8 @@ def create_model_df(parameters_dict_list):
 def compare_wait_time(df_list):
     plt.figure(figsize=(20, 5))
     for i, df in enumerate(df_list):
-        plt.plot(df['request_time'], df['wait_time'], '.--', label=f'Model {i}')
+        length = len(df['wait_time'])
+        plt.plot(df['request_time'][:length], df['wait_time'], '.--', label=f'Model {i}')
     plt.title('Resources request time vs wait time')
     plt.xlabel('Request time (s)')
     plt.ylabel('Wait time (s)')

@@ -60,7 +60,7 @@ class EucaryotesCell:
         # continue with transcription and translation if promoters are found
         if variables.dna_sequences_to_transcript_list is not None:
             sequences_count = itertools.count()
-            variables.init_transcription_translation_var() # init variables
+            variables._init_transcription_translation_var() # init variables
             
             # transcription and translation each promoter region
             for dna_sequence in variables.dna_sequences_to_transcript_list:
