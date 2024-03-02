@@ -26,6 +26,52 @@ CYTOSINE_INITIAL_AMOUNT = 5000
 RANDOM_SEED = None
 
 class ProteinSinthesisProcess:
+    """
+    Class to simulate the protein synthesis process in eucaryotes cells.
+
+    Parameters
+    ----------
+    dna_sequences_df: pandas.DataFrame
+        DataFrame containing a column 'sequence' with the DNA sequences to be synthesized.
+    number_resources: int, optional
+        Number of resources available in the simulation environment. The default is 200.
+    number_rna_polymerases: int, optional
+        Number of RNA polymerases in the simulation environment. The default is 3.
+    number_ribosomes: int, optional
+        Number of ribosomes in the simulation environment. The default is 2.
+    number_rna_transfers_per_codon: int, optional
+        Number of RNA transfer per codon in the simulation environment is a random integer in 
+        [0.9*number_rna_transfers_per_codon, 1.1*number_rna_transfers_per_codon]. The default is 2000.
+    uracil_initial_amount: int, optional
+        Initial amount of uracil in the simulation environment. The default is 5000.
+    adenine_initial_amount: int, optional
+        Initial amount of adenine in the simulation environment. The default is 5000.
+    guanine_initial_amount: int, optional
+        Initial amount of guanine in the simulation environment. The default is 5000.
+    cytosine_initial_amount: int, optional
+        Initial amount of cytosine in the simulation environment. The default is 5000.
+    random_seed: int, optional
+        Random seed to reproduce the results. The default is None.
+    verbose: bool, optional
+        If True, print the simulation process. The default is False.
+
+    Methods
+    -------
+    run(simulation_time)
+        Run the simulation process.
+
+        parameters:
+            simulation_time: int, optional
+                Simulation time. The default is 1000.
+
+    save_process(folder_test_name)
+        Save the results of the simulation process.
+
+        parameters:
+            folder_test_name: str, optional
+                Name of the folder generated into the results folder to save the results. 
+                By default, the results are saved in the root of the results folder.
+    """
     def __init__(self, 
             dna_sequences_df, 
             number_resources=NUMBER_RESOURCES,
@@ -63,11 +109,11 @@ class ProteinSinthesisProcess:
         self.available =  {row['sequence']: True if row['protein_synthesized']==None else False
             for _, row in self.dna_sequences_df.iterrows()}
         
-        random.seed(random_seed)
-        self.env = simpy.Environment()
+        random.seed(random_seed) # set the random seed
+        self.env = simpy.Environment() # create the Simpy simulation environment
         self.resources = EucaryotesCellResource(
             self.env, capacity=number_resources, save_history=False) 
-        self.env.process(self.setup_process())
+        self.env.process(self._setup_process())
 
         self.eucaryotes_cell = EucaryotesCell(
             environment=self.env, 
@@ -109,6 +155,9 @@ class ProteinSinthesisProcess:
             f'{trna_info}.')
     
     def run(self, simulation_time=SIM_TIME):
+        """
+        Run the simulation process.
+        """
         print('Simulation started')
         self.env.run(until=simulation_time)
 
@@ -121,26 +170,36 @@ class ProteinSinthesisProcess:
         print(f'End simulation: {proteins_number} proteins synthesized from '
             f'{dna_sequences_processed_number} DNA sequences.')
     
-    def setup_process(self):
+    def _setup_process(self):
+        """
+        Setup the simulation process.
+        Chose the dna sequences, check the availability of the dna sequences to 
+        be synthesized and start the protein synthesis process.
+        """
         process_queue = []
         sequences_count = itertools.count()
 
         while True:
             dna_sequence = random.choice(self.dna_sequences)
             if self.available[dna_sequence]:
+                # initialize the variables related to the dna sequence
                 variables = EucaryotesCellVariables()
                 variables.dna_sequence = dna_sequence
                 variables.sequence_count = next(sequences_count)
 
-                process_queue.append(self.env.process(self.process(variables)))
+                process_queue.append(self.env.process(self._process(variables)))
                 
                 self.available[dna_sequence] = False
-                yield self.env.timeout(round(random.random()*50, ndigits=4)) # time between start of protein synthesis
+                # time between start of protein synthesis
+                yield self.env.timeout(round(random.random()*50, ndigits=4))
 
                 while process_queue: # wait for all the protein synthesis to be completed
                     process_queue.pop(0)
         
-    def process(self, variables):
+    def _process(self, variables):
+        """
+        Start the protein synthesis process.
+        """
         # Synthesize dna sequences while the simulation is running       
         with self.resources.request() as request:
             if self.verbose:
@@ -157,12 +216,15 @@ class ProteinSinthesisProcess:
             variables.end_process_time = self.env.now
 
             # save the results
-            self.save_proteins_synthesized_in_df(variables)
+            self._save_proteins_synthesized_in_df(variables)
 
             if self.verbose:
                 print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthetis ended')
         
-    def save_proteins_synthesized_in_df(self, variables):
+    def _save_proteins_synthesized_in_df(self, variables):
+        """
+        Save the results of the protein synthesis process in the dataframe.
+        """
         self.dna_sequences_df = save_proteins_synthesized(
             dna_sequences_df=self.dna_sequences_df, 
             dna_sequence=variables.get_dna(),
@@ -180,13 +242,16 @@ class ProteinSinthesisProcess:
             )
         
     def save_process(self, folder_test_name=''):
+        """
+        Save the results of the simulation process.
+        """
         # create folder to save the results
         if folder_test_name != '':
             if not os.path.exists(RESULTS_FOLDER+folder_test_name):
                 os.mkdir(RESULTS_FOLDER+folder_test_name)
             folder_test_name = folder_test_name + '/'
 
-        # save dataframe        
+        # save dataframe with the results    
         df_to_save = self.dna_sequences_df[self.dna_sequences_df['protein_synthesized'].notna()]
         df_to_save = df_to_save.apply(post_processing_results, axis=1)
         df_to_save.to_csv(RESULTS_FOLDER+folder_test_name+'results.csv')

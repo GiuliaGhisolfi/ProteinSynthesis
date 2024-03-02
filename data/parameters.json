@@ -1,5 +1,5 @@
 {
-    "simulation_time": [10e+4],
+    "simulation_time": [1e+4],
     "number_resources": [1e+6],
     "number_rna_polymerases": [1e+3, 1e+5],
     "number_ribosomes": [2e+2, 2e+3],
