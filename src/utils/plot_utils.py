@@ -160,9 +160,9 @@ def plot_mrna_lifetime(results_df):
     length_mrna = [item for sublist in length_mrna for item in sublist]
     
     plt.figure(figsize=(20, 5))
-    plt.scatter(length_mrna, mrna_lifetime)
-    plt.xscale('log')
-    plt.yscale('log')
+    plt.scatter(length_mrna, mrna_lifetime, marker='.')
+    #plt.xscale('log')
+    #plt.yscale('log')
     plt.title('Mature mRNA lifetime')
     plt.xlabel('mRNA length')
     plt.ylabel('mRNA lifetime (s)')
@@ -351,9 +351,9 @@ def compare_mrna_lifetime(results_df_list):
         length_mrna = results_df[results_df['mrna_sequences'].notna()]['length_mrna_sequences']
         length_mrna = [ast.literal_eval(x) if isinstance(x, str) else x for x in length_mrna]
         length_mrna = [item for sublist in length_mrna for item in sublist]
-        plt.scatter(length_mrna, mrna_lifetime, label=f'Model {i}')
-    plt.xscale('log')
-    plt.yscale('log')
+        plt.scatter(length_mrna, mrna_lifetime, marker='.', label=f'Model {i}')
+    #plt.xscale('log')
+    #plt.yscale('log')
     plt.title('Mature mRNA lifetime')
     plt.xlabel('mRNA length')
     plt.ylabel('mRNA lifetime (s)')
