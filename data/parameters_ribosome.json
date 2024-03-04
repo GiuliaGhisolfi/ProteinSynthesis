@@ -1,0 +1,13 @@
+{
+    "simulation_time": [3600],
+    "number_resources": [1e+5],
+    "number_rna_polymerases": [1e+3],
+    "number_ribosomes": [2, 50, 1e+2, 1e+3],
+    "number_rna_transfers_per_codon": [1e+4],
+    "uracil_initial_amount": [5e+4],
+    "adenine_initial_amount": [5e+4],
+    "guanine_initial_amount": [5e+4],
+    "cytosine_initial_amount": [5e+4],
+    "random_seed": [42],
+    "verbose": [false]
+}
