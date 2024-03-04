@@ -57,12 +57,12 @@ def plot_number_proteins_per_length_mrna(results_df):
         number_of_proteins_synthesized_per_mrna for item in sublist]
     
     plt.figure(figsize=(20, 5))
-    plt.scatter(length_mrna, number_of_proteins_synthesized_per_mrna)
+    plt.scatter(length_mrna, number_of_proteins_synthesized_per_mrna, marker='.')
     plt.xscale('log')
     plt.yscale('log')
-    plt.title('Number of proteins synthesized per mRNA length')
+    plt.title('Number of proteins synthesized per mRNA vs mRNAlength')
     plt.xlabel('mRNA length')
-    plt.ylabel('Number of proteins')
+    plt.ylabel('Number of proteins synthesized per mrna')
     plt.show()
 
 def plot_cumulative_proteins_number_over_time(results_df):
@@ -89,7 +89,7 @@ def plot_proteins_number_over_time(results_df):
     time, number_of_proteins_synthesized = zip(*sorted(zip(time, number_of_proteins_synthesized)))
 
     plt.figure(figsize=(20, 5))
-    plt.plot(time, number_of_proteins_synthesized, '.--')
+    plt.plot(time, number_of_proteins_synthesized, '.', alpha=0.5)
     plt.title('Number of proteins synthesized over time')
     plt.xlabel('Time (s)')
     plt.ylabel('Number of proteins')
@@ -114,7 +114,7 @@ def barplot_proteins_length(results_df):
     plt.bar(protein_length_final, protein_length_frequncy)
     plt.title('Proteins length')
     plt.xlabel('Proteins length')
-    plt.ylabel('Number of proteins')
+    plt.ylabel('Frequency')
     plt.show()
 
 def hist_process_time(results_df):
@@ -133,7 +133,7 @@ def plot_process_time(results_df):
     time = data_df['start_process_time']
     time, process_time = zip(*sorted(zip(time, process_time)))
     plt.figure(figsize=(20, 5))
-    plt.plot(time, process_time, '.--')
+    plt.plot(time, process_time, '.--', alpha=0.5)
     plt.title('Process time')
     plt.xlabel('Start process time (s)')
     plt.ylabel('Process time (s)')
@@ -161,10 +161,19 @@ def plot_mrna_lifetime(results_df):
     
     plt.figure(figsize=(20, 5))
     plt.scatter(length_mrna, mrna_lifetime, marker='.')
-    #plt.xscale('log')
-    #plt.yscale('log')
+    plt.xscale('log')
+    plt.yscale('log')
     plt.title('Mature mRNA lifetime')
     plt.xlabel('mRNA length')
+    plt.ylabel('mRNA lifetime (s)')
+    plt.show()
+
+    time = results_df[results_df['mrna_sequences'].notna()]['start_process_time']
+    time, mrna_lifetime = zip(*sorted(zip(time, mrna_lifetime)))
+    plt.figure(figsize=(20, 5))
+    plt.plot(time, mrna_lifetime, '.--', alpha=0.5)
+    plt.title('Mature mRNA lifetime')
+    plt.xlabel('Start process time (s)')
     plt.ylabel('mRNA lifetime (s)')
     plt.show()
 
