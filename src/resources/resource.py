@@ -1,7 +1,7 @@
 import simpy.resources.resource as SimpyResource
 import json
 
-class EucaryotesCellResource(SimpyResource.Resource):
+class EukaryoticCellResource(SimpyResource.Resource):
     """
     This class extends the simpy Resource class to add the history of the queue
     and the usage of the resource. The history is saved in a dictionary with the

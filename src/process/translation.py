@@ -3,7 +3,7 @@ from Bio.SeqUtils import seq3
 from Bio import BiopythonWarning
 import warnings
 import random
-from src.resources.resource import EucaryotesCellResource
+from src.resources.resource import EukaryoticCellResource
 from src.resources.transfer_mrna import TransferRNA
 
 START_CODON = 'AUG' # start codon
@@ -44,7 +44,7 @@ class Ribosome:
     ----------
     env : simpy.Environment
         The simulation environment.
-    ribosomes : EucaryotesCellResource 
+    ribosomes : EukaryoticCellResource 
         The ribonucleoprotein complex in the cytoplasm.
     rna_transfer : TransferRNA
         The transfer RNA in the cell.
@@ -78,7 +78,7 @@ class Ribosome:
             codons_list, nucleotides, amminoacids, random_seed):
         # ribonucleoprotein complex in the cytoplasm
         self.env = environment
-        self.ribosomes = EucaryotesCellResource(self.env, capacity=number_ribosomes)
+        self.ribosomes = EukaryoticCellResource(self.env, capacity=number_ribosomes)
         self.rna_transfer = TransferRNA(self.env, amount=number_rna_transfers_per_codon,
             codons_list=codons_list, random_seed=random_seed)
         self.nucleotides = nucleotides

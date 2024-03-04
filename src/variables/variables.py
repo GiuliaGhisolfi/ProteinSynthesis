@@ -1,7 +1,7 @@
 
-class EucaryotesCellVariables:
+class EukaryoticCellVariables:
     """
-    Class to store the variables of the eucaryotes cell simulation.
+    Class to store the variables of the eukaryotic cell simulation.
 
     Attributes
     ----------

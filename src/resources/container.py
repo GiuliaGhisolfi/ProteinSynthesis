@@ -5,7 +5,7 @@ import random
 MIN_DEGRADATION_TIME = 60 # seconds
 MAX_DEGRADATION_TIME = 180 # seconds
 
-class EucaryotesCellContainer(SimpyContainer.Container):
+class EukaryoticCellContainer(SimpyContainer.Container):
     """
     This class extends the simpy Container class to add the degradation of the
     amount in the container. The degradation time is a random value between

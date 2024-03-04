@@ -3,9 +3,9 @@ import random
 import itertools
 import json
 import os
-from src.process.protein_synthesis import EucaryotesCell
-from src.variables.variables import EucaryotesCellVariables
-from src.resources.resource import EucaryotesCellResource
+from src.process.protein_synthesis import EukaryoticCell
+from src.variables.variables import EukaryoticCellVariables
+from src.resources.resource import EukaryoticCellResource
 from src.utils.utils import save_proteins_synthesized, post_processing_results
 
 LENGTH_AMIO_GROUP = 4 # length of amino acid group
@@ -27,7 +27,7 @@ RANDOM_SEED = None
 
 class ProteinSinthesisProcess:
     """
-    Class to simulate the protein synthesis process in eucaryotes cells.
+    Class to simulate the protein synthesis process in eukaryotic cells.
 
     Parameters
     ----------
@@ -101,11 +101,11 @@ class ProteinSinthesisProcess:
         
         random.seed(random_seed) # set the random seed
         self.env = simpy.Environment() # create the Simpy simulation environment
-        self.resources = EucaryotesCellResource(
+        self.resources = EukaryoticCellResource(
             self.env, capacity=number_resources, save_history=False) 
         self.env.process(self._setup_process())
 
-        self.eucaryotes_cell = EucaryotesCell(
+        self.eukaryotic_cell = EukaryoticCell(
             environment=self.env, 
             number_rna_polymerases=number_rna_polymerases,
             number_ribosomes=number_ribosomes, 
@@ -124,20 +124,20 @@ class ProteinSinthesisProcess:
         return (f'Protein Sinthesis Process:\n'
             f'{len(self.dna_sequences)} dna sequences to synthesize,\n'
             f'{self.resources.capacity} resources available,\n'
-            f'{self.eucaryotes_cell.nucleus.rna_polymerase.capacity} RNA polymerases,\n'
-            f'{self.eucaryotes_cell.ribosome.ribosomes.capacity} ribosomes,\n'
+            f'{self.eukaryotic_cell.nucleus.rna_polymerase.capacity} RNA polymerases,\n'
+            f'{self.eukaryotic_cell.ribosome.ribosomes.capacity} ribosomes,\n'
             f'{self.uracil_initial_amount} uracil bases,\n'
             f'{self.adenine_initial_amount} adenine bases,\n'
             f'{self.guanine_initial_amount} guanine bases,\n'
             f'{self.cytosine_initial_amount} cytosine bases.')
     
     def __repr__(self):
-        trna_info = ''.join([f",\n{self.eucaryotes_cell.ribosome.rna_transfer.trna_resources_dict[codon].capacity} transfer RNA for {codon} codon"for codon in self.codons])
+        trna_info = ''.join([f",\n{self.eukaryotic_cell.ribosome.rna_transfer.trna_resources_dict[codon].capacity} transfer RNA for {codon} codon"for codon in self.codons])
         return (f'Protein Sinthesis Process:\n'
             f'{len(self.dna_sequences)} dna sequences to synthesize,\n'
             f'{self.resources.capacity} resources available,\n'
-            f'{self.eucaryotes_cell.nucleus.rna_polymerase.capacity} RNA polymerases,\n'
-            f'{self.eucaryotes_cell.ribosome.ribosomes.capacity} ribosomes,\n'
+            f'{self.eukaryotic_cell.nucleus.rna_polymerase.capacity} RNA polymerases,\n'
+            f'{self.eukaryotic_cell.ribosome.ribosomes.capacity} ribosomes,\n'
             f'{self.uracil_initial_amount} uracil bases,\n'
             f'{self.adenine_initial_amount} adenine bases,\n'
             f'{self.guanine_initial_amount} guanine bases,\n'
@@ -178,7 +178,7 @@ class ProteinSinthesisProcess:
             dna_sequence = random.choice(self.dna_sequences)
             if self.available[dna_sequence]:
                 # initialize the variables related to the dna sequence
-                variables = EucaryotesCellVariables()
+                variables = EukaryoticCellVariables()
                 variables.dna_sequence = dna_sequence
                 variables.sequence_count = next(sequences_count)
 
@@ -197,7 +197,7 @@ class ProteinSinthesisProcess:
 
         Parameters
         ----------
-        variables: EucaryotesCellVariables
+        variables: EukaryoticCellVariables
             Variables related to the dna sequence to be synthesized.
         """
         # Synthesize dna sequences while the simulation is running       
@@ -212,7 +212,7 @@ class ProteinSinthesisProcess:
                 print(f'Time {self.env.now:.4f}: DNA Sequence {variables.sequence_count} synthesize started')
             variables.start_process_time = self.env.now
 
-            yield self.env.process(self.eucaryotes_cell.synthesize_protein(variables))
+            yield self.env.process(self.eukaryotic_cell.synthesize_protein(variables))
             variables.end_process_time = self.env.now
 
             # save the results
@@ -227,7 +227,7 @@ class ProteinSinthesisProcess:
 
         Parameters
         ----------
-        variables: EucaryotesCellVariables
+        variables: EukaryoticCellVariables
             Variables related to the dna sequence to be synthesized.
         """
         self.dna_sequences_df = save_proteins_synthesized(
@@ -267,20 +267,20 @@ class ProteinSinthesisProcess:
         df_to_save.to_csv(RESULTS_FOLDER+folder_test_name+'results.csv')
 
         # save resources history 
-        self.eucaryotes_cell.nucleus.rna_polymerase.save_history(
+        self.eukaryotic_cell.nucleus.rna_polymerase.save_history(
             RESULTS_FOLDER+folder_test_name+'rna_polymerase_history.json')
         
-        self.eucaryotes_cell.ribosome.ribosomes.save_history(
+        self.eukaryotic_cell.ribosome.ribosomes.save_history(
             RESULTS_FOLDER+folder_test_name+'ribosome_history.json')
         
         if not os.path.exists(RESULTS_FOLDER+folder_test_name+'nucleotides'):
             os.mkdir(RESULTS_FOLDER+folder_test_name+'nucleotides')
-        self.eucaryotes_cell.nucleotides.save_history(
+        self.eukaryotic_cell.nucleotides.save_history(
             RESULTS_FOLDER+folder_test_name+'nucleotides/'+'nucleotides_history.json')
 
         if not os.path.exists(RESULTS_FOLDER+folder_test_name+'rna_transfer'):
             os.mkdir(RESULTS_FOLDER+folder_test_name+'rna_transfer')
-        self.eucaryotes_cell.ribosome.rna_transfer.save_history(
+        self.eukaryotic_cell.ribosome.rna_transfer.save_history(
             RESULTS_FOLDER+folder_test_name+'rna_transfer/'+'rna_transfer_history.json')
         
         print('Process saved.')

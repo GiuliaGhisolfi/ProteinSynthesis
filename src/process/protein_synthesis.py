@@ -8,9 +8,9 @@ from src.resources.nucleotides import Nucleotides
 DATA_PATH = 'data/'
 CODONS_PATH = DATA_PATH + 'codons.json'
 
-class EucaryotesCell:
+class EukaryoticCell:
     """
-    Eucaryotes Cell class, this class models the eucaryotes cell and 
+    Eukaryotic Cell class, this class models the eukaryotic cell and 
     simulates the protein synthesis through the transcription and translation processes.
 
     Parameters
@@ -109,8 +109,8 @@ class EucaryotesCell:
 
         Parameters
         ----------
-        variables : object
-            The variables object.
+        variables : EukaryoticCellVariables
+            Variables related to the dna sequence to be synthesized.
         """
         # start transcription
         if self.verbose:

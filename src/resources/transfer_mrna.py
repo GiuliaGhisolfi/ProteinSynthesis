@@ -1,4 +1,4 @@
-from src.resources.resource import EucaryotesCellResource
+from src.resources.resource import EukaryoticCellResource
 import random
 import os
 DEV_AMOUNT_TRNA_PER_CODON = 0.1
@@ -44,7 +44,7 @@ class TransferRNA:
         trna_amount = random.randint(
             int(amount * (1 - DEV_AMOUNT_TRNA_PER_CODON)),
             int(amount * (1 + DEV_AMOUNT_TRNA_PER_CODON)))
-        return EucaryotesCellResource(self.env, capacity=trna_amount)
+        return EukaryoticCellResource(self.env, capacity=trna_amount)
     
     def save_history(self, path_to_save):
         base_path, ext = os.path.splitext(path_to_save)

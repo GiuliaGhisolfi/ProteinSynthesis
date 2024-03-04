@@ -1,4 +1,4 @@
-from src.resources.container import EucaryotesCellContainer
+from src.resources.container import EukaryoticCellContainer
 import os
 NUCLEOTIDES_NAMES = ['uracil', 'adenine', 'guanine', 'cytosine']
 
@@ -52,7 +52,7 @@ class Nucleotides:
         }
 
     def _init_nucleotide(self, amount, random_seed):
-        return EucaryotesCellContainer(
+        return EukaryoticCellContainer(
             self.env, capacity=float('inf'), init=amount, random_seed=random_seed)
 
     def request(self, nucleotide, amount):

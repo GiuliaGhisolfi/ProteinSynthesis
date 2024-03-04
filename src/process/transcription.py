@@ -1,6 +1,6 @@
 import random
 from src.variables.nucleotides_allocations import NucleotidesSymbolsAllocations
-from src.resources.resource import EucaryotesCellResource
+from src.resources.resource import EukaryoticCellResource
 
 BASE_COMPLEMENT_DNA2RNA = {
     'A': 'U', 
@@ -36,7 +36,7 @@ RNA_POLYMERASE_ERROR_RATE = 10e-4 # 1 error per 10^4 nucleotides
 
 class Nucleus:
     """
-    Nucleus class, this class models the nucleus of the eucaryotes cell 
+    Nucleus class, this class models the nucleus of the eukaryotic cell 
     and simulates the transcription process.
 
     Parameters
@@ -62,7 +62,7 @@ class Nucleus:
         The list of extron sequences.
     editing_sites_dict : dict
         The dictionary of editing sites.
-    rna_polymerase : EucaryotesCellResource
+    rna_polymerase : EukaryoticCellResource
         The RNA polymerase resource.
     nucleotides : Nucleotides
         The nucleotides in the cell.
@@ -109,7 +109,7 @@ class Nucleus:
         self.editing_sites_dict = dict(sorted(self.editing_sites_dict.items(), 
             key=lambda x: len(x[0]), reverse=False)) # sort by length of key
         
-        self.rna_polymerase = EucaryotesCellResource(self.env, capacity=number_rna_polymerases)
+        self.rna_polymerase = EukaryoticCellResource(self.env, capacity=number_rna_polymerases)
         self.nucleotides = nucleotides
 
         random.seed(random_seed)
