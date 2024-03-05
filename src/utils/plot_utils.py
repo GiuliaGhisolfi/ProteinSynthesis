@@ -328,56 +328,142 @@ def create_model_df(parameters_dict_list):
     df = pd.DataFrame(parameters_dict_list)
     return(df)
 
-def compare_wait_time(df_list):
-    plt.figure(figsize=(20, 5))
-    for i, df in enumerate(df_list):
-        length = len(df['wait_time'])
-        plt.plot(df['request_time'][:length], df['wait_time'], '.--', label=f'Model {i}')
-    plt.title('Resources request time vs wait time')
-    plt.xlabel('Request time (s)')
-    plt.ylabel('Wait time (s)')
-    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+def display_model_parameters(parameters_dict_list):
+    parameters_df = create_model_df(parameters_dict_list)
+    print('Parameters shared by all models:\n'
+        f'simulation_time: {parameters_df["simulation_time"].unique()[0]}\n'
+        f'number_resources: {parameters_df["number_resources"].unique()[0]}\n'
+        f'number_rna_transfers_per_codon: {parameters_df["number_rna_transfers_per_codon"].unique()[0]}\n'
+        f'uracil_initial_amount: {parameters_df["uracil_initial_amount"].unique()[0]}\n'
+        f'adenine_initial_amount: {parameters_df["adenine_initial_amount"].unique()[0]}\n'
+        f'guanine_initial_amount: {parameters_df["guanine_initial_amount"].unique()[0]}\n'
+        f'cytosine_initial_amount: {parameters_df["cytosine_initial_amount"].unique()[0]}\n')
+
+    print('Paramethers that differ between models:')
+    print(parameters_df[['number_rna_polymerases', 'number_ribosomes']])
+
+def compare_wait_time(df_list, df_list_seed, parameters_dict_list, resource_name):
+    plt.subplots(3, 2, figsize=(20, 10))
+
+    for i in range(len(df_list)):
+        plt.subplot(3, 2, i+1)
+        plt.plot(df_list[i]['wait_time'], '.--', alpha=0.5, label='Original')
+        plt.plot(df_list_seed[i]['wait_time'], '.--', alpha=0.5, label='Seed')
+        plt.xlabel('Time')
+        plt.ylabel('Wait time')
+        plt.title(f'Test {i}: ribosome {parameters_dict_list[i]["number_ribosomes"]}, rna_polymerase {parameters_dict_list[i]["number_rna_polymerases"]}')
+        plt.legend()
+    plt.suptitle('Comparison of wait time for '+ resource_name)
+    plt.tight_layout()
     plt.show()
 
-def compare_proteins_number_over_time(results_df_list):
-    plt.figure(figsize=(20, 5))
-    for i, results_df in enumerate(results_df_list):
-        number_of_proteins_synthesized = results_df[results_df['mrna_sequences'].notna()]['number_of_proteins_synthesized']
-        time = results_df[results_df['mrna_sequences'].notna()]['end_process_time']
+def compare_proteins_number_over_time(results_df_list, df_list_seed, parameters_dict_list):
+    plt.subplots(3, 2, figsize=(20, 10))
+    for i in range(len(results_df_list)):
+        number_of_proteins_synthesized = results_df_list[i][results_df_list[i]['mrna_sequences'
+            ].notna()]['number_of_proteins_synthesized']
+        time = results_df_list[i][results_df_list[i]['mrna_sequences'].notna()]['end_process_time']
         time, number_of_proteins_synthesized = zip(*sorted(zip(time, number_of_proteins_synthesized)))
-        plt.plot(time, number_of_proteins_synthesized, '.--', label=f'Model {i}')
-    plt.title('Number of proteins synthesized over time')
-    plt.xlabel('Time (s)')
-    plt.ylabel('Number of proteins')
-    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+
+        number_of_proteins_synthesized_seed = df_list_seed[i][df_list_seed[i]['mrna_sequences'
+            ].notna()]['number_of_proteins_synthesized']
+        time_seed = df_list_seed[i][df_list_seed[i]['mrna_sequences'].notna()]['end_process_time']
+        time_seed, number_of_proteins_synthesized_seed = zip(*sorted(zip(time_seed, number_of_proteins_synthesized_seed)))
+
+        plt.subplot(3, 2, i+1)
+        plt.plot(time, number_of_proteins_synthesized, '.--', alpha=0.5, label='Original')
+        plt.plot(time_seed, number_of_proteins_synthesized_seed, '.--', alpha=0.5, label='Seed')
+        plt.xlabel('Time')
+        plt.ylabel('Number of proteins')
+        plt.title(f'Test {i}: ribosome {parameters_dict_list[i]["number_ribosomes"]}, rna_polymerase {parameters_dict_list[i]["number_rna_polymerases"]}')
+        plt.legend()
+    plt.suptitle('Comparison of number of proteins synthesized over time')
+    plt.tight_layout()
     plt.show()
 
-def compare_process_time(results_df_list):
-    plt.figure(figsize=(20, 5))
-    for i, results_df in enumerate(results_df_list):
-        data_df = results_df[results_df['mrna_sequences'].notna()]
+def compare_number_proteins_per_length_mrna(results_df_list, df_list_seed, parameters_dict_list):
+    plt.subplots(3, 2, figsize=(20, 10))
+    for i in range(len(results_df_list)):
+        length_mrna = results_df_list[i][results_df_list[i]['mrna_sequences'].notna()]['length_mrna_sequences']
+        length_mrna = [ast.literal_eval(x) if isinstance(x, str) else x for x in length_mrna]
+        length_mrna = [int(item) for sublist in length_mrna for item in sublist]
+
+        number_of_proteins_synthesized_per_mrna = results_df_list[i][results_df_list[i]['mrna_sequences'
+            ].notna()]['number_of_proteins_synthesized_per_mrna']
+        number_of_proteins_synthesized_per_mrna = [ast.literal_eval(x) if isinstance(x, str) 
+            else x for x in number_of_proteins_synthesized_per_mrna]
+        number_of_proteins_synthesized_per_mrna = [int(item) for sublist in 
+            number_of_proteins_synthesized_per_mrna for item in sublist]
+
+        length_mrna_seed = df_list_seed[i][df_list_seed[i]['mrna_sequences'].notna()]['length_mrna_sequences']
+        length_mrna_seed = [ast.literal_eval(x) if isinstance(x, str) else x for x in length_mrna_seed]
+        length_mrna_seed = [item for sublist in length_mrna_seed for item in sublist]
+
+        number_of_proteins_synthesized_per_mrna_seed = df_list_seed[i][df_list_seed[i]['mrna_sequences'
+            ].notna()]['number_of_proteins_synthesized_per_mrna']
+        number_of_proteins_synthesized_per_mrna_seed = [ast.literal_eval(x) if isinstance(x, str) 
+            else x for x in number_of_proteins_synthesized_per_mrna_seed]
+        number_of_proteins_synthesized_per_mrna_seed = [int(item) for sublist in 
+            number_of_proteins_synthesized_per_mrna_seed for item in sublist]
+
+        plt.subplot(3, 2, i+1)
+        plt.scatter(length_mrna, number_of_proteins_synthesized_per_mrna, marker='.', label='Original')
+        plt.scatter(length_mrna_seed, number_of_proteins_synthesized_per_mrna_seed, marker='.', label='Seed')
+        plt.xscale('log')
+        plt.yscale('log')
+        plt.xlabel('mRNA length')
+        plt.ylabel('Number of proteins synthesized per mRNA')
+        plt.title(f'Test {i}: ribosome {parameters_dict_list[i]["number_ribosomes"]}, rna_polymerase {parameters_dict_list[i]["number_rna_polymerases"]}')
+        plt.legend()
+    plt.suptitle('Comparison of number of proteins synthesized per mRNA vs mRNA length')
+    plt.tight_layout()
+    plt.show()
+
+def compare_process_time(results_df_list, df_list_seed, parameters_dict_list):
+    plt.subplots(3, 2, figsize=(20, 10))
+    for i in range(len(results_df_list)):
+        data_df = results_df_list[i][results_df_list[i]['mrna_sequences'].notna()]
         process_time = data_df['end_process_time'] - data_df['start_process_time']
         time = data_df['start_process_time']
         time, process_time = zip(*sorted(zip(time, process_time)))
-        plt.plot(time, process_time, '.--', label=f'Model {i}')
-    plt.title('Process time')
-    plt.xlabel('Start process time (s)')
-    plt.ylabel('Process time (s)')
-    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+        plt.subplot(3, 2, i+1)
+        plt.plot(time, process_time, '.--', alpha=0.5, label='Original')
+        data_df_seed = df_list_seed[i][df_list_seed[i]['mrna_sequences'].notna()]
+        process_time_seed = data_df_seed['end_process_time'] - data_df_seed['start_process_time']
+        time_seed = data_df_seed['start_process_time']
+        time_seed, process_time_seed = zip(*sorted(zip(time_seed, process_time_seed)))
+        plt.plot(time_seed, process_time_seed, '.--', alpha=0.5, label='Seed')
+        plt.xlabel('Time')
+        plt.ylabel('Process time')
+        plt.title(f'Test {i}: ribosome {parameters_dict_list[i]["number_ribosomes"]}, rna_polymerase {parameters_dict_list[i]["number_rna_polymerases"]}')
+        plt.legend()
+    plt.suptitle('Comparison of process time')
+    plt.tight_layout()
     plt.show()
 
-def compare_mrna_lifetime(results_df_list):
-    plt.figure(figsize=(20, 5))
-    for i, results_df in enumerate(results_df_list):
-        mrna_lifetime = compute_mrna_lifetime(results_df)
-        length_mrna = results_df[results_df['mrna_sequences'].notna()]['length_mrna_sequences']
+def compare_mrna_lifetime(results_df_list, results_df_list_seed, parameters_dict_list):
+    plt.subplots(3, 2, figsize=(20, 10))
+    for i in range(len(results_df_list)):
+        mrna_lifetime = compute_mrna_lifetime(results_df_list[i])
+        length_mrna = results_df_list[i][results_df_list[i]['mrna_sequences'].notna()]['length_mrna_sequences']
         length_mrna = [ast.literal_eval(x) if isinstance(x, str) else x for x in length_mrna]
         length_mrna = [item for sublist in length_mrna for item in sublist]
-        plt.scatter(length_mrna, mrna_lifetime, marker='.', label=f'Model {i}')
-    #plt.xscale('log')
-    #plt.yscale('log')
-    plt.title('Mature mRNA lifetime')
-    plt.xlabel('mRNA length')
-    plt.ylabel('mRNA lifetime (s)')
-    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+
+        mrna_lifetime_seed = compute_mrna_lifetime(results_df_list_seed[i])
+        length_mrna_seed = results_df_list_seed[i][results_df_list_seed[i]['mrna_sequences'
+            ].notna()]['length_mrna_sequences']
+        length_mrna_seed = [ast.literal_eval(x) if isinstance(x, str) else x for x in length_mrna_seed]
+        length_mrna_seed = [item for sublist in length_mrna_seed for item in sublist]
+
+        plt.subplot(3, 2, i+1)
+        plt.scatter(length_mrna, mrna_lifetime, marker='.', label='Original')
+        plt.scatter(length_mrna_seed, mrna_lifetime_seed, marker='.', label='Seed')
+        plt.xscale('log')
+        plt.yscale('log')
+        plt.xlabel('mRNA length')
+        plt.ylabel('mRNA lifetime (s)')
+        plt.title(f'Test {i}: ribosome {parameters_dict_list[i]["number_ribosomes"]}, rna_polymerase {parameters_dict_list[i]["number_rna_polymerases"]}')
+        plt.legend()
+    plt.suptitle('Comparison of mature mRNA lifetime')
+    plt.tight_layout()
     plt.show()
