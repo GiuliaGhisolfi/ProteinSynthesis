@@ -241,27 +241,6 @@ def resources_request_wait_time(rna_polymerase_df, ribosome_df):
     plt.legend()
     plt.show()
 
-def plot_codons_request(file_path, time_unit=TIME_UNIT):
-    codon_dict_list = []
-    for codon in CODONS:
-        with open(file_path+f'rna_transfer_history_{codon}.json') as f:
-            codon_dict_list.append(json.load(f))
-    
-    max_time = max([max(codon_dict['request_time']) for codon_dict in codon_dict_list])
-    time = np.arange(0, max_time, time_unit)
-
-    plt.figure(figsize=(20, 7))
-    for codon_dict, codon in zip(codon_dict_list, CODONS):
-        requestes = requestes_serie_over_time(codon_dict, time_unit)
-        requestes.extend([0] * (len(time) - len(requestes)))
-        plt.plot(time, requestes, '.', alpha=0.5, label=codon)
-    plt.title('Number of requests of tRNA')
-    plt.yscale('log')
-    plt.ylabel('Number of requests')
-    plt.xlabel('Request time (s)')
-    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=3)
-    plt.show()
-
 def plot_codons_request_per_aminoacid(file_path, time_unit=TIME_UNIT):
     codon_dict_list = []
     for codon in CODONS:
@@ -279,16 +258,51 @@ def plot_codons_request_per_aminoacid(file_path, time_unit=TIME_UNIT):
     for codon, aminoacid in codons_dict.items():
         if aminoacid != 'STOP':
             i = aminoacids.index(aminoacid)
-            #requestes = requestes_serie_over_time(codon_dict_list[CODONS.index(codon)], time_unit)
             time_list = codon_dict_list[CODONS.index(codon)]['request_time']
             plt.subplot(5, 4, i+1)
             plt.hist(time_list, bins=50, alpha=0.3, edgecolor='black', label=codon)
             plt.title(AMINOACIDS[aminoacid])
             plt.xlabel('Request time (s)')
-            plt.ylabel('Number of requests')
+            if i%4 == 0:
+                plt.ylabel('Number of requests')
             plt.subplots_adjust(hspace=0.3)
             plt.legend()
-    #plt.axes().set_aspect('equal')
+    plt.show()
+
+def plot_codons_request(file_path, time_unit=TIME_UNIT):
+    codon_dict_list = []
+    for codon in CODONS:
+        with open(file_path+f'rna_transfer_history_{codon}.json') as f:
+            codon_dict_list.append(json.load(f))
+    
+    max_time = max([max(codon_dict['request_time']) for codon_dict in codon_dict_list])
+    time = np.arange(0, max_time, time_unit)
+
+    with open(CODONS_PATH) as f:
+        codons_dict = json.load(f)
+
+    # map each aminoacid to a number, exclude stop codons
+    aminoacids = list(set(codons_dict.values()))
+    #aminoacids.remove('STOP')
+
+    colors_list = ['b', 'm', 'g', 'r', 'c', 'y', 'k', 'orange', 'purple', 
+        'brown', 'pink', 'lightblue', 'lightseagreen',
+        'lightgreen', 'gray', 'lightcoral', 'lightcyan', 'lightyellow', 
+        'lightgrey', 'lightpink', 'lightsteelblue', ]
+
+    plt.figure(figsize=(20, 7))
+    for codon_dict, codon in zip(codon_dict_list, CODONS):
+        aminoacid = codons_dict[codon]
+        i = aminoacids.index(aminoacid)
+
+        requestes = requestes_serie_over_time(codon_dict, time_unit)
+        requestes.extend([0] * (len(time) - len(requestes)))
+
+        plt.plot(time, requestes, '.', color=colors_list[i], alpha=0.5, label=codon)
+    plt.title('Number of requests of tRNA')
+    plt.ylabel('Number of requests')
+    plt.xlabel('Request time (s)')
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), ncol=3)
     plt.show()
 
 def requestes_serie_over_time(codons_dict, time_unit=TIME_UNIT):
@@ -299,8 +313,7 @@ def requestes_serie_over_time(codons_dict, time_unit=TIME_UNIT):
     current_time = 0
     req = 0
     for time in time_list:
-        delta_t = np.round(time - current_time, 4)
-        time_steps = int(delta_t / time_unit)
+        time_steps = int(time / time_unit) - int(current_time / time_unit)
         if time_steps > 0:
             requestes.extend([req] * time_steps)
             req = 0
