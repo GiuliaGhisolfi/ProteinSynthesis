@@ -6,16 +6,16 @@ The process is simulated using `SimPy` framework, with customized classes tailor
 
 The process is modeled by the `EukaryoticCell` class, which coordinates transcription and translation through its components: the `Nucleus` class handles transcription, while the `Ribosome` class manages translation. 
 
-The throughput of DNA sequences processed concurrently during protein synthesis is regulated by the `Resource` object. Transcription relies on the availability of `RNA polymerase` as a critical resource, while translation demands ribosomes and `RNA transfer` molecules with the appropriate anticodons. Additionally, nucleotides are crucial resources present throughout the process. 
+The throughput of DNA sequences processed concurrently during protein synthesis is regulated by the `Resource` object. Transcription relies on the availability of `RNA_polymerase` as a critical resource, while translation demands ribosomes and `RNA_transfer` molecules with the appropriate anticodons. Additionally, nucleotides are crucial resources present throughout the process. 
 
 All resources have been integrated into the simulation framework through extensions of `SimPy`'s resource or container classes.
 
 For a visual representation of the [Protein Synthesis Process](sources/ProteinSynthesisProcess.png) modeling, refer to the diagram provided in the [sources folder](sources/).
 
 ## Experiments
-Al fine di testare il modello sono stati svolti degli esperimenti riportati in 
-
-Notebook ['12h_simulation'](12h_simulation.ipynb) contains
+To test the model, experiments were conducted and are detailed in the following notebooks:
+1. `12h_simulation.ipynb`: This notebook presents a 12-hour simulation of protein synthesis aimed at testing the model and examining the resulting outcomes. [Available here](12h_simulation.ipynb).
+2. `comparative_analysis.ipynb`: This notebook contains a comparative analysis of models utilizing different resources. The objective of these experiments is to evaluate how the model's performance, in terms of the number of synthesized proteins and execution times, varies with the number of available resources. [Available here](comparative_analysis.ipynb).
 
 ## Dataset
 To conduct the experiments, a dataset containing sequences from the human genome was utilized. The dataset was obtained from the RefSeqGene section of the Reference Sequence Database for the [Homo sapiens gene](https://ftp.ncbi.nih.gov/refseq/H_sapiens/RefSeqGene/) from the [RefSeq](https://www.ncbi.nlm.nih.gov/refseq/) Database.
