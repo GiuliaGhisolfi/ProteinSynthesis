@@ -1,16 +1,26 @@
 # Protein Synthesis in Eukaryotic Cells 🧬🧫
 This repository contains the code for a project aimed at modeling protein synthesis in eukaryotic cells as a discrete-time process.
 
-# Modellizzazione 
-dire dove la modelizzazione è descritta + link al notebook
-simpy
+## Modeling
+The process is simulated using `SimPy` framework, with customized classes tailored to the specific requirements. 
 
-Un grafico esplicativo della modellizzazione del [Protein Synthesis Process](sources/ProteinSynthesisProcess.png) è riportato nella [sources folder](sources/).
+The process is modeled by the `EukaryoticCell` class, which coordinates transcription and translation through its components: the `Nucleus` class handles transcription, while the `Ribosome` class manages translation. 
+
+The throughput of DNA sequences processed concurrently during protein synthesis is regulated by the `Resource` object. Transcription relies on the availability of `RNA polymerase` as a critical resource, while translation demands ribosomes and `RNA transfer` molecules with the appropriate anticodons. Additionally, nucleotides are crucial resources present throughout the process. 
+
+All resources have been integrated into the simulation framework through extensions of `SimPy`'s resource or container classes.
+
+For a visual representation of the Protein Synthesis Process modeling, refer to the diagram provided in the [sources folder](sources/).
 
 ## Experiments
-Per svolgere gli esperimenti è stato utilizzato un dataset contenete seguenze del genoma umano (add repo link) from the RefSeq Database, per more rivo refers to readme della repo in cui è salvato.
+Al fine di testare il modello sono stati svolti degli esperimenti riportati in 
 
-notebook con link
+Notebook ['12h_simulation'](12h_simulation.ipynb) contains
+
+## Dataset
+To conduct the experiments, a dataset containing sequences from the human genome was utilized. The dataset was obtained from the RefSeqGene section of the Reference Sequence Database for the [Homo sapiens gene](https://ftp.ncbi.nih.gov/refseq/H_sapiens/RefSeqGene/) from the [RefSeq](https://www.ncbi.nlm.nih.gov/refseq/) Database.
+
+For more detailed information and access to the dataset, please refer to the [repository](https://github.com/GiuliaGhisolfi/HumanGenomeDataset) where it is stored.
 
 ## Repository structure (main elements)
 ```
