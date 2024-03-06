@@ -10,7 +10,7 @@ The throughput of DNA sequences processed concurrently during protein synthesis 
 
 All resources have been integrated into the simulation framework through extensions of `SimPy`'s resource or container classes.
 
-For a visual representation of the Protein Synthesis Process modeling, refer to the diagram provided in the [sources folder](sources/).
+For a visual representation of the [Protein Synthesis Process](sources/ProteinSynthesisProcess.png) modeling, refer to the diagram provided in the [sources folder](sources/).
 
 ## Experiments
 Al fine di testare il modello sono stati svolti degli esperimenti riportati in 
