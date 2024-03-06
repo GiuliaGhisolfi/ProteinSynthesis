@@ -14,8 +14,8 @@ For a visual representation of the [Protein Synthesis Process](sources/ProteinSy
 
 ## Experiments
 To test the model, experiments were conducted and are detailed in the following notebooks:
-1. `12h_simulation.ipynb`: This notebook presents a 12-hour simulation of protein synthesis aimed at testing the model and examining the resulting outcomes. [Available here](experiments\12h_simulation.ipynb).
-2. `comparative_analysis.ipynb`: This notebook contains a comparative analysis of models utilizing different resources. The objective of these experiments is to evaluate how the model's performance, in terms of the number of synthesized proteins and execution times, varies with the number of available resources. [Available here](experiments\comparative_analysis.ipynb).
+1. `12h_simulation.ipynb`: This notebook presents a 12-hour simulation of protein synthesis aimed at testing the model and examining the resulting outcomes. [Available here](experiments/12h_simulation.ipynb).
+2. `comparative_analysis.ipynb`: This notebook contains a comparative analysis of models utilizing different resources. The objective of these experiments is to evaluate how the model's performance, in terms of the number of synthesized proteins and execution times, varies with the number of available resources. [Available here](experiments/comparative_analysis.ipynb).
 
 ## Dataset
 To conduct the experiments, a dataset containing sequences from the human genome was utilized. The dataset was obtained from the RefSeqGene section of the Reference Sequence Database for the [Homo sapiens gene](https://ftp.ncbi.nih.gov/refseq/H_sapiens/RefSeqGene/) from the [RefSeq](https://www.ncbi.nlm.nih.gov/refseq/) Database.
