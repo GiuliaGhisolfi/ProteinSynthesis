@@ -34,7 +34,7 @@ ProteinSynthesis/
 │    ├─── parameters_rna_polymerases.json
 │    └─── peptides.json
 │
-├─── experiments
+├─── experiments/
 │    ├─── 12h_simulation.ipynb                # 12-hour simulation of protein synthesis
 │    └─── comparative_analysis.ipynb          # Comparative analysis of models utilizing different resources
 │
