@@ -34,6 +34,10 @@ ProteinSynthesis/
 │    ├─── parameters_rna_polymerases.json
 │    └─── peptides.json
 │
+├─── experiments
+│    ├─── 12h_simulation.ipynb                # 12-hour simulation of protein synthesis
+│    └─── comparative_analysis.ipynb          # Comparative analysis of models utilizing different resources
+│
 ├─── src/                                # Source code files
 │    ├─── process/
 │    │    ├─── protein_synthesis.py      # EukarioticCell class, simulates the protein synthesis
@@ -56,7 +60,5 @@ ProteinSynthesis/
 │    │
 │    └─── simulation.py                  # Class to simulate the protein synthesis process
 │
-├─── 12h_simulation.ipynb                # 12-hour simulation of protein synthesis
-├─── comparative_analysis.ipynb          # Comparative analysis of models utilizing different resources
 └─── main.py                             # Main script to run experiments
 ```
