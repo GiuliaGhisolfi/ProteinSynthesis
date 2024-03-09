@@ -6,7 +6,7 @@ The process is simulated using `SimPy` framework, with customized classes tailor
 
 The process is modeled by the `EukaryoticCell` class, which coordinates transcription and translation through its components: the `Nucleus` class handles transcription, while the `Ribosome` class manages translation. 
 
-The throughput of DNA sequences processed concurrently during protein synthesis is regulated by the `Resource` object. Transcription relies on the availability of `RNA_polymerase` as a critical resource, while translation demands ribosomes and `RNA_transfer` molecules with the appropriate anticodons. Additionally, nucleotides are crucial resources present throughout the process. 
+The throughput of DNA sequences processed concurrently during protein synthesis is regulated by the `Resource` object. Transcription relies on the availability of `RNA_polymerase` as a critical resource, while translation demands ribosomes and `RNA_transfer` molecules with the appropriate anticodons. Additionally, `Nucleotides` are crucial resources present throughout the process. 
 
 All resources have been integrated into the simulation framework through extensions of `SimPy`'s resource or container classes.
 
