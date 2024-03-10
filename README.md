@@ -6,7 +6,7 @@ The process is simulated using `SimPy` framework, with customized classes tailor
 
 The process is modeled by the `EukaryoticCell` class, which coordinates transcription and translation through its components: the `Nucleus` class handles transcription, while the `Ribosome` class manages translation. 
 
-The throughput of DNA sequences processed concurrently during protein synthesis is regulated by the `Resource` object. Transcription relies on the availability of `RNA_polymerase` as a critical resource, while translation demands ribosomes and `RNA_transfer` molecules with the appropriate anticodons. Additionally, nucleotides are crucial resources present throughout the process. 
+The throughput of DNA sequences processed concurrently during protein synthesis is regulated by the `Resource` object. Transcription relies on the availability of `RNA_polymerase` as a critical resource, while translation demands ribosomes and `RNA_transfer` molecules with the appropriate anticodons. Additionally, `Nucleotides` are crucial resources present throughout the process. 
 
 All resources have been integrated into the simulation framework through extensions of `SimPy`'s resource or container classes.
 
@@ -34,6 +34,10 @@ ProteinSynthesis/
 │    ├─── parameters_rna_polymerases.json
 │    └─── peptides.json
 │
+├─── experiments/
+│    ├─── 12h_simulation.ipynb                # 12-hour simulation of protein synthesis
+│    └─── comparative_analysis.ipynb          # Comparative analysis of models utilizing different resources
+│
 ├─── src/                                # Source code files
 │    ├─── process/
 │    │    ├─── protein_synthesis.py      # EukarioticCell class, simulates the protein synthesis
@@ -56,7 +60,5 @@ ProteinSynthesis/
 │    │
 │    └─── simulation.py                  # Class to simulate the protein synthesis process
 │
-├─── 12h_simulation.ipynb                # 12-hour simulation of protein synthesis
-├─── comparative_analysis.ipynb          # Comparative analysis of models utilizing different resources
 └─── main.py                             # Main script to run experiments
 ```
