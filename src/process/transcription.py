@@ -233,6 +233,12 @@ class Nucleus:
 
         return self.request_nucleotide(complement_base)
     
+    def capping(self, rna_sequence):
+        """
+        Add a 5'-methyl cap to a RNA sequence.
+        """
+        return 'CH3GPPP-{}'.format(rna_sequence) # Add 5'-methyl cap
+    
     def splicing(self, rna_sequence):
         """
         Remove the introns (non coding regions) from a RNA sequence.
@@ -267,12 +273,6 @@ class Nucleus:
                 self.release_nucleotide(base, editing_site_count)
 
         return rna_sequence
-
-    def capping(self, rna_sequence):
-        """
-        Add a 5'-methyl cap to a RNA sequence.
-        """
-        return 'CH3GPPP-{}'.format(rna_sequence) # Add 5'-methyl cap
     
     def cleavage(self):
         """

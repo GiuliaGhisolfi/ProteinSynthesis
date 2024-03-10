@@ -89,7 +89,7 @@ class EukaryoticCell:
             extron_sequences_list=self.extron_list,
             editing_sites_dict={},
             number_rna_polymerases=number_rna_polymerases,
-            nucleotides = self.nucleotides,
+            nucleotides=self.nucleotides,
             random_seed=random_seed
             )
         
@@ -98,8 +98,8 @@ class EukaryoticCell:
             number_ribosomes=number_ribosomes,
             number_rna_transfers_per_codon=number_rna_transfers_per_codon,
             codons_list=self.extron_list,
-            nucleotides = self.nucleotides,
-            amminoacids = self.amminoacids,
+            nucleotides=self.nucleotides,
+            amminoacids=self.amminoacids,
             random_seed=random_seed
             )
         

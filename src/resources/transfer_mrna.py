@@ -38,9 +38,9 @@ class TransferRNA:
 
         self.trna_resources_dict = dict()
         for codon in codons_list:
-            self.trna_resources_dict[codon] = self._init_nucleotide(amount)
+            self.trna_resources_dict[codon] = self._init_trna(amount)
 
-    def _init_nucleotide(self, amount):
+    def _init_trna(self, amount):
         trna_amount = random.randint(
             int(amount * (1 - DEV_AMOUNT_TRNA_PER_CODON)),
             int(amount * (1 + DEV_AMOUNT_TRNA_PER_CODON)))
