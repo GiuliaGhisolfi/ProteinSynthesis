@@ -35,8 +35,8 @@ ProteinSynthesis/
 │    └─── peptides.json
 │
 ├─── experiments/
-│    ├─── 12h_simulation.ipynb                # 12-hour simulation of protein synthesis
-│    └─── comparative_analysis.ipynb          # Comparative analysis of models utilizing different resources
+│    ├─── 12h_simulation.ipynb           # 12-hour simulation of protein synthesis
+│    └─── comparative_analysis.ipynb     # Comparative analysis of models utilizing different resources
 │
 ├─── src/                                # Source code files
 │    ├─── process/
